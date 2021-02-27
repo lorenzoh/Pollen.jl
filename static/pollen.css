@@ -1,0 +1,136 @@
+:root {
+    /* width of the main article for desktop screens */
+    --content-width: 80ch;
+    /* width of the sidebar table of contents on desktop screens */
+    --toc-width: 240px;
+    /* width of margin notes */
+    --margin-width: 240px;
+}
+
+article {
+    max-width: var(--content-width);
+    min-height: 420px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+code, pre > code {
+    font-family: JuliaMono;
+    font-size: 0.80em;
+}
+
+pre {
+    overflow-x: auto;
+    display: block;
+    line-height: 125%;
+    border-radius: 0px;
+    padding: 8px;
+    background-color: #ececec;
+}
+body {
+    font-family: Spectral;
+}
+
+
+article {
+    font-size: 19px;
+    line-height: 1.3;
+}
+
+h2, h3, h4 {
+    margin-block-start: 2em;
+    margin-block-end: 0.5em;
+    color: #333333;
+}
+
+p {
+    margin-bottom: 1em;
+    margin-block-start: 0.5em;
+}
+
+pre {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+}
+
+li > p {
+    margin-block-start: 0.2em;
+    margin-block-end: 0.2em;
+}
+
+h1 {
+    font-size: 1.8em;
+    margin-block-start: 1em;
+    margin-block-end: 0.6em;
+    color: #333333;
+    line-height: 1.2em;
+    font-family: Lora;
+    font-weight: 400;
+
+}
+
+h2 {
+    /*letter-spacing: 0.03em;*/
+    font-size: 1.4em;
+    margin-bottom: 0.8em;
+    margin-top: 2.2em;
+    line-height: 1.3;
+    border-bottom: 1px dotted #c3c3c3;
+    font-family: Lora, 'Spectral SC';
+    font-weight: 400;
+    padding-bottom: 0.1em;
+    /*text-transform: lowercase;*/
+}
+
+h3 {
+    font-size: 1.15em;
+    font-family: 'Lora';
+    margin-bottom: 0.2em;
+    margin-top: 1.6em;
+    font-weight: 400;
+}
+
+
+a {
+    font-family: 'Spectral SC';
+    border-radius: .2em;
+    padding: 0 .1em;
+    font-size: 0.9em;
+}
+
+a:link {
+    text-decoration: none;
+    color: inherit;
+}
+a:visited {
+    color: #555
+}
+
+a:hover {
+    display: inline;
+    background-color: #e3e3e3;
+    color: black;
+}
+
+article > hr {
+    margin-top: 50px;
+    margin-bottom: 50px;
+    max-width: 200px;
+    color: #aaa;
+}
+
+.toc {
+    margin: 1.5em 2em;
+}
+
+.toc a:link {
+    color: #333
+}
+
+.toc ul {
+    list-style-type: none;
+    padding-inline-start: 1.5em;
+}
+.toc > ul {
+    padding-inline-start: 0em;
+}

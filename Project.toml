@@ -3,5 +3,14 @@ uuid = "c88717ad-5130-4874-a664-5a9aba5ec443"
 authors = ["Lorenz Ohly <lorenz.ohly@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
+CommonMark = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
+FilePathsBase = "48062228-2e41-5def-b9a4-89aafe57970f"
+FileTrees = "72696420-646e-6120-6e77-6f6420746567"
+Gumbo = "708ec375-b3d6-5a57-a7ce-8257bf98657a"
+Mustache = "ffc61752-8dc7-55ee-8c37-f3e9cdd09e70"
+Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
+
 [compat]
 julia = "1"
