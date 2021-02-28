@@ -13,4 +13,5 @@ Mustache = "ffc61752-8dc7-55ee-8c37-f3e9cdd09e70"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 
 [compat]
+Mustache = "1.0"
 julia = "1"
