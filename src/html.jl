@@ -52,6 +52,7 @@ end
 
 
 extensionformat(::Val{:css}) = CSS()
+formatextension(::HTML) = "html"
 
 
 # Constants

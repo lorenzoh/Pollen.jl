@@ -65,7 +65,7 @@ Base.:(!)(sel::Selector) = SelectNot(sel)
 
 Select an x-expression with attribute `attr == val`
 """
-struct SelectAttrEq{T}
+struct SelectAttrEq{T} <: Selector
     attr::Symbol
     val::T
 end
@@ -98,7 +98,7 @@ end
 
 function Base.map(f, doc::XExpr, sel::Selector)
     return fold(doc, nothing) do x, s
-        return matches(sel, x) ? f(x) : x, nothing
+        return matches(sel, x) ? (f(x), nothing) : (x, nothing)
     end |> first
 end
 
@@ -122,9 +122,25 @@ function fold(f, doc::XExpr, state)
         child, state = fold(f, child, state)
         push!(children, child)
     end
-    return f(xexpr(doc.tag, doc.attributes, children...), state)
+    return f(xexpr(doc.tag, doc.attributes, children), state)
 end
 
+function Base.foreach(f, doc::XExpr, sel::Selector; kwargs...)
+    for x in traverse(doc; kwargs...)
+        if matches(sel, x)
+            f(x)
+        end
+    end
+end
+
+function mapfirst(f, doc::XExpr, sel::Selector)
+    return fold(doc, false) do x, hasreplaced
+        hasreplaced && return (x, true)
+        matches(sel, x) ? (f(x), true) : (x, false)
+    end |> first
+end
+
+replacefirst(doc, x, sel) = mapfirst(_ -> x, doc, sel)
 
 function foldchildren(f, doc::XExpr, state)
     children = []

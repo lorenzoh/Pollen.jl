@@ -7,6 +7,7 @@ function parse(io::IO, ::Markdown; parser = CommonMark.Parser())
 end
 
 extensionformat(::Val{:md}) = Markdown()
+formatextension(::Markdown) = "md"
 
 ## Parsing helpers
 
@@ -38,6 +39,7 @@ const BLOCK_TO_TAG = Dict(
     Emph => :em,
     SoftBreak => :br,
     ThematicBreak => :hr,
+    BlockQuote => :blockquote,
 )
 
 function xexpr(ast::Node, c::AbstractContainer)

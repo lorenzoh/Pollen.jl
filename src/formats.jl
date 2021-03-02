@@ -4,7 +4,6 @@ abstract type Format end
 # input interface
 
 
-
 """
     parse(io, format)
     parse(path, format)
@@ -22,12 +21,13 @@ end
 """
     extensionformat(Val(Symbol(ext)))
 
-Define a default `Format` for parsing files with extension `ext`.html
+Define a default `Format` for parsing files with extension `ext`.
 
 For example `extensionformat(Val(:html)) == HTML()`, so `parse(p"index.html")`
 relays to `parse(p"index.html", HTML())`
 """
 function extensionformat(::Val{:ext}) end
+function formatextension end
 
 # output interface
 

@@ -1,45 +1,62 @@
-struct Files <: Format end
-
-
-function parse(path::AbstractPath, ::Files)
-    tree = FileTree(path)
-    return xexpr(tree)
+function parsefiletree(p::AbstractPath; exts = ("md",))
+    tree = FileTree(p)
+    tree = filter(f -> extension(path(f)) in exts, tree, dirs=false)
+    tree = FileTrees.load(f -> Pollen.parse(path(f)), tree, dirs = false)
+    return tree
 end
 
-function xexpr(tree::FileTree)
-    return xexpr(
-        :folder,
-        Dict(:path => FileTrees.path(tree), :name => tree.name),
-        [xexpr(child) for child in (tree.children)])
+parsefiletree(dir::String) = parsefiletree(Path(dir))
 
-end
-
-
-xexpr(file::FileTrees.File) = xexpr(
-    :file,
-    Dict(:path => FileTrees.path(file), :name => file.name))
-
-
-function render(dst::AbstractPath, xtree::XExpr, format::Files)
-    if (isdir(dst) && !isempty(readdir(dst))) || isfile(dst)
-        error("`dst` already exists, aborting.")
-    end
-    mkpath(dst)
-    @assert all(getfield.(collect(select(xtree, SelectTag(:file))), :tag) .== :file)
-    for folder in select(xtree, SelectTag(:folder))
-        mkpath(joinpath(dst, folder.attributes[:path]))
-    end
-
-    for file in select(xtree, SelectTag(:file))
-        content = only(file.children)
-        path = joinpath(dst, withext(file.attributes[:path], "html"))
-        format = extensionformat(Val(Symbol(extension(path))))
-        format = HTML()
-        render!(path, content, format)
+function savefiletree(tree, dst::AbstractPath, format::Pollen.Format)
+    tree = rename(tree, dst)
+    FileTrees.save(tree) do f
+        p = withext(joinpath(dst, path(f)), formatextension(format))
+        render!(p, f[], format)
     end
 end
-
 
 function withext(path::AbstractPath, ext)
     return joinpath(parent(path), "$(filename(path)).$ext")
 end
+
+
+function hasfile(tree::FileTree, p)
+    try
+        tree[p]
+        return true
+    catch
+        return false
+    end
+end
+
+
+const RE_HREF = r"(.*)#(.*)"
+
+# TODO: refactor
+function changehrefextension(href, ext)
+    m = match(RE_HREF, href)
+    # Does not have an ID
+    if isnothing(m)
+        if href == ""
+            return ""
+        else
+            return string(withext(Path(href), ext))
+        end
+    # Has an ID
+    else
+        ref, id = m[1], m[2]
+        if ref == ""
+            return "#$id"
+        else
+            ref_ = string(withext(Path(ref), ext))
+            return "$ref_#$id"
+        end
+    end
+end
+
+
+function nodehref(node)
+    return "/" * string(relative(path(node), path(root(node))))
+end
+
+root(node) = isnothing(parent(node)) ? node : root(parent(node))

@@ -6,6 +6,7 @@ version = "0.1.0"
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 CommonMark = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 FilePathsBase = "48062228-2e41-5def-b9a4-89aafe57970f"
 FileTrees = "72696420-646e-6120-6e77-6f6420746567"
 Gumbo = "708ec375-b3d6-5a57-a7ce-8257bf98657a"

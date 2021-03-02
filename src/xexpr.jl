@@ -52,3 +52,15 @@ end
 function xexpr(tag::Symbol, attributes::Dict{Symbol, <:Any}, children::Vector{<:Union{XExpr, T}}) where T
     return XExpr(tag, attributes, children)
 end
+
+
+function Base.:(==)(x1::XExpr, x2::XExpr)
+    return ((x1.tag == x2.tag) &&
+            (x1.attributes == x2.attributes) &&
+            (length(x1.children) == length(x2.children)) &&
+            all(c1 == c2 for (c1, c2) in zip(x1.children, x2.children)))
+end
+
+
+Base.:(==)(::XExpr, _) = false
+Base.:(==)(_, ::XExpr) = false

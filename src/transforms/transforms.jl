@@ -133,3 +133,27 @@ function htmlify(doc, htmltag = :div)
         )
     end
 end
+
+
+struct ChangeLinkExtensions
+    ext
+    linkattr
+end
+
+ChangeLinkExtensions(ext = "html") = ChangeLinkExtensions(ext, :href)
+
+
+function (chle::ChangeLinkExtensions)(doc::XExpr)
+    @show doc
+    if haskey(doc.attributes, chle.linkattr)
+        href = doc.attributes[chle.linkattr]
+        @show href
+        return xexpr(
+            doc.tag,
+            merge(doc.attributes, Dict(chle.linkattr => changehrefextension(href, chle.ext))),
+            doc.children,
+        )
+    else
+        return doc
+    end
+end

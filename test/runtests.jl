@@ -1,7 +1,4 @@
-using Pollen
-using Pollen: Markdown, HTML, xexpr
-using Test
-using TestSetExtensions
+include("imports.jl")
 
 
 @testset "Pollen.jl" begin
@@ -14,4 +11,6 @@ using TestSetExtensions
         format = Markdown()
         @test_nowarn Pollen.parse("# Hello World!", format)
     end
+
+    include("fileutils.jl")
 end
