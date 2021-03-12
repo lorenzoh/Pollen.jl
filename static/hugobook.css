@@ -88,6 +88,11 @@ img {
   vertical-align: baseline;
 }
 
+:focus {
+  outline-style: auto;
+  outline-color: currentColor;
+  outline-color: -webkit-focus-ring-color; 
+}
 aside nav ul {
   padding: 0;
   margin: 0;

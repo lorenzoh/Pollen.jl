@@ -2,7 +2,7 @@
 
 
 mutable struct Project
-    srctree::FileTree
+    sources::FileTree
     outtree::FileTree
     rewriters::Vector{<:Rewriter}
 end

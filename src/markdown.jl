@@ -83,6 +83,7 @@ const BLOCK_TO_TAG = Dict(
     ThematicBreak => :hr,
     BlockQuote => :blockquote,
     Admonition => :admonition,
+    Citation => :citation,
 )
 
 function Base.convert(::Type{XTree}, node::Node, c::AbstractContainer, attrs = Dict{Symbol, String}())
@@ -98,8 +99,16 @@ end
 Base.convert(::Type{XTree}, node::Node, ::Text, attrs) = XLeaf(node.literal)
 Base.convert(::Type{XTree}, node::Node, ::Code, attrs) = XNode(:code, [XLeaf(node.literal)])
 
+function Base.convert(::Type{XTree}, node::Node, i::Image, attrs) XNode(:code, [XLeaf(node.literal)])
+    return XNode(
+        :img,
+        Dict(:src => i.destination, :alt => i.title),
+        childrenxtrees(node)
+    )
+end
+
 function Base.convert(::Type{XTree}, node::Node, c::CodeBlock, attrs)
-    XNode(
+    return XNode(
         :pre,
         merge(attrs, Dict(:lang => c.info)),
         [XNode(:code, [XLeaf(node.literal)])],)

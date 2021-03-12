@@ -5,7 +5,7 @@ using Base.Docs
 using CommonMark
 using CommonMark: Document, Item, Text, Paragraph, List, Heading,
     Emph, SoftBreak, Link, Code, Node, AbstractContainer, CodeBlock, ThematicBreak,
-    BlockQuote, Admonition, Attributes
+    BlockQuote, Admonition, Attributes, Image, Citation
 using FileTrees
 using FilePathsBase
 using DataStructures: DefaultDict
