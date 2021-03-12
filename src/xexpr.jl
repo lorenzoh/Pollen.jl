@@ -35,7 +35,7 @@ AbstractTrees.children(x::XExpr) = x.children
 
 Create an `XExpr`.
 """
-xexpr(s::String) = s
+xexpr(s) = s
 xexpr(x::XExpr) = x
 
 xexpr(t::Tuple) = xexpr(t...)
@@ -64,3 +64,32 @@ end
 
 Base.:(==)(::XExpr, _) = false
 Base.:(==)(_, ::XExpr) = false
+
+
+## API
+
+"""
+    tag(x::XExpr)
+
+Get the tag of an x-expression.
+
+```julia
+x = xexpr(:tagname, "Hello", "World")
+tag(x) == :tagname
+```
+"""
+tag(x::XExpr) = x.tag
+attributes(x::XExpr) = x.attributes
+
+
+withattributes(x::XExpr, newattrs) = xexpr(
+    tag(x),
+    merge(attributes(x), newattrs),
+    children(x),
+)
+
+withtag(x::XExpr, t) = xexpr(
+    t,
+    attributes(x),
+    children(x)
+)

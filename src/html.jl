@@ -9,23 +9,23 @@ function parse(io::IO, format::HTML)
 end
 
 function parse(s::String, ::HTML)
-    return xexpr(Gumbo.parsehtml(s).root)
+    return convert(XTree, Gumbo.parsehtml(s).root)
 end
 
 extensionformat(::Val{:html}) = HTML()
 
-function xexpr(htmlnode::Gumbo.HTMLElement{S}) where S
+function Base.convert(::Type{XTree}, htmlnode::Gumbo.HTMLElement{S}) where S
     attrs = Dict{Symbol, Any}(Symbol(key) => val for (key, val) in htmlnode.attributes)
-    return xexpr(S, attrs, htmlnode.children...)
+    return XNode(S, attrs, XTree[convert(XTree, c) for c in htmlnode.children])
 end
 
-function xexpr(htmltext::Gumbo.HTMLText)
-    return htmltext.text
+function Base.convert(::Type{XTree}, htmltext::Gumbo.HTMLText)
+    return XLeaf(htmltext.text)
 end
 
 # Rendering
 
-function render!(io, x::XExpr, format::HTML, ::Val)
+function render!(io, x::XNode, format::HTML, ::Val)
     print(io, "<", x.tag)
     if !isempty(x.attributes)
         print(io, " ")
@@ -39,19 +39,56 @@ function render!(io, x::XExpr, format::HTML, ::Val)
 end
 
 
-function render!(io, s::String, ::HTML)
-    print(io, s)
+function render!(io, x::XLeaf{<:AbstractString}, ::HTML)
+    print(io, CommonMark.escape_xml(x[]))
 end
 
+const HTML_MIME_TYPES = [
+    IJulia.ijulia_mime_types[3],
+    IJulia.ijulia_mime_types[4],
+    IJulia.ijulia_mime_types[1],
+    IJulia.ijulia_mime_types[2],
+    IJulia.ijulia_mime_types[5],
+]
 
-struct CSS <: Format end
+function render!(io, x::XLeaf, ::HTML)
+    val = x[]
 
-function parse(io::IO, format::CSS)
-    return xexpr(:style, read(io, String))
+    for m in HTML_MIME_TYPES
+        try
+            if IJulia._showable(m, val)
+                mime, mime_repr = IJulia.display_mimestring(m, val)
+                print(io, mime_repr)
+                return
+            end
+        catch
+            if m == MIME("text/plain")
+                rethrow() # text/plain is required
+            end
+        end
+    end
+    #=
+    # Try to render as image
+    mimedict = IJulia.display_dict(a)
+    for mime in IMAGEMIMES
+        if mime in keys(mimedict)
+            src = "data;$mime;base64,$(mimedict[mime])"
+            return render!(io, xexpr(:img, Dict(:src => src)), HTML(), Val(:img))
+        end
+    end
+    @show showable(MIME("text/html"), a)
+    error("Could not render $a as HTML.")
+    =#
 end
 
+IMAGEMIMES = [
+    "image/jpeg",
+    "image/svg+xml",
+    "image/png",
+    "image/gif",
+]
 
-extensionformat(::Val{:css}) = CSS()
+
 formatextension(::HTML) = "html"
 
 
@@ -116,6 +153,7 @@ const HTMLTAGS = [
     :header,
     :hr,
     :html,
+    :HTML,
     :i,
     :iframe,
     :img,

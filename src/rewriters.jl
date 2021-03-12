@@ -22,16 +22,21 @@ function updatetree(::Rewriter, tree)
 end
 
 
-struct Replace <: Rewriter
+struct Replacer <: Rewriter
     fn
     selector::Selector
 end
 
-function updatefile(replace::Replace, p::AbstractPath, doc::XExpr)
-    return map(x -> replace.fn(x), doc, replace.selector)
+Base.show(io::IO, replacer::Replacer) = print(io, "Replacer($(replacer.selector))")
+
+function updatefile(replace::Replacer, p::AbstractPath, doc::XTree)
+    return cata(replace.fn, doc, replace.selector)
 end
 
 
 function RenderTemplate(template = TEMPLATE)
-    return Replace(doc -> rendertemplate(template, body = doc), SelectTag(:body))
+    return Replacer(doc -> rendertemplate(template, body = doc), SelectTag(:body))
 end
+
+
+function postbuild(rewriter, project, dst, format) end

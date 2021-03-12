@@ -2,21 +2,31 @@
     /* width of the main article for desktop screens */
     --content-width: 80ch;
     /* width of the sidebar table of contents on desktop screens */
-    --toc-width: 240px;
+    --toc-width: 250px;
     /* width of margin notes */
     --margin-width: 240px;
 }
 
+body {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+body > article {
+}
+
 article {
-    max-width: var(--content-width);
-    min-height: 420px;
-    margin-left: auto;
-    margin-right: auto;
+    width: var(--content-width);
+    min-height: 800px;
 }
 
 code, pre > code {
     font-family: JuliaMono;
     font-size: 0.80em;
+}
+a > code {
+    font-size: 0.85em;
 }
 
 pre {
@@ -28,7 +38,7 @@ pre {
     background-color: #f0f0f0;
 }
 body {
-    font-family: Spectral;
+    font-family: Charter;
 }
 
 
@@ -37,28 +47,28 @@ article {
     line-height: 1.3;
 }
 
-h2, h3, h4 {
+article h2, article h3, article h4 {
     margin-block-start: 2em;
     margin-block-end: 0.5em;
     color: #333333;
 }
 
-p {
+article p {
     margin-bottom: 1em;
     margin-block-start: 0.5em;
 }
 
-pre {
+article pre {
     margin-top: 1.5em;
     margin-bottom: 1.5em;
 }
 
-li > p {
+article li > p {
     margin-block-start: 0.2em;
     margin-block-end: 0.2em;
 }
 
-h1 {
+article h1 {
     font-size: 1.8em;
     margin-block-start: 1em;
     margin-block-end: 0.6em;
@@ -70,7 +80,6 @@ h1 {
 }
 
 h2 {
-    /*letter-spacing: 0.03em;*/
     font-size: 1.4em;
     margin-bottom: 0.8em;
     margin-top: 2.2em;
@@ -79,7 +88,6 @@ h2 {
     font-family: Lora, 'Spectral SC';
     font-weight: 400;
     padding-bottom: 0.1em;
-    /*text-transform: lowercase;*/
 }
 
 h3 {
@@ -134,3 +142,31 @@ article > hr {
 .toc > ul {
     padding-inline-start: 0em;
 }
+
+.doctree {
+    width: var(--toc-width);
+    margin: 1em;
+    float: left;
+    position: sticky;
+    vertical-align: middle;
+    border-left: 1px dotted lightgray; 
+    padding: 1em;
+}
+
+.doctree a:link {
+    color: #333
+}
+
+.doctree ul {
+    list-style-type: none;
+    padding-inline-start: 1.5em;
+}
+.doctree > ul {
+    padding-inline-start: 0em;
+}
+
+.doctree p {
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
+

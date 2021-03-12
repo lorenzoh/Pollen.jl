@@ -35,9 +35,9 @@ function formatextension end
 """
     render!(io, doc::XExpr, format, tag = Val(doc.tag))
 """
-render!(io, doc::XExpr, format) = render!(io, doc, format, Val(doc.tag))
+render!(io, doc::XTree, format) = render!(io, doc, format, Val(doc.tag))
 
-function render!(path::AbstractPath, doc::XExpr, format)
+function render!(path::AbstractPath, doc::XTree, format)
     open(path, "w") do f
         render!(f, doc, format)
     end

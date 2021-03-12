@@ -5,15 +5,14 @@ mutable struct Project
     srctree::FileTree
     outtree::FileTree
     rewriters::Vector{<:Rewriter}
-    format::Format
-    dst::AbstractPath
 end
 
-function Project(srcdir::AbstractPath, dstdir::AbstractPath, rewriters, format = HTML())
+function Project(srcdir::AbstractPath, rewriters)
     tree = parsefiletree(srcdir)
-    Project(tree, tree, rewriters, format, dstdir)
+    Project(tree, tree, rewriters)
 end
 
+Base.show(io::IO, project::Project) = print(io, "Project($(project.srctree.name), $(typeof.(project.rewriters))")
 
 """
     addfiles(tree, rewriters, files) -> dirtypaths
@@ -33,10 +32,12 @@ function addfiles(
     # Update source tree
     newsrcdocs = Dict()
     for (p, doc) in files
+        @show p
         srctree = hasfile(srctree, p) ? srctree : touch(srctree, p)
         newsrcdocs[p] = doc
     end
     srctree = setvalues(srctree, newsrcdocs)
+
 
     # Process new/changed files on document-level
     newoutdocs = Dict()
@@ -78,27 +79,30 @@ function addfiles!(project::Project, files)
 end
 
 
-function build(project::Project)
+function build(project::Project, dst::AbstractPath, format::Format)
     fs = [(relative(path(f), path(project.srctree)), f[]) for f in files(project.srctree)]
     dirtypaths = addfiles!(project, fs)
-    rebuild(project, dirtypaths)
+    rebuild(project, dst, format, dirtypaths)
 end
 
 
-function rebuild(project, dirtypaths)
+function rebuild(project, dst, format, dirtypaths)
     pt = path(project.outtree)
-    dirtytree = filter(project.outtree) do f
+    dirtytree = filter(project.outtree; dirs = false) do f
         p = path(f)
-        return isdir(p) || relative(p, path(project.outtree)) in dirtypaths
+        return relative(p, path(project.outtree)) in dirtypaths
     end
-    savefiletree(dirtytree, project.dst, project.format)
+    savefiletree(dirtytree, dst, format)
+    for rewriter in project.rewriters
+        postbuild(rewriter, project, dst, format)
+    end
 end
 
 
-function buildfile(project, p)
+function buildfile(project, p, dst, format)
     doc = project.tree[p][]
-    p = withext(joinpath(project.dst, p), formatextension(project.format))
-    render!(p, doc, project.format)
+    p = withext(joinpath(dst, p), formatextension(format))
+    render!(p, doc, format)
 end
 
 function relativepaths(tree::FileTree)

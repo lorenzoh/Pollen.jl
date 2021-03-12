@@ -1,9 +1,29 @@
 struct Markdown <: Format end
 
 
-function parse(io::IO, ::Markdown; parser = CommonMark.Parser())
+function parse(io::IO, ::Markdown; parser = default_md_parser())
     ast = parser(io)
-    return xexpr(ast)
+    return convert(XTree, ast)
+end
+
+function default_md_parser()
+    # adapted from https://github.com/MichaelHatherly/Publish.jl/blob/master/src/utilities.jl
+    cm = CommonMark
+    parser = cm.enable!(cm.Parser(), [
+        ## CommonMark-provided.
+        cm.AdmonitionRule(),
+        cm.AttributeRule(),
+        cm.AutoIdentifierRule(),
+        cm.CitationRule(),
+        cm.DollarMathRule(),
+        cm.FootnoteRule(),
+        cm.FrontMatterRule(toml=TOML.parse),
+        cm.MathRule(),
+        cm.RawContentRule(),
+        cm.TableRule(),
+        cm.TypographyRule(),
+    ])
+    return parser
 end
 
 extensionformat(::Val{:md}) = Markdown()
@@ -26,9 +46,31 @@ function mdchildren(node::CommonMark.Node)
     return childs
 end
 
-xexpr(node::Node) = xexpr(node, node.t)
+function mdchildrenattrs(node::CommonMark.Node)
+    allcs = mdchildren(node)
+    cs = CommonMark.Node[]
+    attrs = Dict{Symbol, String}[]
+    as = Dict{Symbol, String}()
 
-# Default behavior is to wrap the contents in a tag.
+    for (i, c) in enumerate(allcs)
+        if c.t isa Attributes
+            as = Dict((Symbol(k), v) for (k, v) in c.t.dict)
+        else
+            push!(cs, c)
+            push!(attrs, as)
+            as = Dict{Symbol, String}()
+        end
+    end
+    return cs, attrs
+end
+
+
+function childrenxtrees(node::Node)
+    cs, attrs = mdchildrenattrs(node)
+    return XTree[convert(XTree, c, as) for (c, as) in zip(cs, attrs)]
+end
+
+Base.convert(::Type{XTree}, node::Node, attrs::Dict = Dict{Symbol, String}()) = convert(XTree, node, node.t, attrs)
 
 const BLOCK_TO_TAG = Dict(
     Document => :body,
@@ -40,24 +82,37 @@ const BLOCK_TO_TAG = Dict(
     SoftBreak => :br,
     ThematicBreak => :hr,
     BlockQuote => :blockquote,
+    Admonition => :admonition,
 )
 
-function xexpr(ast::Node, c::AbstractContainer)
+function Base.convert(::Type{XTree}, node::Node, c::AbstractContainer, attrs = Dict{Symbol, String}())
     tag = BLOCK_TO_TAG[typeof(c)]
     # TODO: respect `Attributes`
-    return xexpr(tag, mdchildren(ast)...)
+    return XNode(tag, attrs, childrenxtrees(node))
 end
 
 
 # For some `AbstractContainer`s, the behavior is customized.
 
-xexpr(node::Node, ::Text) = node.literal
-xexpr(node::Node, ::Code) = xexpr(:code, node.literal)
-xexpr(node::Node, c::CodeBlock) = xexpr(:pre, Dict(:lang => c.info), (:code, node.literal))
-function xexpr(node::Node, l::Link)
-    xexpr(:a, Dict(:href => l.destination, :title => l.title), mdchildren(node)...)
+
+Base.convert(::Type{XTree}, node::Node, ::Text, attrs) = XLeaf(node.literal)
+Base.convert(::Type{XTree}, node::Node, ::Code, attrs) = XNode(:code, [XLeaf(node.literal)])
+
+function Base.convert(::Type{XTree}, node::Node, c::CodeBlock, attrs)
+    XNode(
+        :pre,
+        merge(attrs, Dict(:lang => c.info)),
+        [XNode(:code, [XLeaf(node.literal)])],)
 end
-function xexpr(node::Node, c::Heading)
+
+function Base.convert(::Type{XTree}, node::Node, l::Link, attrs)
+    return XNode(
+        :a,
+        Dict(:href => l.destination, :title => l.title),
+        childrenxtrees(node))
+end
+
+function Base.convert(::Type{XTree}, node::Node, c::Heading, attrs)
     tag = Symbol("h$(c.level)")
-    return xexpr(tag, node.first_child.literal)
+    return XNode(tag, attrs, childrenxtrees(node))
 end

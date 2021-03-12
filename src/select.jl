@@ -26,7 +26,11 @@ end
 matches(sel::SelectCond, x) = sel.f(x)
 
 struct SelectAll <: Selector end
-matches(sel::SelectAll, x) = true
+matches(::SelectAll, x) = true
+
+struct SelectNode <: Selector end
+matches(::SelectNode, ::XExpr) = true
+matches(::SelectNode, _) = false
 
 struct SelectTag <: Selector
     tag::Symbol
@@ -48,7 +52,7 @@ struct SelectAnd{T<:Tuple} <: Selector
 end
 
 Base.:(&)(sel1::Selector, sel2::Selector) = SelectAnd((sel1, sel2))
-Base.:(&)(seland::SelectAnd, sel::Selector) = SelectAnd((seland.seletors..., sel))
+Base.:(&)(seland::SelectAnd, sel::Selector) = SelectAnd((seland.selectors..., sel))
 
 
 matches(sel::SelectAnd, x) = all(matches(s, x) for s in sel.selectors)
@@ -72,12 +76,30 @@ end
 
 matches(sel::SelectAttrEq, x::XExpr) = get(x.attributes, sel.attr, nothing) == sel.val
 
+struct SelectHasAttr <: Selector
+    attr::Symbol
+end
+
+matches(sel::SelectHasAttr, x::XExpr) = haskey(attributes(x), sel.attr)
+
 
 # Traversal
 
 function traverse(doc::XExpr; ordering = PostOrderDFS)
     return (x for x in ordering(doc) if x isa XExpr)
 end
+
+function dfstraversal(doc; childfn = xchildren)
+
+end
+
+xchildren(x::XExpr) = children(x)
+xchildren(_) = ()
+#=
+
+down(tree, i, )
+up(tree, state)
+=#
 
 # Select
 
@@ -180,9 +202,41 @@ function insertafter(sel, doc::XExpr, child)
     end |> first
 end
 
+function insertfirstchild(sel, doc::XExpr, child)
+    return fold(doc, false) do x, inserted
+        if !inserted && matches(sel, x)
+            return xexpr(x.tag, x.attributes, child, x.children...), true
+        else
+            return x, inserted
+        end
+    end |> first
+end
+
 
 function Base.filter(sel::Selector, doc::XExpr)
     return foldchildren(doc, nothing) do children, _
         return [child for child in children if matches(sel, child)], nothing
+    end |> first
+end
+
+
+#=
+Positions:
+
+- Before(sel)
+- After(sel)
+- Child(sel, n)
+
+
+=#
+
+
+function replacemany(doc, blocks, sel)
+    return fold(doc, 1) do x, i
+        if matches(sel, x)
+            return blocks[i], i + 1
+        else
+            return x, i
+        end
     end |> first
 end

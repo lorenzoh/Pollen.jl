@@ -1,6 +1,7 @@
 function parsefiletree(p::AbstractPath; exts = ("md",))
     tree = FileTree(p)
     tree = filter(f -> extension(path(f)) in exts, tree, dirs=false)
+    tree = filter(f -> !startswith(name(f), '.'), tree)
     tree = FileTrees.load(f -> Pollen.parse(path(f)), tree, dirs = false)
     return tree
 end

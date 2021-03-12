@@ -5,13 +5,19 @@ version = "0.1.0"
 
 [deps]
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
+CSTParser = "00ebfdb7-1f24-5e51-bd34-a7502290713f"
 CommonMark = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 FilePathsBase = "48062228-2e41-5def-b9a4-89aafe57970f"
 FileTrees = "72696420-646e-6120-6e77-6f6420746567"
 Gumbo = "708ec375-b3d6-5a57-a7ce-8257bf98657a"
+IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
+IOCapture = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
+JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
+LiveServer = "16fef848-5104-11e9-1b77-fb7a48bbb589"
 Mustache = "ffc61752-8dc7-55ee-8c37-f3e9cdd09e70"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
+TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 
 [compat]
 julia = "1"
