@@ -157,6 +157,7 @@ creategroupid(path, groupname) = Symbol("$(CommonMark.slugify(string(path)))_$gr
 # The code output and result are tagged with classes "codeoutput" and
 # "coderesult" in the output document.
 
+
 function viewcodeoutput(output::AbstractString)
     if isempty(output)
         return XLeaf("")
@@ -168,6 +169,7 @@ function viewcodeoutput(output::AbstractString)
     end
 end
 
+
 function viewcoderesult(result::AbstractString)
     return XNode(
         :pre,
@@ -176,13 +178,22 @@ function viewcoderesult(result::AbstractString)
     )
 end
 
+
 viewcoderesult(result::Nothing) = XLeaf("")
 
 
 function viewcoderesult(result)
-    return XNode(
-        :div,
-        Dict(:class => "coderesult"),
-        [XLeaf(result)],
-    )
+    if any([showable(m, result) for m in HTML_MIMES[1:end-1]])
+        return XNode(
+            :div,
+            Dict(:class => "coderesult"),
+            [XLeaf(result)],
+        )
+    else
+        return XNode(
+            :pre,
+            Dict(:class => "coderesult"),
+            [XNode(:code, [XLeaf(result)])],
+        )
+    end
 end

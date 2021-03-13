@@ -43,22 +43,24 @@ function render!(io, x::XLeaf{<:AbstractString}, ::HTML)
     print(io, CommonMark.escape_xml(x[]))
 end
 
-const HTML_MIME_TYPES = [
-    IJulia.ijulia_mime_types[3],
-    IJulia.ijulia_mime_types[4],
-    IJulia.ijulia_mime_types[1],
-    IJulia.ijulia_mime_types[2],
-    IJulia.ijulia_mime_types[5],
+const HTML_MIMES = [
+    MIME"image/png"(),
+    MIME"image/jpeg"(),
+    MIME"image/svg+xml"(),
+    MIME"text/latex"(),
+    MIME"text/markdown"(),
+    MIME"text/html"(),
+    MIME"text/plain"(),
 ]
 
 function render!(io, x::XLeaf, ::HTML)
     val = x[]
 
-    for m in HTML_MIME_TYPES
+    for m in HTML_MIMES
         try
             if IJulia._showable(m, val)
-                mime, mime_repr = IJulia.display_mimestring(m, val)
-                print(io, mime_repr)
+                s = htmlstr(m, val)
+                print(io, s)
                 return
             end
         catch
@@ -67,19 +69,26 @@ function render!(io, x::XLeaf, ::HTML)
             end
         end
     end
-    #=
-    # Try to render as image
-    mimedict = IJulia.display_dict(a)
-    for mime in IMAGEMIMES
-        if mime in keys(mimedict)
-            src = "data;$mime;base64,$(mimedict[mime])"
-            return render!(io, xexpr(:img, Dict(:src => src)), HTML(), Val(:img))
-        end
-    end
-    @show showable(MIME("text/html"), a)
-    error("Could not render $a as HTML.")
-    =#
 end
+
+
+function htmlstr(mime::MIME, x)
+    s = IJulia.limitstringmime(mime, x)
+    return adapthtmlstr(mime, x)
+end
+
+
+adapthtmlstr(::MIME, s) = s
+
+
+function adapthtmlstr(::MIME{Symbol("image/png")}, s)
+    return """<img src="data:image/png;base64,$s"/>"""
+end
+
+function adapthtmlstr(::MIME{Symbol("image/jpeg")}, s)
+    return """<img src="data:image/jpeg;base64,$s"/>"""
+end
+
 
 IMAGEMIMES = [
     "image/jpeg",

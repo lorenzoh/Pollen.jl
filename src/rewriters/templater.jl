@@ -67,7 +67,7 @@ function inlineintemplate(template::XNode, includes)
 end
 
 
-function getfilehandlers(templater::HTMLTemplater, project, dst, format)
+function getfilehandlers(templater::HTMLTemplater, project, srcdir, dst, format)
     handlers =  [
         # When template changes, reload it and rebuild every file
         (

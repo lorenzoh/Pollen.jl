@@ -8,14 +8,16 @@ mutable struct Referencer <: Rewriter
     linkfn
 end
 
+Base.show(io::IO, referencer::Referencer) = print(io, "Referencer($(Tuple(referencer.modules)), $(length(referencer.references)) references)")
+
 function Referencer(modules; path = p"REFERENCE")
     return Referencer(
         Dict{String, Union{Reference, Nothing}}(),
         modules,
         XNode(:body),
         Dict{String, XNode}(),
-        Path("$path.html"),
-        ref -> "$path/$(CommonMark.slugify(ref))",
+        Path(path),
+        ref -> "$path/$ref",
     )
 end
 
@@ -30,28 +32,28 @@ function updatefile(referencer::Referencer, ::AbstractPath, doc::XNode)
 end
 
 
-function updatetree(referencer::Referencer, tree::FileTree)
+function updatetree(referencer::Referencer, outputs)
     refdoc = buildreference(referencer)
-    newfiles = Set()
+    newsources = Dict{AbstractPath, XNode}()
 
     # Conditionally update/create reference page
     if refdoc != referencer.doc
         referencer.doc = refdoc
-        push!(newfiles, (referencer.path, refdoc))
+        newsources[referencer.path] =  refdoc
     end
 
 
     # Conditionally update/create binding pages
-    for ref in values(referencer.references)
-        doc = get(referencer.refdocs, ref.fullname, XNode(:null))
-        newdoc = buildreferencepage(ref)
-        if doc != newdoc
+    Threads.@threads for ref in collect(values(referencer.references))
+        doc = get(referencer.refdocs, ref.fullname, nothing)
+        if isnothing(doc)
+            newdoc = buildreferencepage(ref)
             referencer.refdocs[ref.fullname] = newdoc
-            push!(newfiles, (Path(referencer.linkfn(ref.fullname)), newdoc))
+            newsources[Path(referencer.linkfn(ref.fullname))] = newdoc
         end
     end
 
-    return tree, newfiles, Set()
+    return outputs, newsources, Set()
 end
 
 
@@ -110,13 +112,17 @@ const ORDERREFTYPE = Dict(
 function buildreferencepage(ref::Reference)
     docs = getdocs(ref.m, ref.identifier)
     xdocs = if isnothing(docs)
-        XNode(:p, [
+        XNode(:p, XTree[
             XLeaf("No documentation found for "),
             XNode(:code, [XLeaf(ref.fullname)]),
             XLeaf(".")
             ])
     else
         convert(XTree, docs)
+    end
+    if !isnothing(ref.identifier) && ref.kind in (:struct, :function)
+        push!(xdocs.children, XNode(:h2, [XLeaf("Methods")]))
+        push!(xdocs.children, XLeaf(methods(getfield(ref.m, ref.identifier))))
     end
     return XNode(
         :body,

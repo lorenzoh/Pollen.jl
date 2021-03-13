@@ -6,7 +6,6 @@ using CommonMark
 using CommonMark: Document, Item, Text, Paragraph, List, Heading,
     Emph, SoftBreak, Link, Code, Node, AbstractContainer, CodeBlock, ThematicBreak,
     BlockQuote, Admonition, Attributes, Image, Citation
-using FileTrees
 using FilePathsBase
 using DataStructures: DefaultDict
 import Gumbo
@@ -17,6 +16,7 @@ using IJulia
 using LiveServer: SimpleWatcher, watch_file!, start, stop
 using TOML
 using IOCapture
+using JSON3
 
 
 include("xtree.jl")
@@ -27,11 +27,13 @@ include("folds.jl")
 #include("xexpr.jl")
 include("reflectionutils.jl")
 include("references.jl")
+include("files.jl")
 
 include("formats.jl")
 include("markdown.jl")
-include("files.jl")
 include("html.jl")
+include("jupyter.jl")
+
 include("rewriters.jl")
 include("rewriters/referencer.jl")
 include("rewriters/documenttree.jl")
@@ -44,6 +46,7 @@ include("rewriters/toc.jl")
 
 include("project.jl")
 include("serve.jl")
+include("projects.jl")
 
 
 
@@ -55,8 +58,9 @@ export select,
     NthChild, FirstChild, Before, After,
     Project,
     SelectTag, SelectOr, XExpr, ChangeTag, htmlify, AddSlugID, AddTableOfContents, SelectAttrEq,
-    Selector, parse, HTML, Markdown, resolveidentifier, parsefiletree, serve,
+    Selector, parse, HTML, Markdown, resolveidentifier, serve,
     # rewriters
-    AddID, HTMLify, ChangeLinkExtension, FormatCode, AddTableOfContents, Referencer
+    AddID, HTMLify, ChangeLinkExtension, FormatCode, AddTableOfContents, Referencer,
+    documentationproject
 
 end

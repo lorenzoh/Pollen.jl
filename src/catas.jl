@@ -36,6 +36,20 @@ function replacemany(xtree, xnodes, selector::Selector)
 end
 
 
+# Filter
+
+function Base.filter(f, xtree::XNode)
+    return cata(xtree) do x
+        if x isa XLeaf
+            return x
+        else
+            return withchildren(x, collect(filter(f, children(x))))
+        end
+    end
+end
+
+Base.filter(xtree::XNode, sel::Selector) = filter(x -> matches(sel, x), xtree)
+
 # Insertion
 
 abstract type Position end

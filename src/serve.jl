@@ -1,8 +1,9 @@
 
 
-function serve(project, dst = Path(mktempdir()); format = HTML())
+function serve(project, srcdir::AbstractPath, dst = Path(mktempdir()); format = HTML())
+    srcdir = absolute(srcdir)
     Pollen.build(project, dst, format)
-    handlers = getfilehandlers(project, dst, format)
+    handlers = getfilehandlers(project, srcdir, dst, format)
     watcher = watchfiles(handlers)
     try
         LiveServer.serve(dir=string(dst))
@@ -31,38 +32,40 @@ function watchfiles(handlers)
 end
 
 
-function getfilehandlers(project::Project, dst, format)
+function getfilehandlers(project::Project, srcdir, dst, format)
     handlers = Dict{AbstractPath, Any}()
-    for f in files(project.srctree)
-        p = absolute(path(f))
-        if isfile(p)
-            append!(handlers, p, () -> defaulthandler(project, p, dst, format))
+
+    # For physical files, rebuild them when they change on disk
+    for path in keys(project.sources)
+        fullpath = joinpath(srcdir, path)
+        if isfile(fullpath)
+            append!(handlers, fullpath, () -> defaulthandler(project, path, fullpath, dst, format))
         end
     end
+
+    # Register custom rewriter handlers
     for rewriter in project.rewriters
-        for (p, handlerfn) in getfilehandlers(rewriter, project, dst, format)
+        for (p, handlerfn) in getfilehandlers(rewriter, project, srcdir, dst, format)
             append!(handlers, p, handlerfn)
         end
     end
     return handlers
 end
 
-getfilehandlers(rewriter::Rewriter, project, dst, format) = ()
+getfilehandlers(::Rewriter, project, srcdir, dst, format) = ()
 
 
-function defaulthandler(project, p, dst, format)
-    println("Rebuilding $p")
-    doc = Pollen.parse(p)
-    p = relative(p, path(project.srctree))
-    dirtypaths = addfiles!(project, [(p, doc)])
+function defaulthandler(project, path, fullpath, dst, format)
+    println("Rebuilding $path")
+    doc = Pollen.parse(fullpath)
+    dirtypaths = addfiles!(project, [(path, doc)])
     rebuild(project, dst, format, dirtypaths)
 end
 
 # Utils
 
 function append!(d::Dict, key, val)
-    if !haskey(d, key)
-        d[key] = []
-    end
-    push!(d[key], val)
+    xs = get!(d, key, [])
+    push!(xs, val)
+    d[key] = xs
 end

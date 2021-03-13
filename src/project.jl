@@ -1,98 +1,112 @@
 
 
+function findfiles(dir::AbstractPath; exts = ("md", "ipynb"), includehidden = false)
+    it = filter(collect((relative(p, dir) for p in walkpath(dir)))) do p
+        (extension(p) in exts) && (includehidden || !startswith(filename(p), '.'))
+    end
+    return it
+
+end
+
 
 mutable struct Project
-    sources::FileTree
-    outtree::FileTree
+    sources::Dict{AbstractPath, XTree}
+    outputs::Dict{AbstractPath, XTree}
     rewriters::Vector{<:Rewriter}
 end
 
-function Project(srcdir::AbstractPath, rewriters)
-    tree = parsefiletree(srcdir)
-    Project(tree, tree, rewriters)
+Project(dir::AbstractPath, rewriters::Vector{<:Rewriter}) =
+    Project(dir, collect(findfiles(dir)), rewriters)
+
+Project(paths::Vector{<:AbstractPath}, rewriters::Vector{<:Rewriter}) =
+    Project(Path(pwd()), paths, rewriters)
+
+function Project(dir::AbstractPath, paths::Vector{<:AbstractPath}, rewriters::Vector{<:Rewriter})
+    sources = Dict{AbstractPath, XTree}()
+    Threads.@threads for p in paths
+        sources[p] = parse(joinpath(dir, p))
+    end
+    targets = Dict{AbstractPath, XTree}()
+    return Project(sources, targets, rewriters)
 end
 
-Base.show(io::IO, project::Project) = print(io, "Project($(project.srctree.name), $(typeof.(project.rewriters))")
 
-"""
-    addfiles(tree, rewriters, files) -> dirtypaths
+Base.show(io::IO, project::Project) = print(io, "Project($(length(project.sources)) documents, $(typeof.(project.rewriters))")
 
-Updates `files`  (pairs of paths and x-expressions) on `tree`
-using `rewriters`.
-May produce more files and call itself recursively.
-"""
+
 function addfiles(
-        srctree,
-        outtree,
+        sources::Dict,
+        outputs::Dict,
         rewriters,
-        files; dirtypaths = Set())
+        newsources;
+        dirtypaths = Set())
+    sources = copy(sources)
+    outputs = copy(outputs)
+    dirtypaths = addfiles!(sources, outputs, rewriters, newsources; dirtypaths = dirtypaths)
+    return sources, outputs, dirtypaths
+end
 
-    isempty(files) && return srctree, outtree, dirtypaths
 
-    # Update source tree
-    newsrcdocs = Dict()
-    for (p, doc) in files
-        @show p
-        srctree = hasfile(srctree, p) ? srctree : touch(srctree, p)
-        newsrcdocs[p] = doc
-    end
-    srctree = setvalues(srctree, newsrcdocs)
+"""
+    addfiles(sources, outputs, rewriters, newsources) -> (sources', outputs', dirtypaths)
+    addfiles!(sources, outputs, rewriters, newsources) -> dirtypaths
 
+Updates `sources` and `outputs` based on new or updated `changedsources`
+using `rewriters`.
+"""
+function addfiles!(
+        sources::Dict,
+        outputs::Dict,
+        rewriters,
+        newsources::Dict;
+        dirtypaths = Set())
+    isempty(newsources) && return dirtypaths
 
     # Process new/changed files on document-level
-    newoutdocs = Dict()
-    for (p, _) in files
-        doc = srctree[p][]
-        outtree = hasfile(outtree, p) ? outtree : touch(outtree, p)
+    for (p, xtree) in newsources
+        sources[p] = xtree
         for rewriter in rewriters
-            doc = updatefile(rewriter, p, doc)
+            xtree = updatefile(rewriter, p, xtree)
         end
-        newoutdocs[p] = doc
+        outputs[p] = xtree
         push!(dirtypaths, p)
     end
-    outtree = setvalues(outtree, newoutdocs)
 
     # Apply project-level changes like updating tree elements,
     # and creating new files.
-    newfiles = Set()
+    newersources = Dict{AbstractPath, XNode}()
     for rewriter in rewriters
-        outtree, newfs, dirtyps = updatetree(rewriter, outtree)
+        outputs, new, dirtyps = updatetree(rewriter, outputs)
         dirtypaths = dirtypaths ∪ dirtyps
-        newfiles = newfiles ∪ newfs
+        newersources = merge(newersources, new)
     end
 
-    return addfiles(srctree, outtree, rewriters, newfiles; dirtypaths = dirtypaths)
+    return addfiles!(sources, outputs, rewriters, newersources; dirtypaths = dirtypaths)
 end
 
 
-function setvalues(tree::FileTree, valuesdict)
-    return map(tree) do f
-        val = get(valuesdict, relative(path(f), path(tree)), f[])
-        return setvalue(f, val)
-    end
-end
-
-
-function addfiles!(project::Project, files)
-    project.srctree, project.outtree, dirtypaths = addfiles(project.srctree, project.outtree, project.rewriters, files)
+function addfiles!(project::Project, newsources)
+    dirtypaths = addfiles!(project.sources, project.outputs, project.rewriters, newsources)
     return dirtypaths
 end
 
 
 function build(project::Project, dst::AbstractPath, format::Format)
-    fs = [(relative(path(f), path(project.srctree)), f[]) for f in files(project.srctree)]
-    dirtypaths = addfiles!(project, fs)
+    # Build all documents
+    dirtypaths = addfiles!(project, project.sources)
+
+    # Save to disk
     rebuild(project, dst, format, dirtypaths)
 end
 
 
 function rebuild(project, dst, format, dirtypaths)
-    pt = path(project.outtree)
-    dirtytree = filter(project.outtree; dirs = false) do f
-        p = path(f)
-        return relative(p, path(project.outtree)) in dirtypaths
+    # Save all dirty documents to disk
+    for p in collect(dirtypaths)
+        buildfile(project, p, dst, format)
     end
-    savefiletree(dirtytree, dst, format)
+
+    # Perform post-build actions
     for rewriter in project.rewriters
         postbuild(rewriter, project, dst, format)
     end
@@ -100,11 +114,12 @@ end
 
 
 function buildfile(project, p, dst, format)
-    doc = project.tree[p][]
-    p = withext(joinpath(dst, p), formatextension(format))
-    render!(p, doc, format)
-end
-
-function relativepaths(tree::FileTree)
-    return (relative(path(file), path(tree)) for f in files(tree))
+    dst = joinpath(dst, p)
+    fullpath = withext(dst, formatextension(format))
+    dir = parent(fullpath)
+    try
+        mkpath(parent(fullpath))
+    catch
+    end
+    render!(fullpath, project.outputs[p], format)
 end

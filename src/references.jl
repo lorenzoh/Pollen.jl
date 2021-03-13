@@ -5,6 +5,7 @@ struct Reference
     identifier::Union{Nothing, Symbol}
     fullname::String
     kind::Symbol
+    ispublic::Bool
 end
 
 function Reference(m::Module, identifier::Symbol)
@@ -12,7 +13,8 @@ function Reference(m::Module, identifier::Symbol)
         m,
         identifier,
         join((string(m), string(identifier)), '.'),
-        referencetype(m, identifier)
+        referencetype(m, identifier),
+        Base.isexported(m, identifier),
     )
 end
 
@@ -56,15 +58,23 @@ function resolveidentifier(name, modules = ())
         for m in modules
             if isdefined(m, bindingsymbol)
                 return Reference(m, bindingsymbol)
+
             end
         end
         return nothing
     else
+        for m in modules
+            # TODO: make generic to any level of submodule
+            if isdefined(m, Symbol(modulename))
+                submodule = getfield(m, Symbol(modulename))
+                if isdefined(submodule, bindingsymbol)
+                    return Reference(submodule, bindingsymbol)
+                end
+            end
+        end
         m = getmodule(modulename)
         return isnothing(m) ? nothing : Reference(m, bindingsymbol)
     end
-
-
 end
 
 
@@ -74,7 +84,6 @@ function populatereferences!(references, doc::XNode, linkfn = nothing, modules =
     return cata(doc, sel) do x
         refname = gettext(x)
         refname == "" && return x
-
         ref = resolveidentifier(refname, modules)
         if isnothing(ref)
             @info "Could not resolve reference $refname in modules $modules."
@@ -83,9 +92,18 @@ function populatereferences!(references, doc::XNode, linkfn = nothing, modules =
             references[ref.fullname] = ref
             return XNode(
                 :a,
-                Dict(:href => "/" * linkfn(CommonMark.slugify(ref.fullname))),
-                [XNode(:code, [XLeaf(ref.fullname)])],
+                Dict(:href => "/" * linkfn(ref.fullname)),
+                [XNode(:code, [XLeaf(reflinkname(ref, modules))])],
             )
         end
+    end
+end
+
+
+function reflinkname(ref::Reference, modules = ())
+    if ref.ispublic && ref.m in modules
+        return String(ref.identifier)
+    else
+        return ref.fullname
     end
 end

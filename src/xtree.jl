@@ -6,6 +6,8 @@ struct XNode{T<:XTree, V} <: XTree
     children::Vector{T}
 end
 
+Base.show(io::IO, xnode::XNode) = print_tree(io, xnode, 3)
+
 XNode(tag::Symbol) = XNode(tag, XTree[])
 XNode(tag::Symbol, attributes::Dict) = XNode(tag, attributes, XTree[])
 XNode(tag::Symbol, children::Vector) = XNode(tag, Dict{Symbol, Any}(), children)
@@ -34,7 +36,7 @@ end
 Base.getindex(xleaf::XLeaf) = xleaf.data
 
 
-AbstractTrees.children(xnode::XLeaf) = ()
+AbstractTrees.children(::XLeaf) = ()
 AbstractTrees.printnode(io::IO, xleaf::XLeaf) = print(io, xleaf[])
 
 # Catamorphism

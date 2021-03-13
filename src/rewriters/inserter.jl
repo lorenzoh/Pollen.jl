@@ -13,7 +13,7 @@ Base.show(io::IO, inserter::Inserter) = print(io, "Inserter($(inserter.positions
 function updatefile(inserter::Inserter, p::AbstractPath, doc::XNode)
     for (f, pos) in zip(inserter.fs, inserter.positions)
         if isnothing(selectfirst(doc, pos.selector))
-            error("Could not position $pos to insert into.")
+            error("Could not find position $pos to insert into.")
         end
         doc = insertfirst(doc, f(p, doc), pos)
     end

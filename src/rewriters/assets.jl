@@ -31,7 +31,7 @@ function postbuild(assets::Assets, project, dst, format)
 end
 
 
-function getfilehandlers(assets::Assets, project, dst, format)
+function getfilehandlers(assets::Assets, project, srcdir, dst, format)
     return [(absolute(assetpath), () -> (assets.isdirty[i] = true;))
             for (i, assetpath) in enumerate(assets.srcpaths)]
 end

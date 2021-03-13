@@ -1,33 +1,13 @@
-function parsefiletree(p::AbstractPath; exts = ("md",))
-    tree = FileTree(p)
-    tree = filter(f -> extension(path(f)) in exts, tree, dirs=false)
-    tree = filter(f -> !startswith(name(f), '.'), tree)
-    tree = FileTrees.load(f -> Pollen.parse(path(f)), tree, dirs = false)
-    return tree
-end
-
-parsefiletree(dir::String) = parsefiletree(Path(dir))
-
-function savefiletree(tree, dst::AbstractPath, format::Pollen.Format)
-    tree = rename(tree, dst)
-    FileTrees.save(tree) do f
-        p = withext(joinpath(dst, path(f)), formatextension(format))
-        render!(p, f[], format)
-    end
-end
 
 function withext(path::AbstractPath, ext)
-    return joinpath(parent(path), "$(filename(path)).$ext")
-end
-
-
-function hasfile(tree::FileTree, p)
-    try
-        tree[p]
-        return true
-    catch
-        return false
+    newname = filename(path)
+    for e in extensions(path)
+        newname *= "."
+        newname *= e
     end
+    newname *= "."
+    newname *= ext
+    return joinpath(parent(path), newname)
 end
 
 

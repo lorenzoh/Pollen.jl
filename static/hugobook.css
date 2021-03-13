@@ -93,6 +93,7 @@ img {
   outline-color: currentColor;
   outline-color: -webkit-focus-ring-color; 
 }
+
 aside nav ul {
   padding: 0;
   margin: 0;
@@ -129,6 +130,18 @@ aside nav ul ul {
 }
 /* menu */
 
+.book-brand {
+  margin-top: 0;
+
+}
+.book-brand img {
+    height: 1.5em;
+    width: auto;
+    vertical-align: middle;
+    margin-inline-end: var(--padding-8);
+}
+
+
 .book-menu {
     flex: 0 0 var(--menu-width);
     font-size: var(--font-size-14);
@@ -138,8 +151,8 @@ aside nav ul ul {
     width: var(--menu-width);
     padding: var(--padding-16);
     background: var(--body-background);
-    
 }
+
   
 .book-menu a,
 .book-menu label {
@@ -196,7 +209,6 @@ article > :first-child {
     margin-top: 0;
 }
 
-article h1,
   article h2,
   article h3,
   article h4,
@@ -215,6 +227,9 @@ article h1,
   }
   article h1 {
     font-size: 2em;
+    line-height: 1;
+    font-weight: normal;
+    margin-bottom: var(--padding-16);
   }
 
   article h5 {
@@ -245,16 +260,24 @@ article h1,
   article img {
     max-width: 100%;
   }
+  article svg {
+    max-width: 100%;
+    height: auto;
+  }
 
   article code {
     padding: 0 var(--padding-4);
     background: var(--gray-100);
     border-radius: var(--border-radius);
-    font-size: 0.875em;
+    font-size: var(--font-size-14)
+  }
+
+  article h1 code {
+    font-size: inherit;
   }
 
   article pre {
-    padding: var(--padding-16);
+    padding: var(--padding-8);
     background: var(--gray-100);
     border-radius: var(--border-radius);
     overflow-x: auto;
@@ -385,4 +408,11 @@ body {
 
 code, .codeoutput {
     font-family: JuliaMono, 'Roboto Mono', monospace;
+}
+
+.doctree ul li p {
+  font-weight: bold;
+}
+.doctree ul li p a {
+  font-weight: normal;
 }
