@@ -74,7 +74,7 @@ end
 
 function htmlstr(mime::MIME, x)
     s = IJulia.limitstringmime(mime, x)
-    return adapthtmlstr(mime, x)
+    return adapthtmlstr(mime, s)
 end
 
 

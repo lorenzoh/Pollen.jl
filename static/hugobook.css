@@ -411,8 +411,12 @@ code, .codeoutput {
 }
 
 .doctree ul li p {
-  font-weight: bold;
+  font-style: italic;
 }
 .doctree ul li p a {
-  font-weight: normal;
+  font-style: normal;
+}
+
+article {
+  font-family: Charter;
 }

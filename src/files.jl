@@ -1,5 +1,8 @@
 
 function withext(path::AbstractPath, ext)
+    if extension(path) == ext
+        return path
+    end
     newname = filename(path)
     for e in extensions(path)
         newname *= "."
