@@ -106,7 +106,7 @@ function updatefile(executecode::ExecuteCode, p, doc)
     if executecode.warnonerror
         for (i, result) in enumerate(results)
             if result isa LoadError
-                @warn "Got evaluation error $(result.error) in code block:\n\n$(codes[i])\n" doc=p block=i line=result.line
+                @warn "Got evaluation error in code block:\n\n$(codes[i])\n" error=result.error doc=p block=i line=result.line
             end
         end
     end
