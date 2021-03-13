@@ -10,8 +10,8 @@ function documentationproject(m::Module)
         ExecuteCode(),
         Referencer([m]),
         HTMLTemplater(
-            p"Pollen/static/hugobook.html",
-            [p"Pollen/static/hugobook.css"],
+            joinpath(ASSETDIR, p"hugobook.html"),
+            [joinpath(ASSETDIR, "hugobook.css")],
             inlineincludes = true,
             insertpos = NthChild(2, SelectAttrEq(:class, "book-page"))
         ),
@@ -32,3 +32,6 @@ function serve(m::Module)
     project = documentationproject(m)
     serve(project, Path(pkgdir(m)))
 end
+
+
+const ASSETDIR = joinpath(Path(pkgdir(Pollen)), p"static")
