@@ -20,9 +20,12 @@
   --header-height: 3.5rem;
   --menu-width: 16rem;
   --toc-width: 16rem;
+  /*
   --mobile-breakpoint: calc(
     var(--menu-width) + var(--body-min-width) * 1.2 + var(--toc-width)
   );
+  */
+  --mobile-breakpoint: 800px;
 }
 
 /* Light theme */
@@ -401,14 +404,82 @@ article li p {
          url('fonts/roboto-mono-v6-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
          url('fonts/roboto-mono-v6-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
   }
+
+  /*
+@font-face {
+  font-family: 'VeraMono';
+  src: URL('/fonts/VeraMono.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Charter';
+  src: URL('/fonts/Charter Regular.otf') format('opentype');
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Charter';
+  src: URL('/fonts/Charter Bold.otf') format('opentype');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: 'Charter';
+  src: URL('/fonts/Charter Italic.otf') format('opentype');
+  font-style: italic;
+}
+*/
   
+
+/* Mobile */
+#menu-control, #toc-control {
+  display: none;
+}
+
+@media screen and (max-width: var(--mobile-breakpoint)) {
+  article {
+    font-size: 3em;
+  }
+  #menu-control,
+  #toc-control {
+    display: inline;
+  }
+}
+
+
+
+/* CUSTOM */
+
 body {
     font-family: 'Roboto', sans-serif;
 }
 
 code, .codeoutput {
-    font-family: JuliaMono, 'Roboto Mono', monospace;
+    font-family: JuliaMono, VeraMono, 'Roboto Mono', monospace;
 }
+
+
+pre.codeoutput {
+  background-color: white;
+  border-left: 2px dotted var(--gray-200);
+  border-right: 2px dotted var(--gray-200);
+  margin-top: 0;
+  margin-bottom: 0;
+  border-radius: 4px 4px 0 0;
+}
+
+pre.coderesult {
+  margin-top: 0;
+  border-radius: 0 0 4px 4px;
+  background-color: white;
+  border-left: 2px solid var(--gray-200);
+  border-right: 2px solid var(--gray-200);
+  border-bottom: 2px solid var(--gray-200);
+}
+
+pre[lang] {
+  margin-bottom: 0;
+}
+
 
 .doctree ul li p {
   font-style: italic;
@@ -419,5 +490,5 @@ code, .codeoutput {
 
 
 article {
-  font-family: Charter;
+  font-family: Charter, Garamond, serif;
 }

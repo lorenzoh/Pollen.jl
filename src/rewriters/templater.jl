@@ -13,16 +13,16 @@ Base.show(io::IO, templater::HTMLTemplater) = print(io, "HTMLTemplater($(templat
 function HTMLTemplater(
         templatepath::AbstractPath,
         includes::Vector{<:AbstractPath}=Path[];
+        assetdir = Path("."),
         inlineincludes=false,
         insertpos=FirstChild(SelectTag(:body)),
     )
-    # TODO
     template = Pollen.parse(templatepath)
-    assets = Assets(includes)
+    assets = Assets(Dict(joinpath(p"template/", p) => absolute(joinpath(assetdir, p)) for p in includes))
     if inlineincludes
-        template = inlineintemplate(template, assets.srcpaths)
+        template = inlineintemplate(template, collect(values(assets.assets)))
     else
-        template = includeintemplate(template, assets.dstpaths)
+        template = includeintemplate(template, collect(keys(assets.assets)))
     end
 
     return HTMLTemplater(assets, template, templatepath, inlineincludes, insertpos)
@@ -78,10 +78,10 @@ function getfilehandlers(templater::HTMLTemplater, project, srcdir, dst, format)
 
     if templater.inlineincludes
         handlers = vcat(handlers, [
-            (p, () -> onupdatetemplate(templater, project, dst, format)) for p in templater.assets.srcpaths
+            (p, () -> onupdatetemplate(templater, project, dst, format)) for p in values(templater.assets.assets)
         ])
     else
-        handlers = vcat(handlers, getfilehandlers(templater.assets, project, dst, format))
+        handlers = vcat(handlers, getfilehandlers(templater.assets, project, srcdir, dst, format))
     end
     return handlers
 end
@@ -90,9 +90,9 @@ end
 function onupdatetemplate(templater, project, dst, format)
     template = Pollen.parse(templater.templatepath)
     if templater.inlineincludes
-        templater.template = inlineintemplate(template, templater.assets.srcpaths)
+        templater.template = inlineintemplate(template, collect(values(templater.assets.assets)))
     else
-        templater.template = includeintemplate(template, templater.assets.dstpaths)
+        templater.template = includeintemplate(template, collect(keys(templater.assets.assets)))
     end
     build(project, dst, format)
 end

@@ -99,5 +99,64 @@ function formatcodeblock(doc)
     else
         return doc
     end
+end
 
+
+
+#
+
+const CSSLINKSELECTOR = SelectTag(:link) & SelectHasAttr(:href)
+
+Base.@kwdef struct RelativeLinks <: Rewriter
+    linktag::Symbol = :a
+    linkattr::Symbol = :href
+end
+
+
+function updatefile(rewriter::RelativeLinks, p, doc)
+    sel = SelectTag(rewriter.linktag) & SelectHasAttr(rewriter.linkattr)
+    sel |= CSSLINKSELECTOR
+    cata(doc, sel) do x
+        href = attributes(x)[:href]
+        if startswith(href, '/')
+            newhref = relpath(href, "/" * string(parent(p)))
+            return withattributes(x, merge(attributes(x), Dict(:href => newhref)))
+        else
+            return x
+        end
+    end
+end
+
+
+#
+
+function createtitle(p, x)
+    h1 = selectfirst(x, SelectTag(:h1))
+    title = if !isnothing(h1)
+        gettext(h1)
+    else
+        string(filename(p))
+    end
+    return XNode(:title, [XLeaf(title)])
+end
+
+
+struct HTMLRedirect <: Rewriter
+    p::AbstractPath
+end
+
+
+function postbuild(redirect::HTMLRedirect, project, dst, format)
+    redirectpath = withext(redirect.p, formatextension(format))
+    content = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta http-equiv = "refresh" content = "0; url = $redirectpath" />
+    </head>
+    </html>
+    """
+    open(joinpath(dst, "index.html"), "w") do f
+        write(f, content)
+    end
 end

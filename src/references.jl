@@ -9,11 +9,17 @@ struct Reference
 end
 
 function Reference(m::Module, identifier::Symbol)
+    t = referencetype(m, identifier)
+    # Find module where reference was defined
+    if t in (:function, :struct, :type, :pstruct)
+        m = parentmodule(getfield(m, identifier))
+    end
+
     return Reference(
         m,
         identifier,
         join((string(m), string(identifier)), '.'),
-        referencetype(m, identifier),
+        t,
         Base.isexported(m, identifier),
     )
 end

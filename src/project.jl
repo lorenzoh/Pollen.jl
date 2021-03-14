@@ -107,6 +107,7 @@ function rebuild(project, dst, format, dirtypaths)
     end
 
     # Perform post-build actions
+    # TODO: make thread-safe and use `@threads`
     for rewriter in project.rewriters
         postbuild(rewriter, project, dst, format)
     end

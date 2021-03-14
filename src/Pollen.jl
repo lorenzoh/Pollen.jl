@@ -7,7 +7,7 @@ using CommonMark: Document, Item, Text, Paragraph, List, Heading,
     Emph, SoftBreak, Link, Code, Node, AbstractContainer, CodeBlock, ThematicBreak,
     BlockQuote, Admonition, Attributes, Image, Citation
 using FilePathsBase
-using DataStructures: DefaultDict
+using DataStructures: DefaultDict, OrderedDict
 import Gumbo
 using JuliaFormatter
 using Mustache
