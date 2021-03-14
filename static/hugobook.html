@@ -1,14 +1,13 @@
 <head>
     <meta http-equiv='Content-Type' content='Type=text/html; charset=utf-8'>
-  <title>Hello</title>
 </head>
 
 <body>
-<input type="checkbox" class="hidden toggle" id="menu-control" />
+<input type="checkbox" onclick="toggleMenu()" class="hidden toggle" id="menu-control" />
   <input type="checkbox" class="hidden toggle" id="toc-control" />
 
   <main class="container flex">
-    <aside class="book-menu">
+    <aside class="book-menu" id="menu-container">
       <nav class="book-menu-content">
         <h2 id="title"></h2>
         <div id="sidebar">

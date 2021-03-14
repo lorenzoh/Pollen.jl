@@ -24,8 +24,8 @@
   --mobile-breakpoint: calc(
     var(--menu-width) + var(--body-min-width) * 1.2 + var(--toc-width)
   );
+  16rem + 20rem * 1.2 + 16rem = 46rem
   */
-  --mobile-breakpoint: 800px;
 }
 
 /* Light theme */
@@ -435,15 +435,16 @@ article li p {
   display: none;
 }
 
-@media screen and (max-width: var(--mobile-breakpoint)) {
-  article {
-    font-size: 3em;
+
+@media (max-width: 46rem) {
+  .container {
+    display: block;
   }
-  #menu-control,
-  #toc-control {
-    display: inline;
-  }
+  
+.book-toc .book-toc-content {
+  display: none;
 }
+
 
 
 
