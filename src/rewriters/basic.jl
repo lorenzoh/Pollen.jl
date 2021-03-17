@@ -146,8 +146,9 @@ struct HTMLRedirect <: Rewriter
 end
 
 
-function postbuild(redirect::HTMLRedirect, project, dst, format)
-    redirectpath = withext(redirect.p, formatextension(format))
+function postbuild(redirect::HTMLRedirect, project, builder)
+    builder isa FileBuilder || error("`HTMLRedirect` does not work with $builder")
+    redirectpath = withext(redirect.p, formatextension(builder.format))
     content = """
     <!DOCTYPE html>
     <html>
@@ -156,7 +157,7 @@ function postbuild(redirect::HTMLRedirect, project, dst, format)
     </head>
     </html>
     """
-    open(joinpath(dst, "index.html"), "w") do f
+    open(joinpath(builder.dir, "index.html"), "w") do f
         write(f, content)
     end
 end

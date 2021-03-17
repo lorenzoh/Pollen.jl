@@ -67,41 +67,40 @@ function inlineintemplate(template::XNode, includes)
 end
 
 
-function getfilehandlers(templater::HTMLTemplater, project, srcdir, dst, format)
+function getfilehandlers(templater::HTMLTemplater, project, dir, builder)
     handlers =  [
         # When template changes, reload it and rebuild every file
         (
             absolute(templater.templatepath),
-            () -> onupdatetemplate(templater, project, dst, format)
+            () -> onupdatetemplate(templater, project, builder)
         ),
     ]
 
     if templater.inlineincludes
         handlers = vcat(handlers, [
-            (p, () -> onupdatetemplate(templater, project, dst, format)) for p in values(templater.assets.assets)
+            (p, () -> onupdatetemplate(templater, project, builder)) for p in values(templater.assets.assets)
         ])
     else
-        handlers = vcat(handlers, getfilehandlers(templater.assets, project, srcdir, dst, format))
+        handlers = vcat(handlers, getfilehandlers(templater.assets, project, dir, builder))
     end
     return handlers
 end
 
 
-function onupdatetemplate(templater, project, dst, format)
+function onupdatetemplate(templater, project, builder)
     template = Pollen.parse(templater.templatepath)
     if templater.inlineincludes
         templater.template = inlineintemplate(template, collect(values(templater.assets.assets)))
     else
         templater.template = includeintemplate(template, collect(keys(templater.assets.assets)))
     end
-    build(project, dst, format)
-end
-
-function onupdateinclude(templater, project, dst, format)
-    build(project, dst, format)
+    build(builder, project)
 end
 
 
-function postbuild(templater::HTMLTemplater, project, dst, format)
-    postbuild(templater.assets, project, dst, format)
+function postbuild(templater::HTMLTemplater, project, builder)
+    postbuild(templater.assets, project, builder)
 end
+
+
+reset!(templater::HTMLTemplater) = reset!(templater.assets)

@@ -56,10 +56,19 @@ function updatetree(referencer::Referencer, outputs)
     return outputs, newsources, Set()
 end
 
+function reset!(referencer::Referencer)
+    referencer.references = Dict{String, Union{Reference, Nothing}}()
+    referencer.doc = XNode(:body)
+    referencer.refdocs = Dict{String, XNode}()
+    return
+end
+
 
 function buildreference(referencer)
     refs = referencer.references
     children = [XNode(:h1, [XLeaf("Reference")])]
+
+    ms = sort(unique([ref.m for ref in values(referencer.references)]), by = string)
 
     for m in referencer.modules
         children = vcat(children,

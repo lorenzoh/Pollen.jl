@@ -21,11 +21,17 @@ Project(dir::AbstractPath, rewriters::Vector{<:Rewriter}) =
 Project(paths::Vector{<:AbstractPath}, rewriters::Vector{<:Rewriter}) =
     Project(Path(pwd()), paths, rewriters)
 
+
 function Project(dir::AbstractPath, paths::Vector{<:AbstractPath}, rewriters::Vector{<:Rewriter})
     sources = Dict{AbstractPath, XTree}()
     Threads.@threads for p in paths
         sources[p] = parse(joinpath(dir, p))
     end
+    return Project(sources, rewriters)
+end
+
+
+function Project(sources::Dict{AbstractPath, XTree}, rewriters::Vector{<:Rewriter})
     targets = Dict{AbstractPath, XTree}()
     return Project(sources, targets, rewriters)
 end
@@ -60,6 +66,7 @@ function addfiles!(
         rewriters,
         newsources::Dict;
         dirtypaths = Set())
+
     isempty(newsources) && return dirtypaths
 
     # Process new/changed files on document-level
@@ -81,6 +88,7 @@ function addfiles!(
         newersources = merge(newersources, new)
     end
 
+    # Run recursively with new documents
     return addfiles!(sources, outputs, rewriters, newersources; dirtypaths = dirtypaths)
 end
 
@@ -91,36 +99,10 @@ function addfiles!(project::Project, newsources)
 end
 
 
-function build(project::Project, dst::AbstractPath, format::Format)
-    # Build all documents
-    dirtypaths = addfiles!(project, project.sources)
-
-    # Save to disk
-    rebuild(project, dst, format, dirtypaths)
-end
 
 
-function rebuild(project, dst, format, dirtypaths)
-    # Save all dirty documents to disk
-    for p in collect(dirtypaths)
-        buildfile(project, p, dst, format)
-    end
-
-    # Perform post-build actions
-    # TODO: make thread-safe and use `@threads`
-    for rewriter in project.rewriters
-        postbuild(rewriter, project, dst, format)
-    end
-end
-
-
-function buildfile(project, p, dst, format)
-    dst = joinpath(dst, p)
-    fullpath = withext(dst, formatextension(format))
-    dir = parent(fullpath)
-    try
-        mkpath(parent(fullpath))
-    catch
-    end
-    render!(fullpath, project.outputs[p], format)
+function reset!(project::Project)
+    foreach(k -> delete!(project.sources, k), keys(project.sources))
+    foreach(k -> delete!(project.outputs, k), keys(project.outputs))
+    foreach(reset!, project.rewriters)
 end

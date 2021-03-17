@@ -14,6 +14,7 @@ using Mustache
 using LiveServer
 using IJulia
 using LiveServer: SimpleWatcher, watch_file!, start, stop
+using HTTP
 using TOML
 using IOCapture
 using JSON3
@@ -45,7 +46,9 @@ include("rewriters/inserter.jl")
 include("rewriters/toc.jl")
 
 include("project.jl")
+include("builders.jl")
 include("serve.jl")
+include("servelazy.jl")
 include("projects.jl")
 
 

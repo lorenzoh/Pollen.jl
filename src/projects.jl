@@ -20,7 +20,7 @@ function documentationproject(
     # Run cells marked with "cell" attributes and include results in doc, as in Publish.jl
     executecode && push!(rewriters, ExecuteCode())
 
-    # Find references to defined symbols in package and reference pages for them
+    # Find references to defined symbols in package and create reference pages for them
     push!(rewriters, Referencer(refmodules))
 
     # Insert each doc into a HTML template, and either link to CSS and JS or inline them

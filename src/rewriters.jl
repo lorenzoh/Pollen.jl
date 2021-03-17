@@ -1,4 +1,18 @@
 
+"""
+    abstract type Rewriter
+
+Pluggable extension to a [`Project`] with hooks to transform
+individual documents, create new documents, register file update
+handlers and perform additional build steps.
+
+See the following methods:
+- [`updatefile`](#)
+- [`updatetree`](#)
+- [`reset!`](#)
+- [`postbuild`](#)
+- [`getfilehandlers`](#)
+"""
 abstract type Rewriter end
 
 """
@@ -6,9 +20,17 @@ abstract type Rewriter end
 
 Rewrite `doc` at path `p`. Return rewritten `doc`.
 """
-function updatefile(rewriter, p, doc)
+function updatefile(rewriter::Rewriter, p, doc)
     return doc
 end
+
+
+"""
+    reset!(rewriter)
+
+Clears internal state of `rewriter`. Does nothing if not overwritten.
+"""
+function reset!(rewriter::Rewriter) end
 
 
 """
@@ -16,7 +38,7 @@ end
 
 Post-build callback for [`Rewriter`](#)s.
 """
-function postbuild(rewriter, project, dst, format) end
+function postbuild(rewriter, project, builder) end
 
 
 """

@@ -22,18 +22,27 @@ function Assets(assets::Dict)
 end
 
 
-function postbuild(assets::Assets, project, dst, format)
+function postbuild(assets::Assets, project, builder::FileBuilder)
     for (i, (dstpath, srcpath)) in enumerate(assets.assets)
         if assets.isdirty[i]
-            mkpath(joinpath(dst, parent(dstpath)))
-            cp(srcpath, joinpath(dst, dstpath), force = true)
+            mkpath(joinpath(builder.dir, parent(dstpath)))
+            @show joinpath(builder.dir, dstpath)
+            cp(srcpath, joinpath(builder.dir, dstpath), force = true)
             assets.isdirty[i] = false
         end
     end
 end
+function postbuild(assets::Assets, project, builder::Builder)
+    error("`Assets` does not work with $builder")
+end
 
 
-function getfilehandlers(assets::Assets, project, srcdir, dst, format)
+function getfilehandlers(assets::Assets, project, dir, builder)
     return [(srcpath, () -> (assets.isdirty[i] = true;))
             for (i, srcpath) in enumerate(values(assets.assets))]
+end
+
+
+function reset!(assets::Assets)
+    fill!(assets.isdirty, true)
 end
