@@ -26,7 +26,6 @@ function postbuild(assets::Assets, project, builder::FileBuilder)
     for (i, (dstpath, srcpath)) in enumerate(assets.assets)
         if assets.isdirty[i]
             mkpath(joinpath(builder.dir, parent(dstpath)))
-            @show joinpath(builder.dir, dstpath)
             cp(srcpath, joinpath(builder.dir, dstpath), force = true)
             assets.isdirty[i] = false
         end

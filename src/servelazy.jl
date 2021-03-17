@@ -12,7 +12,8 @@ function servelazy(project::Project, dir; dstdir = Path(mktempdir()))
     build(project, builder)
 
     server = LazyServer(project, dir, builder, getwatcher(project, dir, builder))
-    HTTP.serve(server, verbose = true)
+    #return server
+    LiveServer.serve(callback = server, dir = string(dstdir))
 end
 
 
@@ -40,11 +41,12 @@ function (server::LazyServer)(path::AbstractPath)
 
     # Check if document is not built but is physical file
     if extension(path) == "html"
-        srcpath = joinpath(server.dir, parent(path), filename(path))
+        docpath = joinpath(parent(path), filename(path))
+        srcpath = joinpath(server.dir, docpath)
         if isfile(srcpath)
-            @info "Building $srcpath for the first time..."
+            @info "Building $docpath for the first time..."
             # Add it to sources and rebuild the project
-            dirtypaths = addfiles!(server.project, Dict(path => Pollen.parse(srcpath)))
+            dirtypaths = addfiles!(server.project, Dict(docpath => Pollen.parse(srcpath)))
             LiveServer.stop(server.watcher)
             server.watcher = getwatcher(server.project, server.dir, server.builder)
             build(server.builder, server.project, dirtypaths)

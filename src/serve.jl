@@ -24,9 +24,9 @@ function getwatcher(project, dir, builder)
 end
 
 
-
 function watchfiles(handlers)
     watcher = SimpleWatcher() do file
+        @show file
         p = Path(file)
         handlerfns = get(handlers, p, ())
         for f in handlerfns
@@ -73,7 +73,7 @@ function defaulthandler(project, dir, path, builder)
     fullpath = joinpath(dir, path)
     println("Rebuilding $fullpath")
     doc = Pollen.parse(fullpath)
-    dirtypaths = addfiles!(project, [(path, doc)])
+    dirtypaths = addfiles!(project, Dict(path => doc))
     build(builder, project, dirtypaths)
 end
 

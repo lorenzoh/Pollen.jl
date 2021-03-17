@@ -36,6 +36,9 @@ include("html.jl")
 include("jupyter.jl")
 
 include("rewriters.jl")
+include("project.jl")
+include("builders.jl")
+
 include("rewriters/referencer.jl")
 include("rewriters/documenttree.jl")
 include("rewriters/basic.jl")
@@ -45,8 +48,6 @@ include("rewriters/coderunner.jl")
 include("rewriters/inserter.jl")
 include("rewriters/toc.jl")
 
-include("project.jl")
-include("builders.jl")
 include("serve.jl")
 include("servelazy.jl")
 include("projects.jl")
