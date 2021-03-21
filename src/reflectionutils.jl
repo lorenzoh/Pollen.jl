@@ -39,6 +39,6 @@ end
 function Base.convert(::Type{XTree}, doc::Base.Docs.DocStr)
     s = collect(doc.text)[1]
     # Parse from docstring and filter out redundant line breaks
-    xdoc = filter(Pollen.parse(s, Pollen.Markdown()), !SelectTag(:br))
+    xdoc = replace(Pollen.parse(s, Pollen.Markdown()), XLeaf("\n"), SelectTag(:br))
     return XNode(:doc, doc.data, children(xdoc))
 end

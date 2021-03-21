@@ -18,6 +18,7 @@ using HTTP
 using TOML
 using IOCapture
 using JSON3
+using Revise
 
 
 include("xtree.jl")
@@ -47,6 +48,7 @@ include("rewriters/templater.jl")
 include("rewriters/coderunner.jl")
 include("rewriters/inserter.jl")
 include("rewriters/toc.jl")
+include("rewriters/packagewatcher.jl")
 
 include("serve.jl")
 include("servelazy.jl")
@@ -60,7 +62,7 @@ export select,
     SelectNode,
     Replacer, Inserter, HTMLTemplater, ExecuteCode,
     NthChild, FirstChild, Before, After,
-    Project,
+    Project, build,
     SelectTag, SelectOr, XExpr, ChangeTag, htmlify, AddSlugID, AddTableOfContents, SelectAttrEq,
     Selector, parse, HTML, Markdown, resolveidentifier, serve,
     # rewriters

@@ -94,7 +94,7 @@ function onupdatetemplate(templater, project, builder)
     else
         templater.template = includeintemplate(template, collect(keys(templater.assets.assets)))
     end
-    build(builder, project)
+    rebuild(builder, project)
 end
 
 

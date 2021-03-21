@@ -197,3 +197,11 @@ function viewcoderesult(result)
         )
     end
 end
+
+
+# Resetting the rewriter clears the caches:
+
+function reset!(executecode::ExecuteCode)
+    foreach(k -> delete!(executecode.caches, k), keys(executecode.caches))
+    return
+end

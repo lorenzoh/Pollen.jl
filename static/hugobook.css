@@ -405,7 +405,6 @@ article li p {
          url('fonts/roboto-mono-v6-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
   }
 
-  /*
 @font-face {
   font-family: 'VeraMono';
   src: URL('/fonts/VeraMono.ttf') format('truetype');
@@ -427,7 +426,6 @@ article li p {
   src: URL('/fonts/Charter Italic.otf') format('opentype');
   font-style: italic;
 }
-*/
   
 /* Mobile */
 #menu-control, #toc-control {

@@ -26,7 +26,6 @@ end
 
 function watchfiles(handlers)
     watcher = SimpleWatcher() do file
-        @show file
         p = Path(file)
         handlerfns = get(handlers, p, ())
         for f in handlerfns
@@ -41,6 +40,7 @@ function watchfiles(handlers)
 end
 
 
+# TODO: remove `dir`
 function getfilehandlers(project::Project, dir, builder)
     handlers = Dict{AbstractPath, Any}()
 

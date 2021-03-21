@@ -31,12 +31,15 @@ function postbuild(assets::Assets, project, builder::FileBuilder)
         end
     end
 end
+
+
 function postbuild(assets::Assets, project, builder::Builder)
     error("`Assets` does not work with $builder")
 end
 
 
 function getfilehandlers(assets::Assets, project, dir, builder)
+    # TODO: simply copy file over
     return [(srcpath, () -> (assets.isdirty[i] = true;))
             for (i, srcpath) in enumerate(values(assets.assets))]
 end

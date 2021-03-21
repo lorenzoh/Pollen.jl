@@ -1,19 +1,28 @@
 """
     servelazy(project, dir)
 
-
-
+Serve `project` lazily, meaning documents will only be built when they're
+requested.
 """
-function servelazy(project::Project, dir; dstdir = Path(mktempdir()))
-    reset!(project)
+function servelazy(
+        project::Project,
+        dir;
+        dstdir = Path(mktempdir()),
+        builder = FileBuilder(HTML(), dstdir))
+
+    foreach(reset!, project.rewriters)
+    foreach(k -> delete!(project.outputs, k), keys(project.outputs))
 
     # Do an empty build once for assets etc.
-    builder = FileBuilder(HTML(), dstdir)
-    build(project, builder)
+    build(project, builder, Dict())
 
     server = LazyServer(project, dir, builder, getwatcher(project, dir, builder))
-    #return server
-    LiveServer.serve(callback = server, dir = string(dstdir))
+    try
+        LiveServer.serve(callback = server, dir = string(dstdir))
+    catch e
+        rethrow(e)
+    finally
+    end
 end
 
 
@@ -24,23 +33,19 @@ mutable struct LazyServer
     watcher::LiveServer.SimpleWatcher
 end
 
+
 function (server::LazyServer)(req::HTTP.Request)
     p = Path(req.target[2:end])
     return server(p)
 end
 
+
 function (server::LazyServer)(path::AbstractPath)
-    # Check if document is already built
-    if path == p"."
-        return server(p"index.html")
-    end
+    # Check if document is not built but is physical file
     buildpath = joinpath(server.builder.dir, path)
     if isfile(buildpath)
-        return String(read(buildpath))
-    end
-
-    # Check if document is not built but is physical file
-    if extension(path) == "html"
+        return
+    elseif extension(path) == "html"
         docpath = joinpath(parent(path), filename(path))
         srcpath = joinpath(server.dir, docpath)
         if isfile(srcpath)
@@ -54,7 +59,4 @@ function (server::LazyServer)(path::AbstractPath)
             return String(read(buildpath))
         end
     end
-
-    @info "Failed to request $path"
-    return "404"
 end

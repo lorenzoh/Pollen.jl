@@ -19,6 +19,7 @@ JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
 LiveServer = "16fef848-5104-11e9-1b77-fb7a48bbb589"
 Mustache = "ffc61752-8dc7-55ee-8c37-f3e9cdd09e70"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 
 [compat]

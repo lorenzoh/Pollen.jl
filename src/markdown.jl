@@ -84,6 +84,7 @@ const BLOCK_TO_TAG = Dict(
     BlockQuote => :blockquote,
     Admonition => :admonition,
     Citation => :citation,
+    CommonMark.Strong => :strong,
 )
 
 function Base.convert(::Type{XTree}, node::Node, c::AbstractContainer, attrs = Dict{Symbol, String}())
