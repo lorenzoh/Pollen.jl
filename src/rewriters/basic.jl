@@ -64,10 +64,14 @@ end
 function changelinkextension(doc::XNode, ext; attr = :href)
     if haskey(attributes(doc), attr)
         href = doc.attributes[attr]
-        return withattributes(
-            doc,
-            merge(doc.attributes, Dict(attr => changehrefextension(href, ext))),
-        )
+        if startswith(href, "http") || startswith(href, "www")
+            return doc
+        else
+            return withattributes(
+                doc,
+                merge(doc.attributes, Dict(attr => changehrefextension(href, ext))),
+            )
+        end
     else
         return doc
     end
