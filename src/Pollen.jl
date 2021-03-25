@@ -40,6 +40,7 @@ include("rewriters.jl")
 include("project.jl")
 include("builders.jl")
 
+include("rewriters/documentfolder.jl")
 include("rewriters/referencer.jl")
 include("rewriters/documenttree.jl")
 include("rewriters/basic.jl")

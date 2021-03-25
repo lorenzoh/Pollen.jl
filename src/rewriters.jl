@@ -8,7 +8,7 @@ handlers and perform additional build steps.
 
 See the following methods:
 - [`updatefile`](#)
-- [`updatetree`](#)
+- [`createdocs`](#)
 - [`reset!`](#)
 - [`postbuild`](#)
 - [`getfilehandlers`](#)
@@ -47,9 +47,7 @@ function postbuild(rewriter, project, builder) end
 Return an updated `tree`, new `files` to be added and a set of
 `dirtypaths` that were changed.
 """
-function updatetree(::Rewriter, outputs)
-    return outputs, Dict(), Set()
-end
+createdocs(::Rewriter) = Dict{AbstractPath, XTree}()
 
 
 struct Replacer <: Rewriter

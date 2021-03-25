@@ -27,7 +27,7 @@ end
 
 
 function handlepkgupdate(m::Module, p::AbstractPath, builder, project)
-    @info "Code in $m changed, revising and rebuilding..."
+    @info "Code in $m changed ($p), revising and rebuilding..."
     Revise.revise()
     rebuild(builder, project)
 end

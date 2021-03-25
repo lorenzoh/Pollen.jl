@@ -83,8 +83,7 @@ function addfiles!(
     # and creating new files.
     newersources = Dict{AbstractPath, XNode}()
     for rewriter in rewriters
-        outputs, new, dirtyps = updatetree(rewriter, outputs)
-        dirtypaths = dirtypaths ∪ dirtyps
+        new = createdocs(rewriter)
         newersources = merge(newersources, new)
     end
 
@@ -97,8 +96,6 @@ function addfiles!(project::Project, newsources)
     dirtypaths = addfiles!(project.sources, project.outputs, project.rewriters, newsources)
     return dirtypaths
 end
-
-
 
 
 function reset!(project::Project)
