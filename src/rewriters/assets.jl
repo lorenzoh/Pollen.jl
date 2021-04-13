@@ -23,25 +23,23 @@ end
 
 
 function postbuild(assets::Assets, project, builder::FileBuilder)
-    for (i, (dstpath, srcpath)) in enumerate(assets.assets)
-        if assets.isdirty[i]
+    for (i, (relp, srcpath)) in enumerate(assets.assets)
+        dstpath = joinpath(builder.dir, relp)
+        if !isfile(dstpath)
             mkpath(joinpath(builder.dir, parent(dstpath)))
-            cp(srcpath, joinpath(builder.dir, dstpath), force = true)
+            cp(srcpath, dstpath, force = true)
             assets.isdirty[i] = false
         end
     end
 end
 
 
-function postbuild(assets::Assets, project, builder::Builder)
-    error("`Assets` does not work with $builder")
-end
-
-
-function getfilehandlers(assets::Assets, project, dir, builder)
-    # TODO: simply copy file over
-    return [(srcpath, () -> (assets.isdirty[i] = true;))
-            for (i, srcpath) in enumerate(values(assets.assets))]
+function filehandlers(assets::Assets, project, builder::FileBuilder)
+    handlers = Dict()
+    for (relp, fp) in assets.assets
+        handlers[fp] = () -> cp(fp, joinpath(builder.dir, relp); force = true)
+    end
+    return handlers
 end
 
 

@@ -22,8 +22,8 @@ function Referencer(modules; path = p"REFERENCE")
 end
 
 
-function updatefile(referencer::Referencer, ::AbstractPath, doc::XNode)
-    doc = Pollen.populatereferences!(
+function rewritedoc(referencer::Referencer, ::AbstractPath, doc::XNode)
+    doc = populatereferences!(
         referencer.references,
         doc,
         referencer.linkfn,
@@ -32,14 +32,14 @@ function updatefile(referencer::Referencer, ::AbstractPath, doc::XNode)
 end
 
 
-function updatetree(referencer::Referencer, outputs)
+function createsources!(referencer::Referencer)
     refdoc = buildreference(referencer)
-    newsources = Dict{AbstractPath, XNode}()
+    docs = Dict{AbstractPath, XNode}()
 
     # Conditionally update/create reference page
     if refdoc != referencer.doc
         referencer.doc = refdoc
-        newsources[referencer.path] =  refdoc
+        docs[referencer.path] =  refdoc
     end
 
 
@@ -49,11 +49,11 @@ function updatetree(referencer::Referencer, outputs)
         if isnothing(doc)
             newdoc = buildreferencepage(ref)
             referencer.refdocs[ref.fullname] = newdoc
-            newsources[Path(referencer.linkfn(ref.fullname))] = newdoc
+            docs[Path(referencer.linkfn(ref.fullname))] = newdoc
         end
     end
 
-    return outputs, newsources, Set()
+    return docs
 end
 
 function reset!(referencer::Referencer)

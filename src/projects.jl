@@ -10,6 +10,7 @@ function documentationproject(
     doctree = Pollen.loaddoctree(joinpath(dir, "toc.md"))
 
     rewriters = Rewriter[]
+    push!(rewriters, DocumentFolder(dir))
 
     # Change each document :body into an :article
     push!(rewriters, Replacer(x -> Pollen.withtag(x, :article), SelectTag(:body)))
@@ -56,7 +57,7 @@ function documentationproject(
 
     push!(rewriters, HTMLRedirect(p"README.md"))
 
-    project = Project(dir, rewriters)
+    project = Project(rewriters)
 end
 
 

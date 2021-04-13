@@ -9,6 +9,9 @@ to `keys(project.sources)`, meaning every document will be built. If you only
 want to rebuild previously built files, use [`rebuild`](#).
 """
 function build(project::Project, builder::Builder)
+    return project
+
+
     # Build all documents
     dirtypaths = addfiles!(project, project.sources)
 
@@ -25,6 +28,11 @@ Build project to a temporary directory with [`HTML`](#) format.
 """
 build(project) = build(project, FileBuilder(HTML(), Path(mktempdir())))
 
+
+function fullbuild(project, builder)
+    paths = rewritesources!(project)
+    build(builder, project, paths)
+end
 
 """
     rebuild(project, builder)
@@ -45,7 +53,7 @@ struct FileBuilder <: Builder
 end
 
 
-function build(builder::FileBuilder, project::Project, dirtypaths = keys(project.sources))
+function build(builder::FileBuilder, project::Project, dirtypaths = keys(project.outputs))
     # TODO: make threadable for performance
     for p in collect(dirtypaths)
         buildtofile(project.outputs[p], p, builder.dir, builder.format)

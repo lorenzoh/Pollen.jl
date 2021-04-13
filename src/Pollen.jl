@@ -13,7 +13,7 @@ using JuliaFormatter
 using Mustache
 using LiveServer
 using IJulia
-using LiveServer: SimpleWatcher, watch_file!, start, stop
+import LiveServer
 using HTTP
 using TOML
 using IOCapture
@@ -40,6 +40,11 @@ include("rewriters.jl")
 include("project.jl")
 include("builders.jl")
 
+include("serve/events.jl")
+include("serve/server.jl")
+include("serve/servefiles.jl")
+
+include("rewriters/documentfolder.jl")
 include("rewriters/referencer.jl")
 include("rewriters/documenttree.jl")
 include("rewriters/basic.jl")
@@ -66,7 +71,7 @@ export select,
     SelectTag, SelectOr, XExpr, ChangeTag, htmlify, AddSlugID, AddTableOfContents, SelectAttrEq,
     Selector, parse, HTML, Markdown, resolveidentifier, serve,
     # rewriters
-    AddID, HTMLify, ChangeLinkExtension, FormatCode, AddTableOfContents, Referencer,
-    documentationproject
+    AddID, HTMLify, ChangeLinkExtension, FormatCode, AddTableOfContents, Referencer, DocumentFolder,
+    documentationproject, Server, runserver, ServeFiles, ServeFilesLazy
 
 end

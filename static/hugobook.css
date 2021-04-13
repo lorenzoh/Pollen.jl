@@ -360,6 +360,10 @@ article li p {
   margin-top: var(--padding-8);
   margin-bottom: var(--padding-8);
 }
+article ul.tight li p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
 
 /* fonts */
 

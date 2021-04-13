@@ -1,18 +1,39 @@
 
 
-function serve(project, srcdir::AbstractPath, dstdir = Path(mktempdir()); format = HTML())
+function serve(project, dstdir = Path(mktempdir()); format = HTML())
     foreach(reset!, project.rewriters)
-    srcdir = absolute(srcdir)
     builder = FileBuilder(format, dstdir)
     Pollen.build(project, builder)
-    handlers = getfilehandlers(project, srcdir, builder)
-    watcher = watchfiles(handlers)
+
+
+    docupdates = Dict{AbstractPath, XNode}
+    updatelock = ReentrantLock()
+    running = Ref(true)
+    # Loop that processes updated/created documents in batches
+    @async begin
+        while running[]
+            lock(updatelock) do
+                docs = copy(docupdates)
+                foreach(k -> delete!(docupdates, k), keys(docupdates))
+            end
+            build(project, builder, docs)
+
+            sleep(1/60)
+        end
+    end
+
+
+
+    handlers = filehandlers(project, builder)
+    updatech = Channel()
+    watcher = watchfiles(handlers, updatech)
     try
         LiveServer.serve(dir=string(dstdir))
     catch e
         rethrow(e)
     finally
         LiveServer.stop(watcher)
+        running[] = false
     end
 
 end
@@ -24,8 +45,8 @@ function getwatcher(project, dir, builder)
 end
 
 
-function watchfiles(handlers)
-    watcher = SimpleWatcher() do file
+function watchfiles(handlers, ch)
+    watcher = LiveServer.SimpleWatcher() do file
         p = Path(file)
         handlerfns = get(handlers, p, ())
         for f in handlerfns
@@ -33,54 +54,22 @@ function watchfiles(handlers)
         end
     end
     for p in keys(handlers)
-        watch_file!(watcher, string(absolute(p)))
+        LiveServer.watch_file!(watcher, string(absolute(p)))
     end
-    start(watcher)
+    LiveServer.start(watcher)
     return watcher
 end
 
 
-# TODO: remove `dir`
-function getfilehandlers(project::Project, dir, builder)
+function filehandlers(project::Project, builder::Builder)
     handlers = Dict{AbstractPath, Any}()
-
-    # For physical files, rebuild them when they change on disk
-    for path in keys(project.sources)
-        fullpath = joinpath(dir, path)
-        if isfile(fullpath)
-            append!(handlers, fullpath, () -> defaulthandler(project, dir, path, builder))
-        end
-    end
-
-    # Register custom rewriter handlers
     for rewriter in project.rewriters
-        for (p, handlerfn) in getfilehandlers(rewriter, project, dir, builder)
-            append!(handlers, p, handlerfn)
+        for (p, handlerfn) in filehandlers(rewriter, project, builder)
+            phandlers = get!(handlers, p, [])
+            push!(phandlers, handlerfn)
         end
     end
     return handlers
 end
 
-getfilehandlers(::Rewriter, project, dir, builder) = ()
-
-
-"""
-
-Default file update handler that watches "dir/path", updating `project.sources[path]`
-when it changes and triggering a rebuild with `builder`.
-"""
-function defaulthandler(project, dir, path, builder)
-    fullpath = joinpath(dir, path)
-    println("Rebuilding $fullpath")
-    doc = Pollen.parse(fullpath)
-    dirtypaths = addfiles!(project, Dict(path => doc))
-    build(builder, project, dirtypaths)
-end
-
-# Utils
-
-function append!(d::Dict, key, val)
-    xs = get!(d, key, [])
-    push!(xs, val)
-    d[key] = xs
-end
+filehandlers(::Rewriter, project, builder) = Dict()
