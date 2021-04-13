@@ -113,7 +113,7 @@ Base.@kwdef struct RelativeLinks <: Rewriter
 end
 
 
-function updatefile(rewriter::RelativeLinks, p, doc)
+function rewritedoc(rewriter::RelativeLinks, p, doc)
     sel = SelectTag(rewriter.linktag) & SelectHasAttr(rewriter.linkattr)
     sel |= CSSLINKSELECTOR
     cata(doc, sel) do x

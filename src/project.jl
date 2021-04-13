@@ -1,12 +1,13 @@
 
 
+#= TODO: remove
 function findfiles(dir::AbstractPath; exts = ("md", "ipynb"), includehidden = false)
     it = filter(collect((relative(p, dir) for p in walkpath(dir)))) do p
         (extension(p) in exts) && (includehidden || !startswith(filename(p), '.'))
     end
     return it
-
 end
+=#
 
 
 mutable struct Project
@@ -15,30 +16,73 @@ mutable struct Project
     rewriters::Vector{<:Rewriter}
 end
 
-Project(dir::AbstractPath, rewriters::Vector{<:Rewriter}) =
-    Project(dir, collect(findfiles(dir)), rewriters)
+function Project(rewriters)
+    sources = merge(Dict{AbstractPath, XTree}(), [createsources!(rewriter) for rewriter in rewriters]...)
+    outputs = Dict{AbstractPath, XTree}()
+    return Project(sources, outputs, rewriters)
+end
 
-Project(paths::Vector{<:AbstractPath}, rewriters::Vector{<:Rewriter}) =
-    Project(Path(pwd()), paths, rewriters)
+
+Base.show(io::IO, project::Project) = print(io, "Project($(length(project.sources)) documents, $(length(project.rewriters)) rewriters)")
 
 
-function Project(dir::AbstractPath, paths::Vector{<:AbstractPath}, rewriters::Vector{<:Rewriter})
-    sources = Dict{AbstractPath, XTree}()
-    Threads.@threads for p in paths
-        sources[p] = parse(joinpath(dir, p))
+"""
+    rewritesources!(project, paths) -> paths
+
+Rewrite source documents named by `paths` as well as new source documents
+recursively created by rewriters. Return a list of all rewritten paths.
+"""
+function rewritesources!(project, paths = Set(keys(project.sources)))
+    rewritesources!(project.sources, project.outputs, project.rewriters, paths)
+end
+
+function rewritesources!(sources::Dict, outputs::Dict, rewriters::Vector{<:Rewriter}, paths)
+    dirtypaths = []
+    docs = filter(((k, v),) -> k in paths, sources)
+
+    while !isempty(docs)
+        merge!(outputs, rewritedocs(docs, rewriters))
+        docs = createsources!(rewriters)
+        paths = union(paths, keys(docs))
     end
-    return Project(sources, rewriters)
+
+    return paths
 end
 
 
-function Project(sources::Dict{AbstractPath, XTree}, rewriters::Vector{<:Rewriter})
-    targets = Dict{AbstractPath, XTree}()
-    return Project(sources, targets, rewriters)
+"""
+    rewritedocs(sources, rewriters) -> outputs
+
+Applies `rewriters` to a collection of `sources`.
+"""
+function rewritedocs(sources, rewriters)
+    outputs = Dict{AbstractPath, XTree}()
+    paths = collect(keys(sources))
+    Threads.@threads for i in 1:length(paths)
+        p = paths[i]
+        xtree = sources[p]
+        for rewriter in rewriters
+            xtree = rewritedoc(rewriter, p, xtree)
+        end
+        outputs[p] = xtree
+    end
+    return outputs
 end
 
 
-Base.show(io::IO, project::Project) = print(io, "Project($(length(project.sources)) documents, $(typeof.(project.rewriters))")
+"""
+    createsources!(rewriters) -> sources
 
+Creates new source documents from `rewriters`
+"""
+function createsources!(rewriters::Vector{<:Rewriter})
+    docs = Vector{Dict{AbstractPath, XTree}}(undef, length(rewriters))
+    Threads.@threads for i in 1:length(rewriters)
+        docs[i] = createsources!(rewriters[i])
+    end
+    return merge(docs...)
+end
+#=
 
 function addfiles(
         sources::Dict,
@@ -73,7 +117,7 @@ function addfiles!(
     for (p, xtree) in newsources
         sources[p] = xtree
         for rewriter in rewriters
-            xtree = updatefile(rewriter, p, xtree)
+            xtree = rewritedoc(rewriter, p, xtree)
         end
         outputs[p] = xtree
         push!(dirtypaths, p)
@@ -98,6 +142,7 @@ function addfiles!(project::Project, newsources)
 end
 
 
+=#
 function reset!(project::Project)
     foreach(k -> delete!(project.sources, k), keys(project.sources))
     foreach(k -> delete!(project.outputs, k), keys(project.outputs))

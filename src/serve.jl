@@ -39,8 +39,6 @@ function serve(project, dstdir = Path(mktempdir()); format = HTML())
 end
 
 
-function filewatcher(project, builder)
-
 function getwatcher(project, dir, builder)
     handlers = getfilehandlers(project, dir, builder)
     return watchfiles(handlers)
@@ -48,7 +46,7 @@ end
 
 
 function watchfiles(handlers, ch)
-    watcher = SimpleWatcher() do file
+    watcher = LiveServer.SimpleWatcher() do file
         p = Path(file)
         handlerfns = get(handlers, p, ())
         for f in handlerfns
@@ -56,9 +54,9 @@ function watchfiles(handlers, ch)
         end
     end
     for p in keys(handlers)
-        watch_file!(watcher, string(absolute(p)))
+        LiveServer.watch_file!(watcher, string(absolute(p)))
     end
-    start(watcher)
+    LiveServer.start(watcher)
     return watcher
 end
 

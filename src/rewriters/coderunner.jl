@@ -59,12 +59,14 @@ end
 function runblockscached(cache::RunCache, blocks)
     outputs = []
     results = []
+    updated = false
     for (i, block) in enumerate(blocks)
         oldblock = length(cache.blocks) >= i ? cache.blocks[i] : nothing
-        if oldblock == block
+        if !updated && oldblock == block
             output, result = cache.outputs[i], cache.results[i]
         else
             output, result = runblock(cache.module_, block)
+            updated = true
         end
         push!(outputs, output)
         push!(results, result)
@@ -92,16 +94,20 @@ Base.@kwdef struct ExecuteCode <: Rewriter
     codeblocksel::Selector = PUBLISH_CODEBLOCK_SELECTOR
     # Function to get a group from a selected block
     groupfn = x -> get(attributes(x), :cell, "main")
+    # Lock to avoid crashes
+    lock::ReentrantLock = ReentrantLock()
 end
 
-# The rewriter acts on the document tree with [´updatefile`](#).
+# The rewriter acts on the document tree with [´rewritedoc`](#).
 
-function updatefile(executecode::ExecuteCode, p, doc)
+function rewritedoc(executecode::ExecuteCode, p, doc)
     blocks = collect(select(doc, executecode.codeblocksel))
     codes = gettext.(blocks)
 
     groupids = [creategroupid(p, executecode.groupfn(block)) for block in blocks]
-    outputs, results = executegrouped!(executecode.caches, codes, groupids)
+    outputs, results = lock(executecode.lock) do
+        executegrouped!(executecode.caches, codes, groupids)
+    end
 
     if executecode.warnonerror
         for (i, result) in enumerate(results)

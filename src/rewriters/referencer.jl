@@ -22,8 +22,8 @@ function Referencer(modules; path = p"REFERENCE")
 end
 
 
-function updatefile(referencer::Referencer, ::AbstractPath, doc::XNode)
-    doc = Pollen.populatereferences!(
+function rewritedoc(referencer::Referencer, ::AbstractPath, doc::XNode)
+    doc = populatereferences!(
         referencer.references,
         doc,
         referencer.linkfn,
@@ -32,7 +32,7 @@ function updatefile(referencer::Referencer, ::AbstractPath, doc::XNode)
 end
 
 
-function createdocs(referencer::Referencer)
+function createsources!(referencer::Referencer)
     refdoc = buildreference(referencer)
     docs = Dict{AbstractPath, XNode}()
 

@@ -29,7 +29,7 @@ function HTMLTemplater(
 end
 
 
-function updatefile(templater::HTMLTemplater, p, doc)
+function rewritedoc(templater::HTMLTemplater, p, doc)
     # Include the document in the template
     doc = insertfirst(templater.template, doc, templater.insertpos)
     return doc

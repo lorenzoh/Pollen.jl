@@ -23,9 +23,9 @@ end
 
 
 function postbuild(assets::Assets, project, builder::FileBuilder)
-    for (relativepath, srcpath) in enumerate(assets.assets)
+    for (i, (relp, srcpath)) in enumerate(assets.assets)
         dstpath = joinpath(builder.dir, relp)
-        if !isfile(dstp)
+        if !isfile(dstpath)
             mkpath(joinpath(builder.dir, parent(dstpath)))
             cp(srcpath, dstpath, force = true)
             assets.isdirty[i] = false

@@ -54,7 +54,10 @@ function mdchildrenattrs(node::CommonMark.Node)
 
     for (i, c) in enumerate(allcs)
         if c.t isa Attributes
-            as = Dict((Symbol(k), v) for (k, v) in c.t.dict)
+            as = Dict{Symbol, Any}((Symbol(k), v) for (k, v) in c.t.dict)
+            if haskey(as, :class)
+                as[:class] = join(as[:class], ';')
+            end
         else
             push!(cs, c)
             push!(attrs, as)
@@ -70,7 +73,7 @@ function childrenxtrees(node::Node)
     return XTree[convert(XTree, c, as) for (c, as) in zip(cs, attrs)]
 end
 
-Base.convert(::Type{XTree}, node::Node, attrs::Dict = Dict{Symbol, String}()) = convert(XTree, node, node.t, attrs)
+Base.convert(::Type{XTree}, node::Node, attrs::Dict = Dict{Symbol, Any}()) = convert(XTree, node, node.t, attrs)
 
 const BLOCK_TO_TAG = Dict(
     Document => :body,
@@ -85,6 +88,11 @@ const BLOCK_TO_TAG = Dict(
     Admonition => :admonition,
     Citation => :citation,
     CommonMark.Strong => :strong,
+    CommonMark.Table => :table,
+    CommonMark.TableHeader => :span,
+    CommonMark.TableRow => :tr,
+    CommonMark.TableCell => :td,
+    CommonMark.TableBody => :div,
 )
 
 function Base.convert(::Type{XTree}, node::Node, c::AbstractContainer, attrs = Dict{Symbol, String}())
@@ -126,3 +134,6 @@ function Base.convert(::Type{XTree}, node::Node, c::Heading, attrs)
     tag = Symbol("h$(c.level)")
     return XNode(tag, attrs, childrenxtrees(node))
 end
+
+
+# TODO: add conversion for Table Nodes

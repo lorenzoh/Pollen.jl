@@ -7,7 +7,7 @@ individual documents, create new documents, register file update
 handlers and perform additional build steps.
 
 See the following methods:
-- [`updatefile`](#)
+- [`rewritedoc`](#)
 - [`createdocs`](#)
 - [`reset!`](#)
 - [`postbuild`](#)
@@ -16,11 +16,11 @@ See the following methods:
 abstract type Rewriter end
 
 """
-    updatefile(rewriter, p, doc) -> doc'
+    rewritedoc(rewriter, p, doc) -> doc'
 
 Rewrite `doc` at path `p`. Return rewritten `doc`.
 """
-function updatefile(rewriter::Rewriter, p, doc)
+function rewritedoc(rewriter::Rewriter, p, doc)
     return doc
 end
 
@@ -41,13 +41,7 @@ Post-build callback for [`Rewriter`](#)s.
 function postbuild(rewriter, project, builder) end
 
 
-"""
-    updatetree(rewriter, tree) -> (tree', newfiles, dirtypaths)
-
-Return an updated `tree`, new `files` to be added and a set of
-`dirtypaths` that were changed.
-"""
-createdocs(::Rewriter) = Dict{AbstractPath, XTree}()
+createsources!(::Rewriter) = Dict{AbstractPath, XTree}()
 
 
 struct Replacer <: Rewriter
@@ -57,6 +51,6 @@ end
 
 Base.show(io::IO, replacer::Replacer) = print(io, "Replacer($(replacer.selector))")
 
-function updatefile(replace::Replacer, p::AbstractPath, doc::XTree)
+function rewritedoc(replace::Replacer, p::AbstractPath, doc::XTree)
     return cata(replace.fn, doc, replace.selector)
 end
