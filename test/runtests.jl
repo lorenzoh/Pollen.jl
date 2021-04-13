@@ -13,4 +13,10 @@ include("imports.jl")
     end
 
     include("fileutils.jl")
+    include("catas.jl")
+    include("references.jl")
+    include("xtree.jl")
+    include("selectors.jl")
+    include("server.jl")
+    include("rewriters/documentfolder.jl")
 end
