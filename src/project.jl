@@ -77,8 +77,10 @@ Creates new source documents from `rewriters`
 """
 function createsources!(rewriters::Vector{<:Rewriter})
     docs = Vector{Dict{AbstractPath, XTree}}(undef, length(rewriters))
+    docs = []
     Threads.@threads for i in 1:length(rewriters)
-        docs[i] = createsources!(rewriters[i])
+        #docs[i] = createsources!(rewriters[i])
+        push!(docs, createsources!(rewriters[i]))
     end
     return merge(docs...)
 end

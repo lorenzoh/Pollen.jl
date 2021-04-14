@@ -44,12 +44,16 @@ function createsources!(referencer::Referencer)
 
 
     # Conditionally update/create binding pages
-    Threads.@threads for ref in collect(values(referencer.references))
+    l = ReentrantLock()
+    #Threads.@threads for ref in collect(values(referencer.references))
+    for ref in [v for v in values(referencer.references)]
         doc = get(referencer.refdocs, ref.fullname, nothing)
         if isnothing(doc)
             newdoc = buildreferencepage(ref)
-            referencer.refdocs[ref.fullname] = newdoc
-            docs[Path(referencer.linkfn(ref.fullname))] = newdoc
+            lock(l) do
+                referencer.refdocs[ref.fullname] = newdoc
+                docs[Path(referencer.linkfn(ref.fullname))] = newdoc
+            end
         end
     end
 

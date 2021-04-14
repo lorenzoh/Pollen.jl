@@ -38,7 +38,7 @@ function documentationproject(
     push!(rewriters, Inserter([
         (Pollen.toccreator(hierarchysels = SelectTag.((:h1, :h2, :h3, :h4))), FirstChild(SelectAttrEq(:id, "toc"))),
         ((p, x) -> doctree, FirstChild(SelectAttrEq(:id, "sidebar"))),
-        ((p, x) -> XLeaf(string(m)), FirstChild(SelectAttrEq(:id, "title"))),
+        ((p, x) -> XLeaf("$m.jl"), FirstChild(SelectAttrEq(:id, "title"))),
         (createtitle, FirstChild(SelectTag(:head))),
     ]))
 
