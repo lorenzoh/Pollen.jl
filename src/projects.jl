@@ -27,7 +27,7 @@ function documentationproject(
     # Insert each doc into a HTML template, and either link to CSS and JS or inline them
     push!(rewriters,
         HTMLTemplater(
-            p"Pollen/static/hugobook.html",
+            joinpath(ASSETDIR, "hugobook.html"),
             [p"hugobook.css"];
             assetdir = ASSETDIR,
             inlineincludes = inlineincludes,

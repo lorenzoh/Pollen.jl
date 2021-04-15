@@ -23,7 +23,6 @@ end
 
 
 function postbuild(assets::Assets, project, builder::FileBuilder)
-    @show assets.assets
     for (i, (relp, srcpath)) in enumerate(assets.assets)
         dstpath = joinpath(absolute(builder.dir), relp)
         if !isfile(dstpath)
