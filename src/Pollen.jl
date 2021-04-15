@@ -16,7 +16,7 @@ using IJulia
 import LiveServer
 using HTTP
 using TOML
-using IOCapture
+using IOCapture: capture
 using JSON3
 using Revise
 
