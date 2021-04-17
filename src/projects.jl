@@ -5,11 +5,15 @@ function documentationproject(
         inlineincludes = false,
         executecode = true,
         refmodules = (m,),
+        watchpackage = true,
     )
     dir = Path(pkgdir(m))
     doctree = Pollen.loaddoctree(joinpath(dir, "toc.md"))
 
     rewriters = Rewriter[]
+
+    watchpackage && push!(rewriters, PackageWatcher([m]))
+
     push!(rewriters, DocumentFolder(dir))
 
     # Change each document :body into an :article
@@ -57,13 +61,26 @@ function documentationproject(
 
     push!(rewriters, HTMLRedirect(p"README.md"))
 
+
     project = Project(rewriters)
 end
 
 
-function serve(m::Module)
+function serve(m::Module; kwargs...)
     project = documentationproject(m)
-    serve(project, Path(pkgdir(m)))
+    serve(project; kwargs...)
+end
+
+
+"""
+    serve(project)
+    serve(module)
+"""
+function serve(project::Project; lazy = true)
+    builder = FileBuilder(HTML(), Path(mktempdir()))
+    server = Server(project, builder)
+    mode = lazy ? ServeFilesLazy() : ServeFiles()
+    runserver(server, mode)
 end
 
 

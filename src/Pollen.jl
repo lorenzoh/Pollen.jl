@@ -55,8 +55,10 @@ include("rewriters/inserter.jl")
 include("rewriters/toc.jl")
 include("rewriters/packagewatcher.jl")
 
+#=
 include("serve.jl")
 include("servelazy.jl")
+=#
 include("projects.jl")
 
 
