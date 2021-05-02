@@ -17,7 +17,6 @@ function DocumentFolder(
         joinpath(relative(absolute(p), dir)) for p in walkpath(dir)
             if extension(p) in extensions && filterfn(p) && (includehidden || !ishidden(relative(absolute(p), dir)))]
     return DocumentFolder(dir, paths, trues(length(paths)))
-
 end
 
 function createsources!(folder::DocumentFolder)
