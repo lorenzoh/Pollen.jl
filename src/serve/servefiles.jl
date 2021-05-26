@@ -46,13 +46,13 @@ end
 
 function geteventsource(::ServeFilesLazy, server, ch)
     builddir = server.builder.dir
-    return FileServer(builddir, callback = req -> _lazyservecallback(req, ch, builddir))
+    return FileServer(builddir, preprocessrequest = req -> _lazyservecallback(req, ch, builddir))
 end
 
 
 function _lazyservecallback(req, ch, builddir)
     if !endswith(req.target, ".html")
-        return
+        return req
     else
         buildpath = joinpath(builddir, req.target[2:end])
         try mkpath(parent(buildpath)) catch end
@@ -66,5 +66,6 @@ function _lazyservecallback(req, ch, builddir)
         put!(ch, DocRequested(sourcepath))
         # Give time to build so file server doesn't instantly return a 404
         sleep(0.05)
+        return req
     end
 end
