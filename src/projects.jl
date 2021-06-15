@@ -6,6 +6,7 @@ function documentationproject(
         executecode = true,
         refmodules = (m,),
         watchpackage = true,
+        assetdir = p"assets",
     )
     dir = Path(pkgdir(m))
     doctree = Pollen.loaddoctree(joinpath(dir, "toc.md"))
@@ -37,6 +38,9 @@ function documentationproject(
             inlineincludes = inlineincludes,
             insertpos = NthChild(2, SelectAttrEq(:class, "book-page"))
         ))
+
+    push!(rewriters, Assets(assetdir))
+
     # Insert table of contents, a sidebar with document tree, and project title into
     # the template
     push!(rewriters, Inserter([
