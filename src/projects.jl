@@ -39,7 +39,7 @@ function documentationproject(
             insertpos = NthChild(2, SelectAttrEq(:class, "book-page"))
         ))
 
-    push!(rewriters, Assets(joinpath(dir, assetdir)))
+    isdir(joinpath(dir, assetdir)) && push!(rewriters, Assets(joinpath(dir, assetdir)))
 
     # Insert table of contents, a sidebar with document tree, and project title into
     # the template
