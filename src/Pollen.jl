@@ -36,7 +36,7 @@ include("formats.jl")
 include("markdown.jl")
 include("html.jl")
 include("jupyter.jl")
-include("json.jl")
+#include("json.jl")
 
 include("rewriters.jl")
 include("project.jl")
