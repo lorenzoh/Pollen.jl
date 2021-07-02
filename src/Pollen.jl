@@ -1,5 +1,6 @@
 module Pollen
 
+using ANSIColoredPrinters
 using AbstractTrees
 using Base.Docs
 using CommonMark
@@ -35,6 +36,7 @@ include("formats.jl")
 include("markdown.jl")
 include("html.jl")
 include("jupyter.jl")
+include("json.jl")
 
 include("rewriters.jl")
 include("project.jl")
@@ -74,6 +76,8 @@ export select,
     Selector, parse, HTML, Markdown, resolveidentifier, serve,
     # rewriters
     AddID, HTMLify, ChangeLinkExtension, FormatCode, AddTableOfContents, Referencer, DocumentFolder,
-    documentationproject, Server, runserver, ServeFiles, ServeFilesLazy
+    documentationproject, Server, runserver, ServeFiles, ServeFilesLazy,
+    PackageWatcher,
+    RelativeLinks
 
 end

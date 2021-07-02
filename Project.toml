@@ -4,6 +4,7 @@ authors = ["Lorenz Ohly <lorenz.ohly@gmail.com> and contributors"]
 version = "0.1.0"
 
 [deps]
+ANSIColoredPrinters = "a4c015fc-c6ff-483c-b24f-f7ea428134e9"
 AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 CSTParser = "00ebfdb7-1f24-5e51-bd34-a7502290713f"
 CommonMark = "a80b9123-70ca-4bc0-993e-6e3bcb318db6"
@@ -23,5 +24,5 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 
 [compat]
-julia = "1"
 IOCapture = "0.2"
+julia = "1"

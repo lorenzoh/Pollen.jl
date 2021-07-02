@@ -39,10 +39,6 @@ function render!(io, x::XNode, format::HTML, ::Val)
 end
 
 
-function render!(io, x::XLeaf{<:AbstractString}, ::HTML)
-    print(io, CommonMark.escape_xml(x[]))
-end
-
 const HTML_MIMES = [
     MIME"image/png"(),
     MIME"image/jpeg"(),
@@ -87,6 +83,20 @@ end
 
 function adapthtmlstr(::MIME{Symbol("image/jpeg")}, s)
     return """<img src="data:image/jpeg;base64,$s"/>"""
+end
+
+
+function render!(io, x::XLeaf{<:AbstractString}, ::HTML)
+    print(io, ansistringtohtml(x[]))
+end
+
+
+function ansistringtohtml(s)
+    buf = IOBuffer()
+    printer = HTMLPrinter(IOBuffer(s), root_tag="span")
+    ANSIColoredPrinters.show_body(buf, printer)
+    #show(buf, MIME"text/html"(), )
+    return String(take!(buf))
 end
 
 

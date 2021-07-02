@@ -120,9 +120,9 @@ function rewritedoc(executecode::ExecuteCode, p, doc)
     newblocks = [
         XNode(
             :div,
-            Dict(:class => "cellcontainer"),
+            merge(attributes(block), Dict(:class => "cellcontainer")),
             XTree[
-                block,
+                withattributes(block, merge(attributes(block), Dict(:class => "codecell"))),
                 get(attributes(block), :output, "true") == "true" ? viewcodeoutput(outputs[i]) : XLeaf(""),
                 get(attributes(block), :result, "true") == "true" ? viewcoderesult(results[i]) : XLeaf(""),
 

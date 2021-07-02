@@ -1,16 +1,4 @@
 
-#=
-Jupyter notebook import:
-
-- Markdown cells are parsed as `Markdown`
-- Code cells are parsed like the outputs of `ExecuteCode`:
-    - div.codecell
-        - code
-        - code.codeoutput
-        - result
-
-=#
-
 struct Jupyter <: Format end
 
 extensionformat(::Val{:ipynb}) = Jupyter()
@@ -19,9 +7,6 @@ extensionformat(::Val{:ipynb}) = Jupyter()
 function parse(io::IO, format::Jupyter)
     return parse(JSON3.read(io), format)
 end
-
-
-
 
 
 function parse(obj::JSON3.Object, format::Jupyter)
@@ -64,7 +49,7 @@ function parsejupytercellcode(cell, lang)
         if output[:output_type] == "stream"
             stream *= join(output[:text])
         elseif output[:output_type] == "execute_result"
-            # Add concatenated outputs firs
+            # Add concatenated outputs first
             push!(cs, viewcodeoutput(stream))
             stream = ""
 
@@ -86,6 +71,8 @@ struct PreRendered
     reprs::Dict
 end
 
+Base.show(io::IO, prerendered::PreRendered) = print(io,
+    "Prerendered() with $(length(prerendered.reprs)) reprs")
 
 function render!(io, x::XLeaf{PreRendered}, ::HTML)
     reprs = x[].reprs
