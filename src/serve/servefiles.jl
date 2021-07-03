@@ -46,7 +46,7 @@ end
 
 function geteventsource(::ServeFilesLazy, server, ch)
     builddir = server.builder.dir
-    return FileServer(builddir, preprocessrequest = req -> _lazyservecallback(req, ch, builddir))
+    return FileServer(builddir, preprocess_request = req -> _lazyservecallback(req, ch, builddir))
 end
 
 
