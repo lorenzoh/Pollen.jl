@@ -58,6 +58,10 @@ function parsejupytercellcode(cell, lang)
             push!(cs, viewcoderesult(PreRendered(reprs)))
         end
     end
+    if stream != ""
+        push!(cs, viewcodeoutput(stream))
+    end
+
 
     return XNode(
         :div,
