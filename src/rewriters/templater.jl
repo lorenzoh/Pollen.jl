@@ -20,9 +20,11 @@ function HTMLTemplater(
     template = Pollen.parse(templatepath)
     assets = Assets(Dict(joinpath(p"template/", p) => absolute(joinpath(assetdir, p)) for p in includes))
     if inlineincludes
-        template = inlineintemplate(template, collect(values(assets.assets)))
+        template = inlineintemplate(
+            template,
+            [absolute(joinpath(assetdir, p)) for p in includes])
     else
-        template = includeintemplate(template, collect(keys(assets.assets)))
+        template = includeintemplate(template,  [joinpath(p"template/", p) for p in includes])
     end
 
     return HTMLTemplater(assets, template, templatepath, inlineincludes, insertpos)

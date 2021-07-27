@@ -33,7 +33,8 @@ function documentationproject(
     push!(rewriters,
         HTMLTemplater(
             joinpath(ASSETDIR, "hugobook.html"),
-            [p"hugobook.css", p"ansi.css"];
+            [p"hugobook.css", p"ansi.css",
+            p"loadhighlightjs.js", p"julia.min.js", p"highlight.min.js"];
             assetdir = ASSETDIR,
             inlineincludes = inlineincludes,
             insertpos = NthChild(2, SelectAttrEq(:class, "book-page"))
