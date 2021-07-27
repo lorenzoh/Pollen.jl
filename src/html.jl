@@ -43,7 +43,7 @@ const HTML_MIMES = [
     MIME"image/png"(),
     MIME"image/jpeg"(),
     MIME"image/svg+xml"(),
-    MIME"text/markdown"(),
+    #MIME"text/markdown"(),
     MIME"text/html"(),
     #MIME"text/latex"(),
     MIME"text/plain"(),
