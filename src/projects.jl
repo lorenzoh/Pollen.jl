@@ -57,6 +57,7 @@ function documentationproject(
     # Replace absolute links by relative ones so that they are properly resolved, even
     # if output files are served under a subresource like "/Package.jl/dev/..."
     push!(rewriters, RelativeLinks())
+    push!(rewriters, RelativeLinks(:script, :src))
 
     # Change non-html tags like :toc to a :div[class="toc"]
     push!(rewriters, HTMLify())

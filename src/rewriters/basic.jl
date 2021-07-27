@@ -119,12 +119,11 @@ end
 
 function rewritedoc(rewriter::RelativeLinks, p, doc)
     sel = SelectTag(rewriter.linktag) & SelectHasAttr(rewriter.linkattr)
-    sel |= CSSLINKSELECTOR
     cata(doc, sel) do x
-        href = attributes(x)[:href]
+        href = attributes(x)[rewriter.linkattr]
         if startswith(href, '/')
             newhref = relpath(href, "/" * string(parent(p)))
-            return withattributes(x, merge(attributes(x), Dict(:href => newhref)))
+            return withattributes(x, merge(attributes(x), Dict(rewriter.linkattr => newhref)))
         else
             return x
         end
