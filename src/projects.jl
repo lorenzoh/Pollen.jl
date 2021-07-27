@@ -58,6 +58,7 @@ function documentationproject(
     # if output files are served under a subresource like "/Package.jl/dev/..."
     push!(rewriters, RelativeLinks())
     push!(rewriters, RelativeLinks(:script, :src))
+    push!(rewriters, RelativeLinks(:link, :href))
 
     # Change non-html tags like :toc to a :div[class="toc"]
     push!(rewriters, HTMLify())
