@@ -24,5 +24,6 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 
 [compat]
+CSTParser = "3"
 IOCapture = "0.2"
 julia = "1"
