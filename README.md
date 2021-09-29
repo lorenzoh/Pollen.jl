@@ -14,3 +14,5 @@ Features:
 - automatic references
 - table of contents
 - pluggable extension system; only use the features you want
+
+For an example page, see the [FastAI.jl documentation](https://fluxml.ai/FastAI.jl/dev).
