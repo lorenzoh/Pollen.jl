@@ -4,6 +4,8 @@ using ANSIColoredPrinters
 using AbstractTrees
 using Base.Docs
 using CommonMark
+using CSTParser
+using DataFrames
 using CommonMark: Document, Item, Text, Paragraph, List, Heading,
     Emph, SoftBreak, Link, Code, Node, AbstractContainer, CodeBlock, ThematicBreak,
     BlockQuote, Admonition, Attributes, Image, Citation
@@ -11,6 +13,8 @@ using FilePathsBase
 using DataStructures: DefaultDict, OrderedDict
 import Gumbo
 using JuliaFormatter
+using Graphs
+using MetaGraphs
 using Mustache
 using LiveServer
 using IJulia
@@ -18,6 +22,8 @@ import LiveServer
 using HTTP
 using TOML
 using IOCapture
+using ModuleInfo
+using InlineTest
 using JSON3
 using Revise
 
@@ -27,16 +33,18 @@ include("selectors.jl")
 include("catas.jl")
 include("folds.jl")
 
-#include("xexpr.jl")
 include("reflectionutils.jl")
 include("references.jl")
 include("files.jl")
 
-include("formats.jl")
-include("markdown.jl")
-include("html.jl")
-include("jupyter.jl")
-#include("json.jl")
+include("formats/format.jl")
+include("formats/markdown.jl")
+include("formats/html.jl")
+include("formats/jupyter.jl")
+include("formats/json.jl")
+include("formats/julia.jl")
+include("formats/juliacode.jl")
+include("formats/cst.jl")
 
 include("rewriters.jl")
 include("project.jl")
@@ -56,11 +64,10 @@ include("rewriters/coderunner.jl")
 include("rewriters/inserter.jl")
 include("rewriters/toc.jl")
 include("rewriters/packagewatcher.jl")
+include("rewriters/parsecode.jl")
 
-#=
-include("serve.jl")
-include("servelazy.jl")
-=#
+include("frontend/references.jl")
+include("frontend/documentgraph.jl")
 include("projects.jl")
 
 

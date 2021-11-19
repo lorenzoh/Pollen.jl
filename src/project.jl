@@ -46,6 +46,8 @@ function rewritesources!(sources::Dict, outputs::Dict, rewriters::Vector{<:Rewri
         paths = union(paths, keys(docs))
     end
 
+    rewriteoutputs!(Dict(p => outputs[p] for p in paths), rewriters)
+
     return paths
 end
 
@@ -58,7 +60,8 @@ Applies `rewriters` to a collection of `sources`.
 function rewritedocs(sources, rewriters)
     outputs = Dict{AbstractPath, XTree}()
     paths = collect(keys(sources))
-    Threads.@threads for i in 1:length(paths)
+    #Threads.@threads for i in 1:length(paths)
+    for i in 1:length(paths)
         p = paths[i]
         xtree = sources[p]
         for rewriter in rewriters
@@ -68,6 +71,14 @@ function rewritedocs(sources, rewriters)
     end
     return outputs
 end
+
+function rewriteoutputs!(outputs, rewriters::Vector)
+    for r in rewriters
+        outputs = rewriteoutputs!(outputs, r)
+    end
+    outputs
+end
+rewriteoutputs!(outputs, rewriter::Rewriter) = outputs
 
 
 """

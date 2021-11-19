@@ -31,6 +31,7 @@ formatextension(::Markdown) = "md"
 
 ## Parsing helpers
 
+
 function mdchildren(node::CommonMark.Node)
     if !isdefined(node.first_child, :t)
         return CommonMark.Node[]
@@ -45,6 +46,7 @@ function mdchildren(node::CommonMark.Node)
     end
     return childs
 end
+
 
 function mdchildrenattrs(node::CommonMark.Node)
     allcs = mdchildren(node)
@@ -119,9 +121,9 @@ end
 
 function Base.convert(::Type{XTree}, node::Node, c::CodeBlock, attrs)
     return XNode(
-        :pre,
+        :codeblock,
         merge(attrs, Dict(:lang => c.info)),
-        [XNode(:code, [XLeaf(node.literal)])],)
+        [XLeaf(node.literal)],)
 end
 
 function Base.convert(::Type{XTree}, node::Node, l::Link, attrs)
