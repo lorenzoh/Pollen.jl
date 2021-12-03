@@ -87,7 +87,6 @@ const BLOCK_TO_TAG = Dict(
     SoftBreak => :br,
     ThematicBreak => :hr,
     BlockQuote => :blockquote,
-    Admonition => :admonition,
     Citation => :citation,
     CommonMark.Strong => :strong,
     CommonMark.Table => :table,
@@ -136,6 +135,14 @@ end
 function Base.convert(::Type{XTree}, node::Node, c::Heading, attrs)
     tag = Symbol("h$(c.level)")
     return XNode(tag, attrs, childrenxtrees(node))
+end
+
+
+function Base.convert(::Type{XTree}, node::Node, c::Admonition, attrs)
+    return XNode(:admonition, Dict(:class => c.category), [
+        XNode(:admonitiontitle, [XLeaf(c.title)]),
+        XNode(:admonitionbody, childrenxtrees(node))
+    ])
 end
 
 

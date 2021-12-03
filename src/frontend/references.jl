@@ -106,7 +106,10 @@ function addidentifierreferences(doc, symbols)
         else
             XNode(
                 :reference,
-                merge(attributes(x), Dict(:document_id => "references/$symbolid", :reftype => "symbol")),
+                merge(
+                    attributes(x),
+                    Dict(:document_id => "references/$symbolid", :reftype => "symbol"),
+                ),
                 children(x),
             )
         end
@@ -163,7 +166,10 @@ function linktoreference(x, path, symbols)
         end
         return XNode(
             :reference,
-            merge(attributes(x), Dict(:document_id => string(href), :reftype => "document")),
+            merge(
+                attributes(x),
+                Dict(:document_id => string(href), :reftype => "document"),
+            ),
             children(x),
         )
     end
@@ -220,6 +226,28 @@ function referencedata(symbol, info, ::Val{:struct})
     return Dict(:methods => _getmethods(info, symbol.symbol_id))
 end
 
+function referencedata(symbol, info, ::Val{Symbol("abstract type")})
+    return Dict(:methods => _getmethods(info, symbol.symbol_id))
+end
+
+# TODO: gather information from submodules
+function referencedata(symbol, info, ::Val{:module})
+    moduleid = ModuleInfo.getmoduleid(symbol.instance)
+    msymbols = info[:symbols][info[:symbols].module_id.==moduleid, :]
+    symbols = [
+        Dict(
+            :symbol_id => row.symbol_id,
+            :name => row.name,
+            :public => row.public,
+            :kind => row.kind,
+        ) for row in eachrow(msymbols) if row.symbol_id != moduleid
+    ]
+    joinedfiles = innerjoin(info[:sourcefiles], info[:packages], on = :package_id)
+    files = [joinpath(row.basedir, row.file) for row in eachrow(joinedfiles)]
+    return Dict(:symbols => symbols, :files => files)
+end
+
+
 function _getmethods(info, symbol_id)
     methods = info[:methods][info[:methods].symbol_id.==symbol_id, :]
     return [
@@ -231,7 +259,6 @@ function _getmethods(info, symbol_id)
             :signature => row.signature,
         ) for row in eachrow(methods)
     ]
-    return map(row -> Dict(zip(keys(row), values(row))), eachrow(methods))
 end
 
 function referencedata(symbol, info, ::Val)

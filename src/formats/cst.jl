@@ -21,9 +21,33 @@ function parsecst(s::String, cst::CSTParser.EXPR, offset::Int = 0)
     end
 end
 
-BRACKETS = Set([:LPAREN, :RPAREN, :LSQUARE, :RSQUARE, :LBRACE, :RBRACE, :ATSIGN])
-PUNCTUATION = Set([:COMMA, :ATSIGN, :DOT])
-KEYWORDS = Set([
+# Since CSTParser.jl counts trailing whitespace and comments as belonging to identifiers,
+# this utility finds this whitespace and splits it off into its own leaf.
+function parsecstwhitespace(tree::XNode)
+    sel = SelectTag(:CST_KEYWORD) | SelectTag(:CST_IDENTIFIER)
+    return cata(tree, sel) do node
+        ch = Pollen.children(node)
+        length(ch) == 1 || return node
+        ch[1] isa XLeaf{String} || return node
+        s::String = ch[1][]
+
+        r = findfirst(r"\s", s)
+        isnothing(r) && return node
+        i = r.start
+        return XNode(
+            :CST_span,
+            [
+                Pollen.withchildren(node, [XLeaf(s[begin:prevind(s, i)])]),
+                XNode(:CST_whitespace, [XLeaf(s[i:end])]),
+            ],
+        )
+    end
+end
+
+
+const BRACKETS = Set([:LPAREN, :RPAREN, :LSQUARE, :RSQUARE, :LBRACE, :RBRACE, :ATSIGN])
+const PUNCTUATION = Set([:COMMA, :ATSIGN, :DOT])
+const KEYWORDS = Set([
     :ABSTRACT,
     :BAREMODULE,
     :BEGIN,
@@ -82,6 +106,7 @@ end
 function getcsttext(s, cst, offset = 0)
     i1 = offset+1
     i2 = nextind(s, prevind(s, max(1, offset+cst.fullspan)))
+    i2 = min(i2, lastindex(s))
     return s[i1:i2]
 end
 
