@@ -64,8 +64,7 @@ function parsejupytercellcode(cell, lang)
 
 
     return XNode(
-        :div,
-        Dict(:class => "cellcontainer"),
+        :cellcontainer,
         cs,
     )
 end

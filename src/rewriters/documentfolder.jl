@@ -23,6 +23,7 @@ function DocumentFolder(
     ]
     return DocumentFolder(dir, paths, trues(length(paths)), prefix)
 end
+DocumentFolder(p::String, args...; kwargs...) = DocumentFolder(Path(p), args...; kwargs...)
 
 
 function createsources!(folder::DocumentFolder)

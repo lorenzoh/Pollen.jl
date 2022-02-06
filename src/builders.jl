@@ -51,6 +51,7 @@ struct FileBuilder <: Builder
     format::Format
     dir::AbstractPath
 end
+FileBuilder(format::Format, p::String) = FileBuilder(format, Path(p))
 
 
 function build(builder::FileBuilder, project::Project, dirtypaths = keys(project.outputs))
