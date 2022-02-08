@@ -69,6 +69,7 @@ include("rewriters/parsecode.jl")
 include("frontend/references.jl")
 include("frontend/documentgraph.jl")
 include("frontend/searchindex.jl")
+include("frontend/saveattributes.jl")
 include("projects.jl")
 
 
