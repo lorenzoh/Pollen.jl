@@ -70,6 +70,7 @@ include("frontend/references.jl")
 include("frontend/documentgraph.jl")
 include("frontend/searchindex.jl")
 include("frontend/saveattributes.jl")
+include("frontend/loadfrontendconfig.jl")
 include("projects.jl")
 
 
