@@ -41,7 +41,7 @@ end
 
 
 function defaulttoc(projectconfig)
-    return Dict(
+    return OrderedDict(
         "Overview" => "documents/README.md",
         "Reference" => Dict(
             "Module" => "references/$(projectconfig["name"])"
