@@ -33,25 +33,37 @@ function createsources!(folder::DocumentFolder)
             srcpath = joinpath(folder.dir, p)
             docpath = isnothing(folder.prefix) ? p : joinpath(Path(folder.prefix), p)
             rawdoc = Pollen.parse(srcpath)
-            xtitle = Pollen.selectfirst(rawdoc, SelectTag(:h1))
-            title = isnothing(xtitle) ? filename(srcpath) : gettext(xtitle)
-            attrs = Dict(:path => string(srcpath), :title => title)
-            docs[docpath] =
-                XNode(:document, merge(attributes(rawdoc), attrs), children(rawdoc))
+            docs[docpath] = _newdocument(srcpath, rawdoc)
+
             folder.dirty[i] = false
         end
     end
     return docs
 end
 
+function _newdocument(path, doc)
+    xtitle = selectfirst(doc, SelectTag(:h1))
+    title = isnothing(xtitle) ? filename(path) : gettext(xtitle)
+    attrs = Dict(:path => string(path), :title => title)
+    return XNode(:document, merge(attributes(doc), attrs), children(doc))
+end
 
-function geteventsource(folder::DocumentFolder, ch)
+function geteventhandler(folder::DocumentFolder, ch)
     watcher = LiveServer.SimpleWatcher() do filename
-        @info "$filename was udpated"
-        p = Path(filename)
-        doc = parse(p)
-        event = DocUpdated(relative(p, folder.dir), doc)
-        put!(ch, event)
+        try
+            @info "$filename was updated"
+            srcpath = Path(filename)
+            doc = _newdocument(srcpath, Pollen.parse(srcpath))
+
+            docpath = relative(srcpath, folder.dir)
+            if !isnothing(folder.prefix)
+                docpath = joinpath(Path(folder.prefix), docpath)
+            end
+            event = DocUpdated(docpath, doc)
+            put!(ch, event)
+        catch e
+            @error "Error while processing file update for \"$filename\"" e=e
+        end
     end
     for p in folder.paths
         LiveServer.watch_file!(watcher, string(joinpath(folder.dir, p)))

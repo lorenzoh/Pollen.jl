@@ -78,7 +78,6 @@ function _findreferences(doc)
     refs = Set{FilePathsBase.PATH_TYPES[1]}()
 
     for xref in select(doc, SelectDocumentReference())
-        @show attributes(xref)[:document_id]
         push!(refs, Path(attributes(xref)[:document_id]))
     end
     for xref in select(doc, SelectSymbolReference())

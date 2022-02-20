@@ -17,7 +17,7 @@ PackageWatcher(modules) = PackageWatcher(modules, 1)
 # TODO: update to work with event-based serving
 
 
-function geteventsource(pkgwatcher::PackageWatcher, ch)
+function geteventhandler(pkgwatcher::PackageWatcher, ch)
     watcher = LiveServer.SimpleWatcher(filename -> onsourcefilechanged(Path(filename), ch))
     for m in pkgwatcher.modules
         srcdir = joinpath(Path(pkgdir(m)), "src")

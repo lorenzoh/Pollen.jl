@@ -83,8 +83,8 @@ end
     serve(project)
     serve(module)
 """
-function serve(project::Project; lazy = true)
-    builder = FileBuilder(HTML(), Path(mktempdir()))
+function serve(project::Project, path = mktempdir(); lazy = true, format = HTML())
+    builder = FileBuilder(format, Path(path))
     server = Server(project, builder)
     mode = lazy ? ServeFilesLazy() : ServeFiles()
     runserver(server, mode)

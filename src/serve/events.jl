@@ -17,43 +17,67 @@ struct DocRequested <: Event
     name::AbstractPath
 end
 
+struct DocRebuilt <: Event
+    name::AbstractPath
+end
+
 
 """
-    start(eventsource)
+    geteventhandler
+"""
+geteventhandler(rewriter::Rewriter, ch) = return rewriter
+geteventhandler(_, _) = return
 
-Start an event source.
+handle(_, event::Event) = nothing
+
+
+"""
+    start(eventhandler)
+
+Start an event source. Use `startasync` to do this asynchronously.
 """
 function start end
 
-start(es::Vector) = foreach(start, es)
-"""
-    stop(eventsource)
-
-Stop an event source.
-"""
-function stop end
-stop(es::Vector) = foreach(stop, es)
+start(_) = return
+stop(_) = return
 
 
-start(watcher::LiveServer.SimpleWatcher) = LiveServer.start(watcher)
+function startasync(eventhandler)
+    task = @async begin
+        try
+            start(eventhandler)
+        catch e
+            @error "Error while starting event handler!" error=e handler=eventhandler
+        end
+    end
+    return task
+end
+
+function stopasync(eventhandler, task)
+    @async begin
+        try
+            stop(eventhandler)
+            if !(istaskdone(task) || istaskfailed(task))
+                schedule(task, InterruptException(), error=true)
+            end
+        catch e
+            @error "Error while stopping event handler!" error=e handler=eventhandler
+        end
+    end
+end
+
 stop(watcher::LiveServer.SimpleWatcher) = LiveServer.stop(watcher)
 
+start(watcher::LiveServer.SimpleWatcher) = LiveServer.start(watcher)
 
 mutable struct FileServer
     dir
-    t
     kwargs
-    FileServer(dir::AbstractPath; kwargs...) = new(dir, nothing, kwargs)
+    FileServer(dir; kwargs...) = new(dir, kwargs)
 end
 
 function start(fs::FileServer)
-    fs.t = @async begin
-        LiveServer.serve(;dir=string(fs.dir), fs.kwargs...)
-    end
+    LiveServer.serve(;dir=string(fs.dir), fs.kwargs...)
 end
 
-function stop(fs::FileServer)
-    if !(isnothing(fs.t) || istaskdone(fs.t) || istaskfailed(fs.t))
-        schedule(fs.t, InterruptException(), error=true)
-    end
-end
+# TODO: maybe `geteventhandler` not needed and `start(rewriter, channel)` suffices?

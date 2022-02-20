@@ -9,20 +9,15 @@ function LoadFrontendConfig(path::Union{String,AbstractPath}, dstpath = "config.
     file = joinpath(path, "Project.toml")
     isfile(file) || throw(SystemError("loading conifg: \"$file\": No such file"))
     projectconfig = TOML.parsefile(file)
-    config = if haskey(projectconfig, "pollen")
-        merge(loaddefaults(projectconfig), projectconfig["pollen"])
-    else
-        @warn "No configuration section for Pollen found in \"$file\", using default values"
-        DEFAULT_FRONTEND_CONFIG
-    end
-
+    pollenconfig = get(projectconfig, "pollen", Dict())
+    config = merge(loaddefaults(projectconfig), pollenconfig)
     tocfile = joinpath(path, "docs/toc.json")
     if isfile(tocfile)
         open(tocfile, "r") do f
             config["linktree"] = JSON3.read(f)
         end
     else
-        config["linktree"] = defaulttoc(config)
+        config["linktree"] = defaulttoc(projectconfig)
     end
     return LoadFrontendConfig(config, dstpath)
 end
@@ -40,6 +35,17 @@ function loaddefaults(project::Dict)
     return Dict(
         "title" => project["name"],
         "defaultDocument" => "documents/README.md",
-        "viewerWidth" => 650,
+        "columnWidth" => 650,
     )
+end
+
+
+function defaulttoc(projectconfig)
+    return Dict(
+        "Overview" => "documents/README.md",
+        "Reference" => Dict(
+            "Module" => "references/$(projectconfig["name"])"
+        )
+    )
+
 end
