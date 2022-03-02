@@ -163,6 +163,8 @@ function linktoreference(x, path, symbols)
         href = attributes(x)[:href]
         if !startswith(href, "/")
             href = normpath(joinpath(parent(path), href))
+        else
+            href = href[2:end]
         end
         return XNode(
             :reference,
