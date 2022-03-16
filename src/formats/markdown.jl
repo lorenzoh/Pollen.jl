@@ -95,6 +95,7 @@ const BLOCK_TO_TAG = Dict(
     CommonMark.TableCell => :td,
     CommonMark.TableBody => :div,
     CommonMark.FrontMatter => :fm,
+    CommonMark.Math => :math,
 )
 
 function Base.convert(::Type{XTree}, node::Node, c::AbstractContainer, attrs = Dict{Symbol, String}())

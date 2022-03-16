@@ -104,11 +104,29 @@ function parsecstchildren(s::String, cst::CSTParser.EXPR, offset = 0)
 end
 
 function getcsttext(s, cst, offset = 0)
+    return stringrange(s, offset+1, offset+cst.fullspan)
     i1 = offset+1
     i2 = nextind(s, prevind(s, max(1, offset+cst.fullspan)))
     i2 = min(i2, lastindex(s))
     return s[i1:i2]
 end
+
+function stringrange(s, i1, i2)
+    try
+        i1 = _closestindex(s, i1)
+        i2 = _closestindex(s, i2)
+        return s[i1:i2]
+    catch e
+        @error "" error=e s=s i1=i1 i2=i2
+        rethrow()
+    end
+end
+
+function _closestindex(s, i)
+    i = min(max(i, 1), ncodeunits(s))
+    return prevind(s, i+1)
+end
+
 
 getchildren(cst::CSTParser.EXPR) = collect(cst)
 gethead(cst::CSTParser.EXPR) = gethead(CSTParser.headof(cst))

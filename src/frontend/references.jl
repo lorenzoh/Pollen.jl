@@ -48,7 +48,12 @@ function createsources!(pkgdoc::PackageDocumentation)
     )
 
     for row in eachrow(df_docstrings)
-        children = ismissing(row.docstring) ? XNode[] : [parse(row.docstring, Markdown())]
+        children = try
+            ismissing(row.docstring) ? XNode[] : [parse(row.docstring, Markdown())]
+        catch e
+            @error "Could not parse docstring for symbol $(row.symbol_id)" docstring=row.docstring
+            rethrow()
+        end
         doc = XNode(
             :documentation,
             Dict{Symbol,Any}(:symbol_id => row.symbol_id, :title => row.name),
@@ -193,7 +198,7 @@ function resolvesymbol(df, identifier::AbstractString; all = true)
         return identifier
     else
         if all
-            i = findfirst(r -> r.name == identifier, eachrow(df))
+            i = findfirst(r -> isshortidentifier(r.symbol_id, identifier), eachrow(df))
         else
             i = findfirst(r -> r.public && r.name == identifier, eachrow(df))
         end
@@ -203,6 +208,17 @@ function resolvesymbol(df, identifier::AbstractString; all = true)
             return df.symbol_id[i]
         end
     end
+end
+
+
+function isshortidentifier(full, short)
+    fullparts = split(full, ".")
+    shortparts = split(short, ".")
+    length(shortparts) > length(fullparts) && return false
+    for i in 1:length(shortparts)
+        shortparts[end-(i-1)] == fullparts[end-(i-1)] || return false
+    end
+    return true
 end
 
 
