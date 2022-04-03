@@ -13,7 +13,8 @@ function parse(obj::JSON3.Object, format::Jupyter)
     cs = XTree[]
     lang = get(get(get(obj, :metadata, Dict()), :language_info, Dict()), :name, "")
     for cell in obj[:cells]
-        cs = vcat(cs, children(parsejupytercell(cell, lang)))
+        push!(cs, parsejupytercell(cell, lang))
+        #cs = vcat(cs, children(parsejupytercell(cell, lang)))
     end
     return XNode(
         :body,
@@ -40,7 +41,7 @@ end
 
 function parsejupytercellcode(cell, lang)
     code = join(cell[:source])
-    xcode = XNode(:pre, Dict(:lang => lang), [XNode(:code, [XLeaf(code)])])
+    xcode = XNode(:codeblock, Dict(:lang => lang, :class => "codecell"), [XLeaf(code)])
     cs = XTree[xcode]
 
     outputs = cell[:outputs]
@@ -64,7 +65,8 @@ function parsejupytercellcode(cell, lang)
 
 
     return XNode(
-        :cellcontainer,
+        :div,
+        Dict(:class => "cellcontainer"),
         cs,
     )
 end

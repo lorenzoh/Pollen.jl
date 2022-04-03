@@ -169,18 +169,18 @@ function viewcodeoutput(output::AbstractString)
         return XLeaf("")
     else
         return XNode(
-            :pre,
+            :codeblock,
             Dict(:class => "codeoutput"),
-            [XNode(:code, [XLeaf(output)])])
+            [XLeaf(output)])
     end
 end
 
 
 function viewcoderesult(result::AbstractString)
     return XNode(
-        :pre,
+        :codeblock,
         Dict(:class => "coderesult"),
-        [XNode(:code, [XLeaf(result)])],
+        [XLeaf(result)],
     )
 end
 
