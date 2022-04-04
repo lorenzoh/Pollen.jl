@@ -10,7 +10,7 @@ end
 
 Base.show(io::IO, inserter::Inserter) = print(io, "Inserter($(inserter.positions))")
 
-function rewritedoc(inserter::Inserter, p::AbstractPath, doc::XNode)
+function rewritedoc(inserter::Inserter, p::AbstractPath, doc::Node)
     for (f, pos) in zip(inserter.fs, inserter.positions)
         if isnothing(selectfirst(doc, pos.selector))
             error("Could not find position $pos to insert into.")

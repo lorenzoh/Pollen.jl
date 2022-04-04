@@ -14,15 +14,15 @@ function Referencer(modules; path = p"REFERENCE")
     return Referencer(
         Dict{String, Union{Reference, Nothing}}(),
         modules,
-        XNode(:body),
-        Dict{String, XNode}(),
+        Node(:body),
+        Dict{String, Node}(),
         Path(path),
         ref -> "$path/$ref",
     )
 end
 
 
-function rewritedoc(referencer::Referencer, ::AbstractPath, doc::XNode)
+function rewritedoc(referencer::Referencer, ::AbstractPath, doc::Node)
     doc = populatereferences!(
         referencer.references,
         doc,
@@ -34,7 +34,7 @@ end
 
 function createsources!(referencer::Referencer)
     refdoc = buildreference(referencer)
-    docs = Dict{AbstractPath, XNode}()
+    docs = Dict{AbstractPath, Node}()
 
     # Conditionally update/create reference page
     if refdoc != referencer.doc
@@ -62,15 +62,15 @@ end
 
 function reset!(referencer::Referencer)
     referencer.references = Dict{String, Union{Reference, Nothing}}()
-    referencer.doc = XNode(:body)
-    referencer.refdocs = Dict{String, XNode}()
+    referencer.doc = Node(:body)
+    referencer.refdocs = Dict{String, Node}()
     return
 end
 
 
 function buildreference(referencer)
     refs = referencer.references
-    children = [XNode(:h1, [XLeaf("Reference")])]
+    children = [Node(:h1, [Leaf("Reference")])]
 
     ms = sort(unique([ref.m for ref in values(referencer.references)]), by = string)
 
@@ -81,26 +81,26 @@ function buildreference(referencer)
                 [ref for (k, ref) in refs if ref.m == m],
                 referencer.linkfn))
     end
-    return XNode(:body, children)
+    return Node(:body, children)
 end
 
 
 function buildmodulereference(mname, refs, linkfn)
     refs = sortrefs(refs)
 
-    heading = XNode(:h2, [XLeaf(mname)])
+    heading = Node(:h2, [Leaf(mname)])
 
     links = [
-        XNode(
+        Node(
             :a,
             Dict(:href => linkfn(r.fullname)),
-            [XNode(:code, [XLeaf(string(r.identifier))])]
+            [Node(:code, [Leaf(string(r.identifier))])]
         )
         for r in refs
     ]
     return [
         heading,
-        XNode(:ul, [XNode(:li, [link]) for link in links])
+        Node(:ul, [Node(:li, [link]) for link in links])
     ]
 end
 
@@ -125,23 +125,23 @@ const ORDERREFTYPE = Dict(
 function buildreferencepage(ref::Reference)
     docs = getdocs(ref.m, ref.identifier)
     xdocs = if isnothing(docs)
-        XNode(:p, XTree[
-            XLeaf("No documentation found for "),
-            XNode(:code, [XLeaf(ref.fullname)]),
-            XLeaf(".")
+        Node(:p, XTree[
+            Leaf("No documentation found for "),
+            Node(:code, [Leaf(ref.fullname)]),
+            Leaf(".")
             ])
     else
         convert(XTree, docs)
     end
     if !isnothing(ref.identifier) && ref.kind in (:struct, :function)
-        push!(xdocs.children, XNode(:h2, [XLeaf("Methods")]))
-        push!(xdocs.children, XLeaf(methods(getfield(ref.m, ref.identifier))))
+        push!(xdocs.children, Node(:h2, [Leaf("Methods")]))
+        push!(xdocs.children, Leaf(methods(getfield(ref.m, ref.identifier))))
     end
-    return XNode(
+    return Node(
         :body,
-        [XNode(:article,
+        [Node(:article,
             [
-                XNode(:h1, [XNode(:code, [XLeaf(ref.fullname)])]),
+                Node(:h1, [Node(:code, [Leaf(ref.fullname)])]),
                 xdocs,
             ],
         )]

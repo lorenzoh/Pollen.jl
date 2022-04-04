@@ -4,12 +4,12 @@
 function cata(f, xtree, selector::Selector)
     return cata(xtree) do x
         matches(selector, x) ? f(x) : x
-end
+    end
 end
 
 
 function catafirst(f, xtree, selector::Selector)
-    xtree_, state_ = catafold(xtree, false) do x, done
+    xtree_, _ = catafold(xtree, false) do x, done
         (!done && matches(selector, x)) ? (f(x), true) : (x, done)
     end
     return xtree_
@@ -38,9 +38,9 @@ end
 
 # Filter
 
-function Base.filter(f, xtree::XNode)
+function Base.filter(f, xtree::Node)
     return cata(xtree) do x
-        if x isa XLeaf
+        if x isa Leaf
             return x
         else
             return withchildren(x, collect(filter(f, children(x))))
@@ -48,7 +48,7 @@ function Base.filter(f, xtree::XNode)
     end
 end
 
-Base.filter(xtree::XNode, sel::Selector) = filter(x -> matches(sel, x), xtree)
+Base.filter(xtree::Node, sel::Selector) = filter(x -> matches(sel, x), xtree)
 
 # Insertion
 

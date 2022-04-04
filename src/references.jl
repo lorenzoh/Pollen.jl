@@ -85,7 +85,7 @@ end
 
 
 
-function populatereferences!(references, doc::XNode, linkfn = nothing, modules = ())
+function populatereferences!(references, doc::Node, linkfn = nothing, modules = ())
     sel = SelectTag(:a) & Pollen.SelectAttrEq(:href, "#")
     return cata(doc, sel) do x
         refname = gettext(x)
@@ -96,10 +96,10 @@ function populatereferences!(references, doc::XNode, linkfn = nothing, modules =
             return x
         else
             references[ref.fullname] = ref
-            return XNode(
+            return Node(
                 :a,
                 Dict(:href => "/" * linkfn(ref.fullname)),
-                [XNode(:code, [XLeaf(reflinkname(ref, modules))])],
+                [Node(:code, [Leaf(reflinkname(ref, modules))])],
             )
         end
     end

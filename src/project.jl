@@ -127,7 +127,7 @@ function addfiles!(
 
     # Apply project-level changes like updating tree elements,
     # and creating new files.
-    newersources = Dict{AbstractPath, XNode}()
+    newersources = Dict{AbstractPath, Node}()
     for rewriter in rewriters
         new = createdocs(rewriter)
         newersources = merge(newersources, new)

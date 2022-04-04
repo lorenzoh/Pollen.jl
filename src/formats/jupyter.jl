@@ -15,7 +15,7 @@ function parse(obj::JSON3.Object, format::Jupyter)
     for cell in obj[:cells]
         cs = vcat(cs, children(parsejupytercell(cell, lang)))
     end
-    return XNode(
+    return Node(
         :body,
         cs
     )
@@ -35,12 +35,12 @@ end
 
 
 function parsejupytercellmd(cell)
-    return parse(join(cell[:source], "\n"), Markdown())
+    return parse(join(cell[:source], "\n"), MarkdownFormat())
 end
 
 function parsejupytercellcode(cell, lang)
     code = join(cell[:source])
-    xcode = XNode(:pre, Dict(:lang => lang), [XNode(:code, [XLeaf(code)])])
+    xcode = Node(:pre, Dict(:lang => lang), [Node(:code, [Leaf(code)])])
     cs = XTree[xcode]
 
     outputs = cell[:outputs]
@@ -63,7 +63,7 @@ function parsejupytercellcode(cell, lang)
     end
 
 
-    return XNode(
+    return Node(
         :div,
         Dict(:class => "cellcontainer"),
         cs,
@@ -78,7 +78,7 @@ end
 Base.show(io::IO, prerendered::PreRendered) = print(io,
     "Prerendered() with $(length(prerendered.reprs)) reprs")
 
-function render!(io, x::XLeaf{PreRendered}, ::HTML)
+function render!(io, x::Leaf{PreRendered}, ::HTML)
     reprs = x[].reprs
     for mime in HTML_MIMES
         if mime in keys(reprs)

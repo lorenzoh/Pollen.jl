@@ -118,13 +118,13 @@ function rewritedoc(executecode::ExecuteCode, p, doc)
     end
 
     newblocks = [
-        XNode(
+        Node(
             :div,
             merge(attributes(block), Dict(:class => "cellcontainer")),
             XTree[
                 withattributes(block, merge(attributes(block), Dict(:class => "codecell"))),
-                get(attributes(block), :output, "true") == "true" ? viewcodeoutput(outputs[i]) : XLeaf(""),
-                get(attributes(block), :result, "true") == "true" ? viewcoderesult(results[i]) : XLeaf(""),
+                get(attributes(block), :output, "true") == "true" ? viewcodeoutput(outputs[i]) : Leaf(""),
+                get(attributes(block), :result, "true") == "true" ? viewcoderesult(results[i]) : Leaf(""),
 
             ],
         )
@@ -166,40 +166,40 @@ creategroupid(path, groupname) = Symbol("$(CommonMark.slugify(string(path)))_$gr
 
 function viewcodeoutput(output::AbstractString)
     if isempty(output)
-        return XLeaf("")
+        return Leaf("")
     else
-        return XNode(
+        return Node(
             :pre,
             Dict(:class => "codeoutput"),
-            [XNode(:code, [XLeaf(output)])])
+            [Node(:code, [Leaf(output)])])
     end
 end
 
 
 function viewcoderesult(result::AbstractString)
-    return XNode(
+    return Node(
         :pre,
         Dict(:class => "coderesult"),
-        [XNode(:code, [XLeaf(result)])],
+        [Node(:code, [Leaf(result)])],
     )
 end
 
 
-viewcoderesult(result::Nothing) = XLeaf("")
+viewcoderesult(result::Nothing) = Leaf("")
 
 
 function viewcoderesult(result)
     if any([showable(m, result) for m in HTML_MIMES[1:end-1]])
-        return XNode(
+        return Node(
             :div,
             Dict(:class => "coderesult"),
-            [XLeaf(result)],
+            [Leaf(result)],
         )
     else
-        return XNode(
+        return Node(
             :pre,
             Dict(:class => "coderesult"),
-            [XNode(:code, [XLeaf(result)])],
+            [Node(:code, [Leaf(result)])],
         )
     end
 end

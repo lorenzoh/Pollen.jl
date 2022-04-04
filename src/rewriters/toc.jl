@@ -10,7 +10,7 @@ function AddTableOfContents(;
         if isnothing(content)
             error("Could not find contents to generate ToC from with selector $contentsel.")
         end
-        tocnode = XNode(:toc, [maketoc(content, hierarchysels)])
+        tocnode = Node(:toc, [maketoc(content, hierarchysels)])
         return insertfirst(
             body,
             tocnode,
@@ -24,14 +24,14 @@ end
 
 Create a table of contents with a hierarchy given by `tags`.
 """
-function maketoc(doc::XNode, sels::NTuple{N, Selector}) where N
+function maketoc(doc::Node, sels::NTuple{N, Selector}) where N
     # select heading tags and content groups between them
     sel = sels[1]
     headings = collect(select(doc, sel))
     groups = collect(groupchildren(doc, sel))[2:end]
 
     # construct ToC recursively
-    return XNode(:ul, [maketoclistitem(h, g, sels) for (h, g) in zip(headings, groups)])
+    return Node(:ul, [maketoclistitem(h, g, sels) for (h, g) in zip(headings, groups)])
 end
 
 
@@ -41,13 +41,13 @@ end
 Make a list item in a table of contents. If `tags` is not empty, recursively
 create a hierarchical table of contents.
 """
-function maketoclistitem(heading::XNode, group, sels)
+function maketoclistitem(heading::Node, group, sels)
     haskey(heading.attributes, :id) || error("Headings selected in ToC need to have an `:id` field. See `AddSlugID`.")
-    link = XNode(:a, Dict(:href => "#$(heading.attributes[:id])"), [XLeaf(gettext(heading))])
+    link = Node(:a, Dict(:href => "#$(heading.attributes[:id])"), [Leaf(gettext(heading))])
     if length(sels) > 1
-        return XNode(:li, [link, maketoc(group, sels[2:end])])
+        return Node(:li, [link, maketoc(group, sels[2:end])])
     else
-        return XNode(:li, [link])
+        return Node(:li, [link])
     end
 end
 
@@ -73,7 +73,7 @@ collect(groupchildren(doc, SelectTag(:h1))) == [
 ]
 ```
 """
-function groupchildren(xtree::XNode, sel::Selector)
+function groupchildren(xtree::Node, sel::Selector)
     groups = [XTree[]]
     groupidx = 1
     for child in children(xtree)

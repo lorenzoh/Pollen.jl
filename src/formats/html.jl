@@ -16,16 +16,16 @@ extensionformat(::Val{:html}) = HTML()
 
 function Base.convert(::Type{XTree}, htmlnode::Gumbo.HTMLElement{S}) where S
     attrs = Dict{Symbol, Any}(Symbol(key) => val for (key, val) in htmlnode.attributes)
-    return XNode(S, attrs, XTree[convert(XTree, c) for c in htmlnode.children])
+    return Node(S, attrs, XTree[convert(XTree, c) for c in htmlnode.children])
 end
 
 function Base.convert(::Type{XTree}, htmltext::Gumbo.HTMLText)
-    return XLeaf(htmltext.text)
+    return Leaf(htmltext.text)
 end
 
 # Rendering
 
-function render!(io, x::XNode, format::HTML, ::Val)
+function render!(io, x::Node, format::HTML, ::Val)
     print(io, "<", x.tag)
     if !isempty(x.attributes)
         print(io, " ")
@@ -49,7 +49,7 @@ const HTML_MIMES = [
     MIME"text/plain"(),
 ]
 
-function render!(io, x::XLeaf, ::HTML)
+function render!(io, x::Leaf, ::HTML)
     val = x[]
 
     for m in HTML_MIMES
@@ -86,7 +86,7 @@ function adapthtmlstr(::MIME{Symbol("image/jpeg")}, s)
 end
 
 
-function render!(io, x::XLeaf{<:AbstractString}, ::HTML)
+function render!(io, x::Leaf{<:AbstractString}, ::HTML)
     print(io, ansistringtohtml(x[]))
 end
 

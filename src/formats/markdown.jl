@@ -1,16 +1,16 @@
-struct Markdown <: Format end
+struct MarkdownFormat <: Format end
 
 
-function parse(io::IO, ::Markdown; parser = default_md_parser())
+function parse(io::IO, ::MarkdownFormat; parser = default_md_parser())
     ast = parser(io)
     return convert(XTree, ast)
 end
 
 function default_md_parser()
     # adapted from https://github.com/MichaelHatherly/Publish.jl/blob/master/src/utilities.jl
-    cm = CommonMark
+    cm = CM
     parser = cm.enable!(cm.Parser(), [
-        ## CommonMark-provided.
+        ## CM-provided.
         cm.AdmonitionRule(),
         cm.AttributeRule(),
         cm.AutoIdentifierRule(),
@@ -26,14 +26,14 @@ function default_md_parser()
     return parser
 end
 
-extensionformat(::Val{:md}) = Markdown()
-formatextension(::Markdown) = "md"
+extensionformat(::Val{:md}) = MarkdownFormat()
+formatextension(::MarkdownFormat) = "md"
 
 ## Parsing helpers
 
-function mdchildren(node::CommonMark.Node)
+function mdchildren(node::CM.Node)
     if !isdefined(node.first_child, :t)
-        return CommonMark.Node[]
+        return CM.Node[]
     end
 
     child = node.first_child
@@ -46,9 +46,9 @@ function mdchildren(node::CommonMark.Node)
     return childs
 end
 
-function mdchildrenattrs(node::CommonMark.Node)
+function mdchildrenattrs(node::CM.Node)
     allcs = mdchildren(node)
-    cs = CommonMark.Node[]
+    cs = CM.Node[]
     attrs = Dict{Symbol, String}[]
     as = Dict{Symbol, String}()
 
@@ -68,72 +68,72 @@ function mdchildrenattrs(node::CommonMark.Node)
 end
 
 
-function childrenxtrees(node::Node)
+function childrenxtrees(node::CM.Node)
     cs, attrs = mdchildrenattrs(node)
     return XTree[convert(XTree, c, as) for (c, as) in zip(cs, attrs)]
 end
 
-Base.convert(::Type{XTree}, node::Node, attrs::Dict = Dict{Symbol, Any}()) = convert(XTree, node, node.t, attrs)
+Base.convert(::Type{XTree}, node::CM.Node, attrs::Dict = Dict{Symbol, Any}()) = convert(XTree, node, node.t, attrs)
 
 const BLOCK_TO_TAG = Dict(
-    Document => :body,
-    Item => :li,
-    List => :ul,
-    Paragraph => :p,
-    Text => :span,
-    Emph => :em,
-    SoftBreak => :br,
-    ThematicBreak => :hr,
-    BlockQuote => :blockquote,
-    Admonition => :admonition,
+    CM.Document => :body,
+    CM.Item => :li,
+    CM.List => :ul,
+    CM.Paragraph => :p,
+    CM.Text => :span,
+    CM.Emph => :em,
+    CM.SoftBreak => :br,
+    CM.ThematicBreak => :hr,
+    CM.BlockQuote => :blockquote,
+    CM.Admonition => :admonition,
     Citation => :citation,
-    CommonMark.Strong => :strong,
-    CommonMark.Table => :table,
-    CommonMark.TableHeader => :span,
-    CommonMark.TableRow => :tr,
-    CommonMark.TableCell => :td,
-    CommonMark.TableBody => :div,
-    CommonMark.FrontMatter => :fm,
+    CM.Strong => :strong,
+    CM.Table => :table,
+    CM.TableHeader => :span,
+    CM.TableRow => :tr,
+    CM.TableCell => :td,
+    CM.TableBody => :div,
+    CM.FrontMatter => :fm,
 )
 
-function Base.convert(::Type{XTree}, node::Node, c::AbstractContainer, attrs = Dict{Symbol, String}())
+function Base.convert(::Type{XTree}, node::Node, c::CM.AbstractContainer, attrs = Dict{Symbol, String}())
     tag = BLOCK_TO_TAG[typeof(c)]
     # TODO: respect `Attributes`
-    return XNode(tag, attrs, childrenxtrees(node))
+    return Node(tag, attrs, childrenxtrees(node))
 end
 
 
 # For some `AbstractContainer`s, the behavior is customized.
 
 
-Base.convert(::Type{XTree}, node::Node, ::Text, attrs) = XLeaf(node.literal)
-Base.convert(::Type{XTree}, node::Node, ::Code, attrs) = XNode(:code, [XLeaf(node.literal)])
+Base.convert(::Type{XTree}, node::CM.Node, ::CM.Text, attrs) = Leaf(node.literal)
+Base.convert(::Type{XTree}, node::CM.Node, ::CM.Code, attrs) = Node(:code, [Leaf(node.literal)])
 
-function Base.convert(::Type{XTree}, node::Node, i::Image, attrs) XNode(:code, [XLeaf(node.literal)])
-    return XNode(
+function Base.convert(::Type{XTree}, node::CM.Node, i::CM.Image, attrs) Node(:code, [Leaf(node.literal)])
+    return Node(
         :img,
         Dict(:src => i.destination, :alt => i.title),
         childrenxtrees(node)
     )
 end
 
-function Base.convert(::Type{XTree}, node::Node, c::CodeBlock, attrs)
-    return XNode(
+function Base.convert(::Type{XTree}, node::CM.Node, c::CM.CodeBlock, attrs)
+    return Node(
         :pre,
         merge(attrs, Dict(:lang => c.info)),
-        [XNode(:code, [XLeaf(node.literal)])],)
+        [Node(:code, [Leaf(node.literal)])],)
 end
 
-function Base.convert(::Type{XTree}, node::Node, l::Link, attrs)
-    return XNode(
+function Base.convert(::Type{XTree}, node::CM.Node, l::CM.Link, attrs)
+    return Node(
         :a,
         Dict(:href => l.destination, :title => l.title),
         childrenxtrees(node))
 end
 
-function Base.convert(::Type{XTree}, node::Node, c::Heading, attrs)
+function Base.convert(::Type{XTree}, node::CM.Node, c::CM.Heading, attrs)
     tag = Symbol("h$(c.level)")
-    return XNode(tag, attrs, childrenxtrees(node))
+    return Node(tag, attrs, childrenxtrees(node))
 end
 
 

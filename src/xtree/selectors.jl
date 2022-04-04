@@ -12,18 +12,18 @@ struct SelectAll <: Selector end
 matches(::SelectAll, x) = true
 
 struct SelectNode <: Selector end
-matches(::SelectNode, ::XNode) = true
+matches(::SelectNode, ::Node) = true
 matches(::SelectNode, _) = false
 
 struct SelectLeaf <: Selector end
-matches(::SelectLeaf, ::XLeaf) = true
+matches(::SelectLeaf, ::Leaf) = true
 matches(::SelectLeaf, _) = false
 
 struct SelectTag <: Selector
     tag::Symbol
 end
 
-matches(sel::SelectTag, x::XNode) = sel.tag == tag(x)
+matches(sel::SelectTag, x::Node) = sel.tag == tag(x)
 
 struct SelectOr{T<:Tuple} <: Selector
     selectors::T
@@ -61,13 +61,13 @@ struct SelectAttrEq{T} <: Selector
     val::T
 end
 
-matches(sel::SelectAttrEq, x::XNode) = get(attributes(x), sel.attr, nothing) == sel.val
+matches(sel::SelectAttrEq, x::Node) = get(attributes(x), sel.attr, nothing) == sel.val
 
 struct SelectHasAttr <: Selector
     attr::Symbol
 end
 
-matches(sel::SelectHasAttr, x::XNode) = haskey(attributes(x), sel.attr)
+matches(sel::SelectHasAttr, x::Node) = haskey(attributes(x), sel.attr)
 
 
 ## API
@@ -81,4 +81,19 @@ function selectfirst(xtree::XTree, sel::Selector)
         end
     end
     return nothing
+end
+
+
+
+@testset "Selectors" begin
+    node = Node(:body, [Leaf(1), Leaf(2)], Dict(:class => "content"))
+    leaf = children(node)[1]
+    @test matches(SelectTag(:body), node)
+    @test !matches(SelectTag(:div), node)
+    @test matches(!SelectTag(:div), node)
+    @test matches(SelectTag(:div) | SelectTag(:body), node)
+    @test matches(SelectLeaf(), leaf)
+    @test matches(SelectNode(), node)
+    @test matches(SelectHasAttr(:class), node)
+    @test matches(SelectAttrEq(:class, "content"), node)
 end

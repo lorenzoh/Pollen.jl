@@ -20,7 +20,7 @@ function DocumentFolder(
 end
 
 function createsources!(folder::DocumentFolder)
-    docs = Dict{AbstractPath, XNode}()
+    docs = Dict{AbstractPath, Node}()
      for (i, p) in enumerate(folder.paths)
         if folder.dirty[i]
             docs[p] = parse(joinpath(folder.dir, p))

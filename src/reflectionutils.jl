@@ -33,12 +33,12 @@ end
 
 
 function Base.convert(::Type{XTree}, md::Base.Docs.MultiDoc)
-    return XNode(:docs, XTree[convert(XTree, v) for v in values(md.docs)])
+    return Node(:docs, XTree[convert(XTree, v) for v in values(md.docs)])
 end
 
 function Base.convert(::Type{XTree}, doc::Base.Docs.DocStr)
     s = collect(doc.text)[1]
     # Parse from docstring and filter out redundant line breaks
-    xdoc = replace(Pollen.parse(s, Pollen.Markdown()), XLeaf("\n"), SelectTag(:br))
-    return XNode(:doc, doc.data, children(xdoc))
+    xdoc = replace(Pollen.parse(s, Pollen.MarkdownFormat()), Leaf("\n"), SelectTag(:br))
+    return Node(:doc, doc.data, children(xdoc))
 end
