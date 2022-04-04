@@ -5,11 +5,15 @@ using AbstractTrees
 using Base.Docs
 import Crayons: @crayon_str
 import CommonMark as CM
+using CSTParser
+using DataFrames
 using FilePathsBase
 using DataStructures: DefaultDict, OrderedDict
 import Gumbo
 using InlineTest
 using JuliaFormatter
+using Graphs
+using MetaGraphs
 using Mustache
 using LiveServer
 using IJulia
@@ -17,6 +21,8 @@ import LiveServer
 using HTTP
 using TOML
 using IOCapture
+using ModuleInfo
+using InlineTest
 using JSON3
 using Revise
 
@@ -42,7 +48,10 @@ include("formats/format.jl")
 include("formats/markdown.jl")
 include("formats/html.jl")
 include("formats/jupyter.jl")
-#include("json.jl")
+include("formats/json.jl")
+include("formats/julia.jl")
+include("formats/juliacode.jl")
+include("formats/cst.jl")
 
 include("rewriters.jl")
 include("project.jl")
@@ -62,7 +71,13 @@ include("rewriters/coderunner.jl")
 include("rewriters/inserter.jl")
 include("rewriters/toc.jl")
 include("rewriters/packagewatcher.jl")
+include("rewriters/parsecode.jl")
 
+include("frontend/references.jl")
+include("frontend/documentgraph.jl")
+include("frontend/searchindex.jl")
+include("frontend/saveattributes.jl")
+include("frontend/loadfrontendconfig.jl")
 
 
 

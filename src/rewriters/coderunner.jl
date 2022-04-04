@@ -83,7 +83,7 @@ end
 # source code break examples.
 
 # The default selector mimicks the behavior of Publish.jl. "pre[lang="julia" cell]
-const PUBLISH_CODEBLOCK_SELECTOR = SelectTag(:pre) & SelectAttrEq(:lang, "julia") & SelectHasAttr(:cell)
+const PUBLISH_CODEBLOCK_SELECTOR = SelectTag(:codeblock) & SelectAttrEq(:lang, "julia") & SelectHasAttr(:cell)
 
 Base.@kwdef struct ExecuteCode <: Rewriter
     # Execution caches for each group of code blocks

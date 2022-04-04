@@ -8,8 +8,8 @@ function handle(server, ::ServeFiles, event::DocUpdated)
     addbuild!(server, event.name)
 end
 
-function geteventsource(::ServeFiles, server, ch)
-    return FileServer(server.builder.dir)
+function geteventhandler(::ServeFiles, server, ch)
+    return FileServer(server.builder.dir, allow_cors=true)
 end
 
 function initialize(::ServeFiles, server)
@@ -19,6 +19,7 @@ function initialize(::ServeFiles, server)
 end
 
 struct ServeFilesLazy <: ServerMode end
+
 
 
 function initialize(::ServeFilesLazy, server)
@@ -44,14 +45,14 @@ function handle(server, ::ServeFilesLazy, event::DocRequested)
 end
 
 
-function geteventsource(::ServeFilesLazy, server, ch)
+function geteventhandler(::ServeFilesLazy, server, ch)
     builddir = server.builder.dir
-    return FileServer(builddir, preprocess_request = req -> _lazyservecallback(req, ch, builddir))
+    return FileServer(builddir, preprocess_request = req -> _lazyservecallback(req, ch, builddir), port=8000, allow_cors=true)
 end
 
 
 function _lazyservecallback(req, ch, builddir)
-    if !endswith(req.target, ".html")
+    if !(endswith(req.target, ".html") || endswith(req.target, ".json"))
         return req
     else
         buildpath = joinpath(builddir, req.target[2:end])

@@ -137,4 +137,12 @@ function Base.convert(::Type{XTree}, node::CM.Node, c::CM.Heading, attrs)
 end
 
 
+function Base.convert(::Type{XTree}, node::Node, c::Admonition, attrs)
+    return XNode(:admonition, Dict(:class => c.category), [
+        XNode(:admonitiontitle, [XLeaf(c.title)]),
+        XNode(:admonitionbody, childrenxtrees(node))
+    ])
+end
+
+
 # TODO: add conversion for Table Nodes

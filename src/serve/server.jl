@@ -7,13 +7,14 @@ A server manages interactively running a `Project`, coordinating events
 to update project state efficiently.
 """
 mutable struct Server
-    project
-    builder
-    updates
-    lock
+    project::Any
+    builder::Any
+    updates::Any
+    lock::Any
 end
 
-Server(project, builder = FileBuilder(HTML(), Path(mktempdir()))) = Server(project, builder, Updates(), ReentrantLock())
+Server(project, builder = FileBuilder(HTML(), Path(mktempdir()))) =
+    Server(project, builder, Updates(), ReentrantLock())
 
 """
     abstract type ServerMode
@@ -23,12 +24,15 @@ state.
 """
 abstract type ServerMode end
 
-geteventsource(::ServerMode, server, ch) = nothing
-geteventsource(::Rewriter, ch) = nothing
+geteventhandler(::ServerMode, server, ch) = nothing
+
+handle(_, ::ServerMode, ::Event) = return
 
 initialize(::ServerMode, server) = return
+
 """
     handle(server, mode, event)
+    handle(rewriter, event)
 """
 function handle end
 
@@ -39,29 +43,32 @@ function handle end
 Run a `server` in `mode`. Handles start and cleanup of event sources
 from rewriters and `mode`. Synchronizes updates to project state.
 """
-function runserver(server, mode; dt=1 / 60)
+function runserver(server, mode; dt = 1 / 60)
     eventch = Channel()
-    eventsources = servereventsources(server, mode, eventch)
+    eventhandlers = servereventhandlers(server, mode, eventch)
     initialize(mode, server)
     @async begin
         for event in eventch
             @debug "Received $(typeof(event))"
             try
-            handle(server, mode, event)
+                handle(server, mode, event)
+                foreach(r -> handle(r, event), eventhandlers)
             catch e
-                @error "Error was thrown during handling of event!" event=event error=e
+                @error "Error was thrown during handling of event!" event = event error = e
             end
         end
     end
+    tasks = nothing
     try
+        tasks = map(startasync, eventhandlers)
         @info "Starting server..."
-        start(eventsources)
         while true
             updates = server.updates
             lock(server.lock) do
                 server.updates = Updates()
             end
-            applyupdates!(server.project, server.builder, updates)
+            _, events = applyupdates!(server.project, server.builder, updates)
+            foreach(e -> put!(eventch, e), events)
             if !all(isempty.((updates.sources, updates.torewrite, updates.torebuild)))
                 @info "Rebuild complete."
             end
@@ -74,7 +81,7 @@ function runserver(server, mode; dt=1 / 60)
             rethrow(e)
         end
     finally
-        stop(eventsources)
+        isnothing(tasks) || foreach(stopasync, eventhandlers, tasks)
         close(eventch)
     end
 end
@@ -82,7 +89,7 @@ end
 
 #=
 [`Updates`](#) is a container that asynchronously collects updates to
-the project state which are then applied snychronously. For example,
+the project state which are then applied synchronously. For example,
 a file watcher can update source documents using [`addsource!`](#) and
 trigger rewrites and builds using [`addrewrite!`](#) and [`addbuild!`].
 Only in [`applyupdates!`](#) are the changes actually applied to a project. =#
@@ -93,9 +100,9 @@ Only in [`applyupdates!`](#) are the changes actually applied to a project. =#
 Tracks updates to project state. Used internally by [`runserver`](#).
 """
 struct Updates
-    sources
-    torewrite
-    torebuild
+    sources::Any
+    torewrite::Any
+    torebuild::Any
 end
 
 Updates() = Updates(Dict{AbstractPath,XTree}(), Set{AbstractPath}(), Set{AbstractPath}())
@@ -108,6 +115,9 @@ Apply `updates` to a project by updating sources, rewriting and building
 documents.
 """
 function applyupdates!(project, builder, updates::Updates)
+
+    events = Event[]
+
     for (p, doc) in updates.sources
         project.sources[p] = doc
     end
@@ -121,12 +131,16 @@ function applyupdates!(project, builder, updates::Updates)
 
     if !isempty(dirtypaths)
         build(builder, project, dirtypaths)
+        for p in dirtypaths
+            push!(events, DocRebuilt(p))
+        end
     end
 
-    return project
+    return project, events
 end
 
-applyupdates!(server::Server) = applyupdates!(server.project, server.builder, server.updates)
+applyupdates!(server::Server) =
+    applyupdates!(server.project, server.builder, server.updates)
 
 function addsource!(server, path, doc)
     lock(server.lock) do
@@ -139,6 +153,7 @@ function addrewrite!(server, path)
         if haskey(server.project.sources, path) || haskey(server.updates.sources, path)
             push!(server.updates.torewrite, path)
         else
+            @warn "Cannot find source document $path to rewrite!"
             error("Cannot find source document $path to rewrite!")
         end
     end
@@ -155,11 +170,14 @@ function addbuild!(server, path)
 end
 
 
-function servereventsources(server, mode, ch)
-    eventsources = []
+function servereventhandlers(server, mode, ch)
+    eventhandlers = []
     for rewriter in server.project.rewriters
-        push!(eventsources, geteventsource(rewriter, ch))
+        eventhandler = geteventhandler(rewriter, ch)
+        isnothing(eventhandler) || push!(eventhandlers, eventhandler)
     end
-    push!(eventsources, geteventsource(mode, server, ch))
-    return collect(filter(!isnothing, eventsources))
+    eventhandler = geteventhandler(mode, server, ch)
+    isnothing(eventhandler) || push!(eventhandlers, eventhandler)
+
+    return eventhandlers
 end
