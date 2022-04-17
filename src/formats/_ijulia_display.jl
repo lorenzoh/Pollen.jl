@@ -27,12 +27,12 @@
 # Default mimetypes in decreasing richness
 const MIMES = [
     MIME"text/html"(),
-    MIME"text/latex"(),
+    #MIME"text/latex"(),
     MIME"image/svg+xml"(),
     MIME"image/png"(),
     MIME"image/jpeg"(),
     MIME"text/plain"(),
-    MIME"text/markdown"(),
+    #MIME"text/markdown"(),
 ]
 
 
