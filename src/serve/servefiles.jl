@@ -1,5 +1,7 @@
 
-struct ServeFiles <: ServerMode end
+Base.@kwdef struct ServeFiles <: ServerMode
+    port::Int = 8000
+end
 
 
 function handle(server, ::ServeFiles, event::DocUpdated)
@@ -8,8 +10,11 @@ function handle(server, ::ServeFiles, event::DocUpdated)
     addbuild!(server, event.name)
 end
 
-function geteventhandler(::ServeFiles, server, ch)
-    return FileServer(server.builder.dir, allow_cors=true)
+function geteventhandler(serve::ServeFiles, server, ch)
+    return FileServer(
+        server.builder.dir,
+        port=serve.port,
+        allow_cors=true)
 end
 
 function initialize(::ServeFiles, server)
@@ -18,7 +23,9 @@ function initialize(::ServeFiles, server)
     @info "Done."
 end
 
-struct ServeFilesLazy <: ServerMode end
+Base.@kwdef struct ServeFilesLazy <: ServerMode
+    port::Int = 8000
+end
 
 
 
@@ -45,9 +52,14 @@ function handle(server, ::ServeFilesLazy, event::DocRequested)
 end
 
 
-function geteventhandler(::ServeFilesLazy, server, ch)
+function geteventhandler(serve::ServeFilesLazy, server, ch)
     builddir = server.builder.dir
-    return FileServer(builddir, preprocess_request = req -> _lazyservecallback(req, ch, builddir), port=8000, allow_cors=true)
+    return FileServer(
+        builddir,
+        port=serve.port,
+        allow_cors=true,
+        preprocess_request = req -> _lazyservecallback(req, ch, builddir),
+    )
 end
 
 

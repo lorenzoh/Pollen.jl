@@ -1,15 +1,20 @@
 # Filtered catamorphisms
 
 
-function cata(f, xtree, selector::Selector)
-    return cata(xtree) do x
+"""
+    cata(f, tree, selector)
+
+Transform nodes matching `selector` with function `f`.
+"""
+function cata(f, tree, selector::Selector)
+    return cata(tree) do x
         matches(selector, x) ? f(x) : x
     end
 end
 
 
-function catafirst(f, xtree, selector::Selector)
-    xtree_, _ = catafold(xtree, false) do x, done
+function catafirst(f, tree, selector::Selector)
+    xtree_, _ = catafold(tree, false) do x, done
         (!done && matches(selector, x)) ? (f(x), true) : (x, done)
     end
     return xtree_
@@ -18,18 +23,18 @@ end
 
 # Replace
 
-function replace(xtree, xnode, selector::Selector)
-    cata(x -> xnode, xtree, selector)
+function replace(tree, xnode, selector::Selector)
+    cata(x -> xnode, tree, selector)
 end
 
 
-function replacefirst(xtree, xnode, selector::Selector)
-    return catafirst(x -> xnode, xtree, selector)
+function replacefirst(tree, node, selector::Selector)
+    return catafirst(x -> node, tree, selector)
 end
 
 
 function replacemany(xtree, xnodes, selector::Selector)
-    xtree_, state_ = catafold(xtree, 1) do x, i
+    xtree_, _ = catafold(xtree, 1) do x, i
         matches(selector, x) ? (xnodes[i], i + 1) : (x, i)
     end
     return xtree_
@@ -123,3 +128,57 @@ end
 
 _insert(xs::AbstractVector{T}, i, x::T) where T = insert!(copy(xs), i, x)
 _insert(xs::AbstractVector{<:XTree}, i, x::XTree) = vcat(xs[1:i - 1], [x], xs[i:end])
+
+
+@testset "catafirst" begin
+    x = Node(:body, [Leaf(1), Leaf(2)])
+
+    x_ = cata(x, SelectLeaf()) do leaf
+        return Leaf(leaf[] + 1)
+    end
+    @test children(x_)[1][] == 2
+    @test children(x_)[2][] == 3
+
+    x__ = catafirst(x, SelectLeaf()) do leaf
+        return Leaf(leaf[] + 1)
+    end
+    @test children(x__)[1][] == 2
+    @test children(x__)[2][] == 2
+end
+
+
+@testset "replace" begin
+    x = Node(:body, [Leaf(1), Leaf(2)])
+    node = Node(:body)
+    @test Pollen.replace(x, node, SelectNode()) == node
+
+    x_ = Pollen.replacefirst(x, node, SelectLeaf())
+    @test tag(x_) == :body
+    @test tag(children(x_)[1]) == :body
+end
+
+
+@testset "insert" begin
+    x = Node(:body, [Leaf(1), Leaf(2)])
+    @testset "NthChild" begin
+        x_ = insert(x, Leaf(0), NthChild(1, SelectNode()))
+        @test children(x_) == Leaf.(0:2)
+        @test insert(x, Leaf(0), NthChild(1, SelectNode())) == insertfirst(x, Leaf(0), NthChild(1, SelectNode()))
+    end
+
+    @testset "Before" begin
+        x_ = insert(x, Leaf(0), Before(SelectLeaf()))
+        @test children(x_) == Leaf.(0:2)
+    end
+
+    @testset "Before" begin
+        x_ = insert(x, Leaf(0), After(SelectLeaf()))
+        @test children(x_) == Leaf.([1, 0, 2])
+    end
+end
+
+
+@testset "gettext" begin
+    x = Node(:body, Leaf.(["Hello", " ", "World"]))
+    @test Pollen.gettext(x) == "Hello World"
+end

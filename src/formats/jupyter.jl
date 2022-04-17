@@ -1,92 +1,116 @@
 
-struct Jupyter <: Format end
+"""
+    JupyterFormat() <: Format
 
-extensionformat(::Val{:ipynb}) = Jupyter()
+Format for reading in Jupyter notebook (.ipynb) files.
 
 
-function parse(io::IO, format::Jupyter)
+## Extended help
+
+Markdown cells are parsed as `:md` `Node`s using [`MarkdownFormat`](#).
+Parsd code cells have the following structure:
+
+```julia
+Node(:codecell,
+    Node(:codeblock, ...),  # source code
+    Node(:codeoutput, ...)  # printed output
+    Node(:coderesult, ...)  # return value of cell
+)
+```
+"""
+struct JupyterFormat <: Format end
+
+extensionformat(::Val{:ipynb}) = JupyterFormat()
+
+
+function parse(io::IO, format::JupyterFormat)
     return parse(JSON3.read(io), format)
 end
 
 
-function parse(obj::JSON3.Object, format::Jupyter)
+function parse(data::JSON3.Object, format::JupyterFormat)
+    attrs = merge(
+        Dict(data[:metadata]),
+        Dict(:nbformat => (data[:nbformat], data[:nbformat_minor]))
+    )
+    #=
     cs = XTree[]
     lang = get(get(get(obj, :metadata, Dict()), :language_info, Dict()), :name, "")
     for cell in obj[:cells]
         cs = vcat(cs, children(parsejupytercell(cell, lang)))
     end
+    =#
     return Node(
-        :body,
-        cs
+        :jupyter,
+        [parsejupytercell(cell, attrs) for cell in data[:cells]],
+        attrs,
     )
 end
 
 
-function parsejupytercell(cell, lang = "")
-    type = cell[:cell_type]
-    if  type == "markdown"
-        return parsejupytercellmd(cell)
-    elseif type == "code"
-        return parsejupytercellcode(cell, lang)
-    else
-        error("Unsupported cell type $type.")
-    end
+
+parsejupytercell(cell, nbattrs) =
+    parsejupytercell(cell, nbattrs, Val(Symbol(cell[:cell_type])))
+
+
+function parsejupytercell(cell, nbattrs, ::Val{:markdown})
+    return withattributes(
+        parse(join(cell[:source], "\n"), MarkdownFormat()),
+        merge(cell[:metadata], Dict(:id => get(cell, :id, nothing)))
+    )
 end
 
-
-function parsejupytercellmd(cell)
-    return parse(join(cell[:source], "\n"), MarkdownFormat())
-end
-
-function parsejupytercellcode(cell, lang)
+function parsejupytercell(cell, nbattrs, ::Val{:code})
     code = join(cell[:source])
-    xcode = Node(:pre, Dict(:lang => lang), [Node(:code, [Leaf(code)])])
-    cs = XTree[xcode]
+    codeblock = Node(:codeinput, Node(:codeblock, code; lang = nbattrs[:kernelspec][:language]))
+    chs = XTree[codeblock]
 
-    outputs = cell[:outputs]
+
+    return Node(
+        :codecell, [
+            codeblock,
+            _parsecelloutputs(cell[:outputs])...
+        ],
+        merge(
+            Dict(cell[:metadata]),
+            Dict(
+                :id => get(cell, :id, nothing),
+                :execution_count => cell[:execution_count],
+            )
+        )
+    )
+
+
+end
+
+
+function _parsecelloutputs(outputs)
+    cs = Node[]
     stream = ""
     for output in outputs
         if output[:output_type] == "stream"
             stream *= join(output[:text])
         elseif output[:output_type] == "execute_result"
             # Add concatenated outputs first
-            push!(cs, viewcodeoutput(stream))
-            stream = ""
+            if !isempty(stream)
+                push!(cs, Node(:codeoutput, Node(:codeblock, ANSI(stream))))
+                stream = ""
+            end
 
             # The handle result
             reprs = Dict(MIME(k) => join(v) for (k, v) in output[:data])
-            push!(cs, viewcoderesult(PreRendered(reprs)))
+            if length(reprs) == 1 && first(keys(reprs)) == MIME("text/plain")
+                push!(cs, Node(:coderesult, Node(:codeblock, ANSI(first(values(reprs))))))
+            else
+                push!(cs, Node(:coderesult, PreRendered(reprs)))
+            end
         end
     end
     if stream != ""
-        push!(cs, viewcodeoutput(stream))
+        push!(cs, Node(:codeoutput, Node(:codeblock, ANSI(stream))))
     end
-
-
-    return XNode(
-        :cellcontainer,
-        cs,
-    )
+    return cs
 end
 
 
-struct PreRendered
-    reprs::Dict
-end
-
-Base.show(io::IO, prerendered::PreRendered) = print(io,
-    "Prerendered() with $(length(prerendered.reprs)) reprs")
-
-function render!(io, x::Leaf{PreRendered}, ::HTML)
-    reprs = x[].reprs
-    for mime in HTML_MIMES
-        if mime in keys(reprs)
-            print(io, adapthtmlstr(mime, reprs[mime]))
-            return
-        end
-    end
-    error("Could not find mime for $(x[])!")
-end
-
-
-Base.showable(mime::MIME, x::PreRendered) = mime in keys(x.reprs)
+#dict(x::Leaf{PreRendered}) = Dict(:mimes => x[].reprs)

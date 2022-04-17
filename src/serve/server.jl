@@ -13,7 +13,7 @@ mutable struct Server
     lock::Any
 end
 
-Server(project, builder = FileBuilder(HTML(), Path(mktempdir()))) =
+Server(project, builder = FileBuilder(HTMLFormat(), Path(mktempdir()))) =
     Server(project, builder, Updates(), ReentrantLock())
 
 """
@@ -105,7 +105,7 @@ struct Updates
     torebuild::Any
 end
 
-Updates() = Updates(Dict{AbstractPath,XTree}(), Set{AbstractPath}(), Set{AbstractPath}())
+Updates() = Updates(Dict{String,Node}(), Set{String}(), Set{String}())
 
 
 """
@@ -142,29 +142,29 @@ end
 applyupdates!(server::Server) =
     applyupdates!(server.project, server.builder, server.updates)
 
-function addsource!(server, path, doc)
+function addsource!(server, docid, doc)
     lock(server.lock) do
-        server.updates.sources[path] = doc
+        server.updates.sources[docid] = doc
     end
 end
 
-function addrewrite!(server, path)
+function addrewrite!(server, docid)
     lock(server.lock) do
-        if haskey(server.project.sources, path) || haskey(server.updates.sources, path)
-            push!(server.updates.torewrite, path)
+        if haskey(server.project.sources, docid) || haskey(server.updates.sources, path)
+            push!(server.updates.torewrite, docid)
         else
-            @warn "Cannot find source document $path to rewrite!"
-            error("Cannot find source document $path to rewrite!")
+            @warn "Cannot find source document $docid to rewrite!"
+            error("Cannot find source document $docid to rewrite!")
         end
     end
 end
 
-function addbuild!(server, path)
+function addbuild!(server, docid)
     lock(server.lock) do
-        if haskey(server.project.outputs, path) || path in server.updates.torewrite
-            push!(server.updates.torebuild, path)
+        if haskey(server.project.outputs, docid) || path in server.updates.torewrite
+            push!(server.updates.torebuild, docid)
         else
-            error("Cannot find output document $path to build!")
+            error("Cannot find output document $docid to build!")
         end
     end
 end

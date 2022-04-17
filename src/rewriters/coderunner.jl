@@ -48,7 +48,7 @@ Base.show(io::IO, cache::RunCache) = print(io, "RunCache($(nameof(cache.module_)
 # [`runblock`](#).
 
 function runblock(m::Module, codeblock)
-    c = IOCapture.capture(rethrow=InterruptException) do
+    c = IOCapture.capture(rethrow=InterruptException, color=true) do
         Base.include_string(m, codeblock)
     end
     return c.output, c.value
@@ -117,21 +117,41 @@ function rewritedoc(executecode::ExecuteCode, p, doc)
         end
     end
 
-    newblocks = [
-        Node(
-            :div,
-            merge(attributes(block), Dict(:class => "cellcontainer")),
-            XTree[
-                withattributes(block, merge(attributes(block), Dict(:class => "codecell"))),
-                get(attributes(block), :output, "true") == "true" ? viewcodeoutput(outputs[i]) : Leaf(""),
-                get(attributes(block), :result, "true") == "true" ? viewcoderesult(results[i]) : Leaf(""),
 
-            ],
-        )
-        for (i, block) in enumerate(blocks)
-    ]
+    newblocks = Node[]
+    for (i, block) in enumerate(blocks)
+        chs = Node[Node(:codeinput, block)]
+
+        includeoutput = get(attributes(block), :output, "true") == "true"
+        if includeoutput && !isempty(outputs[i])
+            node_output = Node(:codeoutput, Node(:codeblock, [Leaf(ANSI(outputs[i]))]))
+            push!(chs, node_output)
+        end
+
+        include_result = get(attributes(block), :result, "true") == "true"
+        if include_result && !isnothing(results[i])
+            node_result = if hasrichdisplay(results[i])
+                Node(:coderesult, results[i])
+            else
+                Node(:coderesult, Node(:codeblock, ANSI(results[i])))
+            end
+            push!(chs, node_result)
+        end
+
+        push!(newblocks, Node(:codecell, chs, attributes(block)))
+    end
 
     return replacemany(doc, newblocks, executecode.codeblocksel)
+end
+
+function hasrichdisplay(x)
+    return any(showable(m, x) for m in [
+        MIME"text/html"(),
+        MIME"text/latex"(),
+        MIME"image/svg+xml"(),
+        MIME"image/png"(),
+        MIME"image/jpeg"(),
+    ])
 end
 
 # We use a helper for executing the code blocks in groups and restoring the ordering
@@ -158,51 +178,7 @@ function executegrouped!(caches, codes, groupids)
     return outputs, results
 end
 
-creategroupid(path, groupname) = Symbol("$(CommonMark.slugify(string(path)))_$groupname")
-
-# The code output and result are tagged with classes "codeoutput" and
-# "coderesult" in the output document.
-
-
-function viewcodeoutput(output::AbstractString)
-    if isempty(output)
-        return Leaf("")
-    else
-        return Node(
-            :pre,
-            Dict(:class => "codeoutput"),
-            [Node(:code, [Leaf(output)])])
-    end
-end
-
-
-function viewcoderesult(result::AbstractString)
-    return Node(
-        :pre,
-        Dict(:class => "coderesult"),
-        [Node(:code, [Leaf(result)])],
-    )
-end
-
-
-viewcoderesult(result::Nothing) = Leaf("")
-
-
-function viewcoderesult(result)
-    if any([showable(m, result) for m in HTML_MIMES[1:end-1]])
-        return Node(
-            :div,
-            Dict(:class => "coderesult"),
-            [Leaf(result)],
-        )
-    else
-        return Node(
-            :pre,
-            Dict(:class => "coderesult"),
-            [Node(:code, [Leaf(result)])],
-        )
-    end
-end
+creategroupid(path, groupname) = Symbol("$(CM.slugify(string(path)))_$groupname")
 
 
 # Resetting the rewriter clears the caches:
@@ -210,4 +186,41 @@ end
 function reset!(executecode::ExecuteCode)
     foreach(k -> delete!(executecode.caches, k), keys(executecode.caches))
     return
+end
+
+# ## Tests
+
+@testset "ExecuteCode [rewriter]" begin
+    @testset "Basic" begin
+        rewriter = ExecuteCode(codeblocksel = SelectTag(:codeblock))
+        doc = Node(:md, Node(:codeblock, "1 + 1"))
+        @test Pollen.rewritedoc(rewriter, "path", doc) == Node(:md, Node(:codecell,
+            Node(:codeinput, Node(:codeblock, "1 + 1")),
+            Node(:coderesult, 2)
+        ))
+    end
+    @testset "Output" begin
+        rewriter = ExecuteCode(codeblocksel = SelectTag(:codeblock))
+        doc = Node(:md, Node(:codeblock, "print(\"hi\")"))
+        @test Pollen.rewritedoc(rewriter, "path", doc) == Node(:md, Node(:codecell,
+            Node(:codeinput, Node(:codeblock, "print(\"hi\")")),
+            Node(:codeoutput, Node(:codeblock, "hi"))
+        ))
+    end
+    @testset "Cache" begin
+        # If a code block doesn't change, the result should be cached
+        rewriter = ExecuteCode(codeblocksel = SelectTag(:codeblock))
+        doc = Node(:md, Node(:codeblock, "rand()"))
+        outdoc = Pollen.rewritedoc(rewriter, "path", doc)
+        val = only(children(selectfirst(outdoc, SelectTag(:coderesult))))[]
+        outdoc2 = Pollen.rewritedoc(rewriter, "path", doc)
+        val2 = only(children(selectfirst(outdoc2, SelectTag(:coderesult))))[]
+        @test val == val2
+
+        # After a reset, the caches should be cleared
+        reset!(rewriter)
+        outdoc3 = Pollen.rewritedoc(rewriter, "path", doc)
+        val3 = only(children(selectfirst(outdoc3, SelectTag(:coderesult))))[]
+        @test val != val3
+    end
 end

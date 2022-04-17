@@ -5,6 +5,8 @@ using AbstractTrees
 using Base.Docs
 import Crayons: @crayon_str
 import CommonMark as CM
+import Base64: Base64EncodePipe
+import JuliaSyntax
 using CSTParser
 using DataFrames
 using FilePathsBase
@@ -16,7 +18,6 @@ using Graphs
 using MetaGraphs
 using Mustache
 using LiveServer
-using IJulia
 import LiveServer
 using HTTP
 using TOML
@@ -24,7 +25,10 @@ using IOCapture
 using ModuleInfo
 using InlineTest
 using JSON3
+using ThreadSafeDicts
+import Random
 using Revise
+
 
 
 # We first define [`Node`](#)s and [`Leaf`](#)s, the data structure that underpins
@@ -36,8 +40,6 @@ include("xtree/selectors.jl")
 include("xtree/catamorphisms.jl")
 include("xtree/folds.jl")
 
-include("reflectionutils.jl")
-include("references.jl")
 include("files.jl")
 
 # So that we can represent data from different formats as a tree, we define
@@ -45,13 +47,17 @@ include("files.jl")
 # file formats.
 
 include("formats/format.jl")
+include("formats/_ijulia_display.jl")
 include("formats/markdown.jl")
+include("formats/json.jl")
+include("formats/juliasyntax.jl")
 include("formats/html.jl")
 include("formats/jupyter.jl")
-include("formats/json.jl")
-include("formats/julia.jl")
-include("formats/juliacode.jl")
-include("formats/cst.jl")
+#include("formats/julia.jl")
+#include("formats/juliacode.jl")
+#include("formats/cst.jl")
+
+export MarkdownFormat, JSONFormat, HTMLFormat, JuliaSyntaxFormat, JupyterFormat
 
 include("rewriters.jl")
 include("project.jl")
@@ -62,7 +68,6 @@ include("serve/server.jl")
 include("serve/servefiles.jl")
 
 include("rewriters/documentfolder.jl")
-include("rewriters/referencer.jl")
 include("rewriters/documenttree.jl")
 include("rewriters/basic.jl")
 include("rewriters/assets.jl")
@@ -72,16 +77,18 @@ include("rewriters/inserter.jl")
 include("rewriters/toc.jl")
 include("rewriters/packagewatcher.jl")
 include("rewriters/parsecode.jl")
+include("rewriters/parseansi.jl")
 
 include("frontend/references.jl")
 include("frontend/documentgraph.jl")
 include("frontend/searchindex.jl")
 include("frontend/saveattributes.jl")
 include("frontend/loadfrontendconfig.jl")
+include("frontend/staticresources.jl")
 
 
 
-export select,
+export select, selectfirst,
     XTree, Node, Leaf,
     cata, catafirst, replace, replacefirst, fold, catafold,
     SelectNode,
@@ -89,11 +96,11 @@ export select,
     NthChild, FirstChild, Before, After,
     Project, build,
     SelectTag, SelectOr, XExpr, ChangeTag, htmlify, AddSlugID, AddTableOfContents, SelectAttrEq,
-    Selector, parse, HTML, MarkdownFormat, resolveidentifier, serve,
+    Selector, parse, resolveidentifier, serve,
     # rewriters
     AddID, HTMLify, ChangeLinkExtension, FormatCode, AddTableOfContents, Referencer, DocumentFolder,
     documentationproject, Server, runserver, ServeFiles, ServeFilesLazy,
-    PackageWatcher,
+    PackageWatcher, StaticResources,
     RelativeLinks
 
 end

@@ -13,27 +13,27 @@ function Pollen.parse(source::String, ::JuliaCodeFormat)
             ch = children(Pollen.parse(content, Pollen.Markdown()))
             attrs = Dict(:startline => block.startline, :endline => block.endline)
 
-            push!(chs, XNode(:comment, attrs, ch))
+            push!(chs, Node(:comment, attrs, ch))
         else
             attrs = Dict(:startline => block.startline, :endline => block.endline)
-            push!(chs, XNode(:codeblock, attrs, [XLeaf(content)]))
+            push!(chs, Node(:codeblock, attrs, [Leaf(content)]))
         end
     end
 
-    return XNode(:sourcefile, chs)
+    return Node(:sourcefile, chs)
 end
 
 ##
 
 function cleantopleveldefinition(doc)
-    doc isa XLeaf && return doc
+    doc isa Leaf && return doc
     ch = children(doc)
     if iscomment(doc)
         return withtag(doc, :CST_COMMENT)
     elseif isdocdefinition(doc)
-        return XNode(:CST_DEFINITION, Dict(:docstring => Pollen.gettext(ch[3])), [ch[4]])
+        return Node(:CST_DEFINITION, Dict(:docstring => Pollen.gettext(ch[3])), [ch[4]])
     elseif isdefinition(doc)
-        return XNode(:CST_DEFINITION, [doc])
+        return Node(:CST_DEFINITION, [doc])
     else
         return doc
     end

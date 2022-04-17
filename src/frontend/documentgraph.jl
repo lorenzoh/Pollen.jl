@@ -32,10 +32,12 @@ function rewriteoutputs!(docdict, docgraph::DocumentGraph)
         _addrefedges!(g, doc, p)
     end
 
-    for (p, doc) in docdict
-        v = get_prop(g, :idxs)[string(p)]
-        attrs = attributes(doc)
-        attrs[:backlinks] = [backlinkdata(g, v_) for v_ in inneighbors(g, v) if v_ != v]
+    for (docid, doc) in docdict
+        v = get_prop(g, :idxs)[docid]
+        docdict[docid] = withattributes(doc, merge(
+            attributes(doc),
+            Dict(:backlinks => [backlinkdata(g, v_) for v_ in inneighbors(g, v) if v_ != v])
+        ))
     end
 
     return docdict

@@ -6,5 +6,5 @@ formatextension(::JuliaFile) = "jl"
 
 function parse(io::IO, ::JuliaFile)
     s = String(read(io))
-    return XNode(:sourcefile, [XLeaf(s)])
+    return Node(:sourcefile, [Leaf(s)])
 end

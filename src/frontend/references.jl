@@ -1,9 +1,9 @@
 
 
 """
-    PackageDocumentation(modules)
+    PackageDocumentation(modules) <: Rewriter
 
-This rewriter sets up a complete table of a module's symbols and its source files.
+This rewriter sets up tables of a modules' symbols and source files.
 Each reference can be its own document, with metadata for that symbol stored in its
 attributes and the docstring stored as a child X-tree.
 
@@ -24,7 +24,7 @@ function PackageDocumentation(ms::Union{Module,AbstractVector{Module}})
 end
 
 function createsources!(pkgdoc::PackageDocumentation)
-    pkgdoc.dirty || return Dict{AbstractPath,XTree}()
+    pkgdoc.dirty || return Dict{String,Node}()
 
     # Documents for source files
     df = innerjoin(
@@ -33,14 +33,14 @@ function createsources!(pkgdoc::PackageDocumentation)
         on = :package_id,
         validate = false => true,
     )
-    docnames = map(r -> Path(joinpath("sourcefiles", r.name, r.file)), eachrow(df))
-    docpaths = map(r -> Path(joinpath(r.basedir, r.file)), eachrow(df))
-    sourcedocs = Dict{AbstractPath,XTree}(
+    docnames = map(r -> joinpath("sourcefiles", r.name, r.file), eachrow(df))
+    docpaths = map(r -> joinpath(r.basedir, r.file), eachrow(df))
+    sourcedocs = Dict{String,Node}(
         name => createsourcefiledoc(path, name) for (name, path) in zip(docnames, docpaths)
     )
 
     # Documents for symbols
-    symboldocs = Dict{AbstractPath,XTree}()
+    symboldocs = Dict{String,Node}()
     df_docstrings = outerjoin(
         pkgdoc.info[:symbols][:, [:symbol_id, :name]],
         pkgdoc.info[:docstrings],
@@ -49,17 +49,17 @@ function createsources!(pkgdoc::PackageDocumentation)
 
     for row in eachrow(df_docstrings)
         children = try
-            ismissing(row.docstring) ? XNode[] : [parse(row.docstring, Markdown())]
+            ismissing(row.docstring) ? Node[] : [parse(row.docstring, MarkdownFormat())]
         catch e
             @error "Could not parse docstring for symbol $(row.symbol_id)" docstring=row.docstring
             rethrow()
         end
-        doc = XNode(
+        doc = Node(
             :documentation,
-            Dict{Symbol,Any}(:symbol_id => row.symbol_id, :title => row.name),
             children,
+            Dict{Symbol,Any}(:symbol_id => row.symbol_id, :title => row.name),
         )
-        symboldocs[Path(joinpath("references", row.symbol_id))] = doc
+        symboldocs["references/$(row.symbol_id)"] = doc
     end
 
 
@@ -72,10 +72,13 @@ end
 
 function createsourcefiledoc(path, name)
     title = joinpath(splitpath(string(name))[2:end]...)
-    return withattributes(
-        Pollen.parse(String(read(path)), JuliaCodeFormat()),
-        Dict{Symbol,Any}(:path => string(path), :title => title),
-    )
+    doc = Pollen.parse(String(read(path)), JuliaSyntaxFormat())
+    doc = preparesourcefile(doc)
+    return Node(
+            :sourcefile,
+            [doc],
+            Dict{Symbol,Any}(:path => string(path), :title => title),
+        )
 end
 
 
@@ -103,19 +106,19 @@ end
 
 
 function addidentifierreferences(doc, symbols)
-    cata(doc, SelectTag(:CST_IDENTIFIER)) do x
+    cata(doc, SelectTag(:IDENTIFIER)) do x
         s = strip(Pollen.gettext(x), [' ', '\n', ';'])
         symbolid = Pollen.resolvesymbol(symbols, s)
         return if isnothing(symbolid)
             x
         else
-            XNode(
+            Node(
                 :reference,
+                children(x),
                 merge(
                     attributes(x),
                     Dict(:document_id => "references/$symbolid", :reftype => "symbol"),
                 ),
-                children(x),
             )
         end
     end
@@ -143,12 +146,12 @@ link text stored as a child string, and the kind of link as well as the target
 stored as the attribute.
 
 ```julia
-XNode(:refsymbol, Dict(:symbol_id => "DataLoaders.DataLoader"), [XLeaf("DataLoader")])
+Node(:refsymbol, Dict(:symbol_id => "DataLoaders.DataLoader"), [Leaf("DataLoader")])
 ```
 
 =#
 
-function linktoreference(x, path, symbols)
+function linktoreference(x, docid, symbols)
     text = gettext(x)
     if issymbolref(x)
         symbol_id = resolvesymbol(symbols, text)
@@ -156,10 +159,10 @@ function linktoreference(x, path, symbols)
             @info "Could not resolve identifier `$text`."
             return only(children(x))
         else
-            return XNode(
+            return Node(
                 :reference,
-                Dict(:document_id => "references/$symbol_id", :reftype => "symbol"),
                 children(x),
+                Dict(:document_id => "references/$symbol_id", :reftype => "symbol"),
             )
         end
     elseif isurlref(x)
@@ -167,31 +170,31 @@ function linktoreference(x, path, symbols)
     else
         href = attributes(x)[:href]
         if !startswith(href, "/")
-            href = normpath(joinpath(parent(path), href))
+            href = normpath(joinpath(parent(Path(docid)), href))
         else
             href = href[2:end]
         end
-        return XNode(
+        return Node(
             :reference,
+            children(x),
             merge(
                 attributes(x),
                 Dict(:document_id => string(href), :reftype => "document"),
             ),
-            children(x),
         )
     end
 
 end
 
 
-issymbolref(x::XNode) = (
+issymbolref(x::Node) = (
     length(children(x)) == 1 &&
-    only(children(x)) isa XNode &&
+    only(children(x)) isa Node &&
     (tag(only(children(x))) == :code) &&
     get(attributes(x), :href, "") == "#"
 )
 
-isurlref(x::XNode) = startswith(get(attributes(x), :href, ""), r"http(s)?://")
+isurlref(x::Node) = startswith(get(attributes(x), :href, ""), r"http(s)?://")
 
 function resolvesymbol(df, identifier::AbstractString; all = true)
     if identifier ∈ df.symbol_id
@@ -281,4 +284,72 @@ end
 
 function referencedata(symbol, info, ::Val)
     return Dict{Symbol,Any}()
+end
+
+@testset "PackageDocumentation [rewriter]" begin
+    rewriter = PackageDocumentation([Pollen])
+end
+
+
+
+
+
+function preparesourcefile(tree)
+    tree = tree |> stripdocstrings |> splitoncomments
+end
+
+function stripdocstrings(tree)
+    Pollen.cata(tree, SelectTag(:MACROCALL)) do node
+        isempty(children(node)) && return node
+        if tag(first(children(node))) == :CORE_DOC_MACRO_NAME
+            return children(node)[end]
+        else
+            return node
+        end
+    end
+end
+
+
+function splitoncomments(node)
+    chs = Node[]
+
+    in_comment = false
+
+    comment = String[]
+    code = Node[]
+
+    for ch in children(node)
+
+        if tag(ch) === :COMMENT
+            if !isempty(code)
+                push!(chs, Node(:codeblock, code...; lang = "julia"))
+                code = Node[]
+            end
+            in_comment = true
+            push!(comment, _strip_comment(Pollen.gettext(ch)))
+            push!(comment, " ")
+        elseif in_comment & (tag(ch) == :NEWLINE_WS || tag(ch) == :WHITESPACE)
+            continue
+        else
+            if !isempty(comment)
+                push!(chs, Pollen.parse(join(comment), MarkdownFormat()))
+                comment = String[]
+            end
+            in_comment = false
+            push!(code, ch)
+        end
+    end
+    isempty(code) || push!(chs, Node(:codeblock, code...; lang = "julia"))
+    isempty(comment) || push!(chs, Pollen.parse(join(comment), MarkdownFormat()))
+
+    return Pollen.withchildren(node, chs)
+end
+
+
+function _strip_comment(str)
+    if startswith(str, "#=")
+        return strip(str[3:end-2])
+    else
+        return strip(str[2:end])
+    end
 end

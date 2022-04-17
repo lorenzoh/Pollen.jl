@@ -1,31 +1,39 @@
 
-struct HTML <: Format end
+Base.@kwdef struct HTMLFormat <: Format
+    stripbody = true
+end
 
-# Parsing
+# ## Parsing
 
-function parse(io::IO, format::HTML)
+function parse(io::IO, format::HTMLFormat)
     return parse(read(io, String), format)
 
 end
 
-function parse(s::String, ::HTML)
-    return convert(XTree, Gumbo.parsehtml(s).root)
+function parse(s::String, format::HTMLFormat)
+    doc = withtag(xtree(Gumbo.parsehtml(s).root), :html)
+    if format.stripbody
+        doc = withtag(doc.children[2], :html)
+    end
+    return doc
 end
 
-extensionformat(::Val{:html}) = HTML()
+extensionformat(::Val{:html}) = HTMLFormat()
 
-function Base.convert(::Type{XTree}, htmlnode::Gumbo.HTMLElement{S}) where S
+function xtree(htmlnode::Gumbo.HTMLElement{S}) where S
     attrs = Dict{Symbol, Any}(Symbol(key) => val for (key, val) in htmlnode.attributes)
-    return Node(S, attrs, XTree[convert(XTree, c) for c in htmlnode.children])
+    return Node(S, XTree[xtree(c) for c in htmlnode.children], attrs)
 end
 
-function Base.convert(::Type{XTree}, htmltext::Gumbo.HTMLText)
+function xtree(htmltext::Gumbo.HTMLText)
     return Leaf(htmltext.text)
 end
 
-# Rendering
+# ## Rendering
 
-function render!(io, x::Node, format::HTML, ::Val)
+render!(io, doc::Node, format::HTMLFormat) = render!(io, doc, format, Val(doc.tag))
+
+function render!(io, x::Node, format::HTMLFormat, ::Val)
     print(io, "<", x.tag)
     if !isempty(x.attributes)
         print(io, " ")
@@ -49,7 +57,7 @@ const HTML_MIMES = [
     MIME"text/plain"(),
 ]
 
-function render!(io, x::Leaf, ::HTML)
+function render!(io, x::Leaf, ::HTMLFormat)
     val = x[]
 
     for m in HTML_MIMES
@@ -67,6 +75,19 @@ function render!(io, x::Leaf, ::HTML)
     end
 end
 
+
+#=
+function render!(io, x::Leaf{PreRendered}, ::HTMLFormat)
+    reprs = x[].reprs
+    for mime in HTMLFormat_MIMES
+        if mime in keys(reprs)
+            print(io, adapthtmlstr(mime, reprs[mime]))
+            return
+        end
+    end
+    error("Could not find mime for $(x[])!")
+end
+=#
 
 function htmlstr(mime::MIME, x)
     s = IJulia.limitstringmime(mime, x)
@@ -86,21 +107,12 @@ function adapthtmlstr(::MIME{Symbol("image/jpeg")}, s)
 end
 
 
-function render!(io, x::Leaf{<:AbstractString}, ::HTML)
-    print(io, ansistringtohtml(x[]))
+function render!(io, x::Leaf{<:AbstractString}, ::HTMLFormat)
+    print(io, x[])
 end
 
 
-function ansistringtohtml(s)
-    buf = IOBuffer()
-    printer = HTMLPrinter(IOBuffer(s), root_tag="span")
-    ANSIColoredPrinters.show_body(buf, printer)
-    #show(buf, MIME"text/html"(), )
-    return String(take!(buf))
-end
-
-
-IMAGEMIMES = [
+const IMAGEMIMES = [
     "image/jpeg",
     "image/svg+xml",
     "image/png",
@@ -108,12 +120,25 @@ IMAGEMIMES = [
 ]
 
 
-formatextension(::HTML) = "html"
+formatextension(::HTMLFormat) = "html"
+
+
+# ## Tests
+
+@testset "HTMLFormat [format]" begin
+    format = HTMLFormat()
+    @test parse("<b>hi</b>", format) == Node(:html, Node(:b, "hi"))
+    @test parse("<b x=\"yo\">hi</b>", format) == Node(:html, Node(:b, "hi"; x = "yo"))
+    @testset "Round-trip" begin
+        s = "<html><b x=yo >hi</b></html>"
+        @test render(parse(s, format), format) == s
+    end
+end
 
 
 # Constants
 
-const HTMLTAGS = [
+const HTMLFormatTAGS = [
     :DOCTYPE,
     :a,
     :abbr,
@@ -172,7 +197,7 @@ const HTMLTAGS = [
     :header,
     :hr,
     :html,
-    :HTML,
+    :HTMLFormat,
     :i,
     :iframe,
     :img,

@@ -9,16 +9,16 @@ abstract type Event end
 
 
 struct DocUpdated <: Event
-    name::AbstractPath
-    doc::XTree
+    name::String
+    doc::Node
 end
 
 struct DocRequested <: Event
-    name::AbstractPath
+    name::String
 end
 
 struct DocRebuilt <: Event
-    name::AbstractPath
+    name::String
 end
 
 
@@ -81,3 +81,13 @@ function start(fs::FileServer)
 end
 
 # TODO: maybe `geteventhandler` not needed and `start(rewriter, channel)` suffices?
+
+"""
+    serve(project)
+"""
+function serve(project::Project, path = mktempdir(); lazy = true, format = JSONFormat(), port = 8000)
+    builder = FileBuilder(format, Path(path))
+    server = Server(project, builder)
+    mode = lazy ? ServeFilesLazy(port) : ServeFiles(port)
+    runserver(server, mode)
+end

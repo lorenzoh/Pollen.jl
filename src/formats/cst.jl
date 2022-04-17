@@ -11,11 +11,11 @@ parsecst(s::String) = parsecst(s, CSTParser.parse(s, true))
 function parsecst(s::String, cst::CSTParser.EXPR, offset::Int = 0)
     head = gethead(cst)
     if head in BRACKETS
-        return XNode(:CST_BRACKET, [XLeaf{String}(getcsttext(s, cst, offset))])
+        return Node(:CST_BRACKET, [Leaf{String}(getcsttext(s, cst, offset))])
     elseif  head in PUNCTUATION
-        return XNode(:CST_PUNCTUATION, [XLeaf{String}(getcsttext(s, cst, offset))])
+        return Node(:CST_PUNCTUATION, [Leaf{String}(getcsttext(s, cst, offset))])
     elseif head in KEYWORDS
-        return XNode(:CST_KEYWORD, [XLeaf{String}(getcsttext(s, cst, offset))])
+        return Node(:CST_KEYWORD, [Leaf{String}(getcsttext(s, cst, offset))])
     else
         return parsecst(s, cst, Val(head), offset)
     end
@@ -23,22 +23,22 @@ end
 
 # Since CSTParser.jl counts trailing whitespace and comments as belonging to identifiers,
 # this utility finds this whitespace and splits it off into its own leaf.
-function parsecstwhitespace(tree::XNode)
+function parsecstwhitespace(tree::Node)
     sel = SelectTag(:CST_KEYWORD) | SelectTag(:CST_IDENTIFIER)
     return cata(tree, sel) do node
         ch = Pollen.children(node)
         length(ch) == 1 || return node
-        ch[1] isa XLeaf{String} || return node
+        ch[1] isa Leaf{String} || return node
         s::String = ch[1][]
 
         r = findfirst(r"\s", s)
         isnothing(r) && return node
         i = r.start
-        return XNode(
+        return Node(
             :CST_span,
             [
-                Pollen.withchildren(node, [XLeaf(s[begin:prevind(s, i)])]),
-                XNode(:CST_whitespace, [XLeaf(s[i:end])]),
+                Pollen.withchildren(node, [Leaf(s[begin:prevind(s, i)])]),
+                Node(:CST_whitespace, [Leaf(s[i:end])]),
             ],
         )
     end
@@ -85,12 +85,12 @@ const KEYWORDS = Set([
 
 function parsecst(s::String, cst::CSTParser.EXPR, ::Val, offset::Int)
     tag = Symbol("CST_" * string(gethead(cst)))
-    return XNode(tag, parsecstchildren(s, cst, offset))
+    return Node(tag, parsecstchildren(s, cst, offset))
 end
 
 function parsecstchildren(s::String, cst::CSTParser.EXPR, offset = 0)
     if isempty(getchildren(cst))
-        return XTree[XLeaf(getcsttext(s, cst, offset))]
+        return XTree[Leaf(getcsttext(s, cst, offset))]
     else
         # scan offsets
         offsets = Int[]
@@ -109,22 +109,6 @@ function getcsttext(s, cst, offset = 0)
     i2 = nextind(s, prevind(s, max(1, offset+cst.fullspan)))
     i2 = min(i2, lastindex(s))
     return s[i1:i2]
-end
-
-function stringrange(s, i1, i2)
-    try
-        i1 = _closestindex(s, i1)
-        i2 = _closestindex(s, i2)
-        return s[i1:i2]
-    catch e
-        @error "" error=e s=s i1=i1 i2=i2
-        rethrow()
-    end
-end
-
-function _closestindex(s, i)
-    i = min(max(i, 1), ncodeunits(s))
-    return prevind(s, i+1)
 end
 
 

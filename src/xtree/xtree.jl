@@ -12,11 +12,18 @@ end
 
 Base.getindex(xleaf::Leaf) = xleaf.data
 
+Leaf(leaf::Leaf) = leaf
 
 AbstractTrees.children(::Leaf) = ()
 AbstractTrees.printnode(io::IO, xleaf::Leaf) = print(io, xleaf[])
-AbstractTrees.printnode(io::IO, xleaf::Leaf{String}) =
-    print(io, "$(crayon"green")\"$(xleaf[])\"")
+function AbstractTrees.printnode(io::IO, xleaf::Leaf{String})
+    if get(io, :color, false) && !get(io, :compact, false)
+        print(io, "$(crayon"green")\"$(xleaf[])\"$(crayon"reset")")
+    else
+        print(io, "\"$(xleaf[])\"")
+    end
+
+end
 
 
 """
@@ -108,17 +115,46 @@ end
 catafold(f, xleaf::Leaf, state; kwargs...) = f(xleaf, state)
 
 """
-    cata(f, xtree)
+    cata(f, tree)
 
-Replace every node or leaf `v` in `xtree` with `f(v)`. Traverses in
-post-order.
+Transform every node in `tree` with function `f`.
 """
 cata(f, xnode::Node) = f(withchildren(xnode, XTree[cata(f, c) for c in children(xnode)]))
 cata(f, xleaf::Leaf) = f(xleaf)
 
 
-fold(f, xnode::XTree, init) = foldl(f, (l for l in PostOrderDFS(xnode)); init = init)
+"""
+    fold(f, tree)
+
+Fold over tree in post-order iteration.
+
+## Examples
+
+```julia
+node = Node(:table, Node(:row, 10, 10), Node(:row, 10, 10))
+Pollen.fold(node, 0) do x, subtree
+    subtree isa Leaf{Int} ? x + subtree[] : x
+end
+```
+"""
+fold(f, tree::XTree, init) = foldl(f, (l for l in PostOrderDFS(tree)); init = init)
+
+
+"""
+    fold(f, tree)
+
+Fold over all leaves in `tree` in post-order iteration.
+
+## Examples
+
+```julia
+node = Node(:table, Node(:row, 10, 10), Node(:row, 10, 10))
+Pollen.foldleaves((x, leaf) -> x + leaf[], node, 0)
+```
+"""
 foldleaves(f, xnode::XTree, init) = foldl(f, (l[] for l in Leaves(xnode)); init = init)
+
+# Equality comparison for `Node`s and `Leaf`s. Short-circuits on the first mismatch.
 
 function Base.:(==)(x1::Node, x2::Node)
     return ((tag(x1) == tag(x2)) &&
@@ -137,12 +173,17 @@ Base.:(==)(::Node, ::Leaf) = false
 Base.:(==)(::Leaf, ::Node) = false
 
 
-# Showing
+# Printing
 
 function AbstractTrees.printnode(io::IO, x::Node)
-    print(io, "Node(:", crayon"bold", tag(x), crayon"reset")
+    rich = get(io, :color, false) && !get(io, :compact, false)
+    print(io, "Node(:")
+    rich && print(io, crayon"bold")
+    print(io, tag(x))
+    rich && print(io, crayon"reset")
     if !isempty(x.attributes)
-        print(io, "; ", crayon"dark_gray")
+        print(io, "; ")
+        rich && print(io, crayon"dark_gray")
         for (i, (key, value)) in enumerate(x.attributes)
             if i != 1
                 print(io, ", ")
@@ -150,7 +191,7 @@ function AbstractTrees.printnode(io::IO, x::Node)
             print(io, key, " = ")
             show(io, value)
         end
-        print(io, crayon"reset")
+        rich && print(io, crayon"reset")
     end
     print(io, ")")
 end
@@ -166,6 +207,9 @@ end
         @test_nowarn Node(:tag, Leaf.(1:10))
         @test Node(:tag, Leaf.(1:10)) == Node(:tag, (1:10)...)
     end
+
+    @test_nowarn Leaf(1)
+    @test_nowarn Leaf(Leaf(1)) isa Leaf{Int}
 
     @testset "with*" begin
         node = Node(:tag)
