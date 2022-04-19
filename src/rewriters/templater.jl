@@ -2,7 +2,7 @@
 
 mutable struct HTMLTemplater <: Rewriter
     assets::Assets
-    template::XNode
+    template::Node
     templatepath::AbstractPath
     inlineincludes::Bool
     insertpos::Position
@@ -38,13 +38,13 @@ function rewritedoc(templater::HTMLTemplater, p, doc)
 end
 
 
-function includeintemplate(template::XNode, includes)
+function includeintemplate(template::Node, includes)
     for p in includes
         ext = extension(p)
         if ext == "css"
-            x = XNode(:link, Dict(:rel => "stylesheet", :href => "/" * string(p)))
+            x = Node(:link, Dict(:rel => "stylesheet", :href => "/" * string(p)))
         elseif ext == "js"
-            x = XNode(:script, Dict(:src => "/" * string(p)))
+            x = Node(:script, Dict(:src => "/" * string(p)))
         else
             continue
         end
@@ -55,13 +55,13 @@ function includeintemplate(template::XNode, includes)
 end
 
 
-function inlineintemplate(template::XNode, includes)
+function inlineintemplate(template::Node, includes)
     for p in includes
         ext = extension(p)
         if ext == "css"
-            x = XNode(:style, [XLeaf(read(p, String))])
+            x = Node(:style, [Leaf(read(p, String))])
         elseif ext == "js"
-            x = XNode(:script, [XLeaf(read(p, String))])
+            x = Node(:script, [Leaf(read(p, String))])
         end
         template = insertfirst(template, x, FirstChild(SelectTag(:head)))
     end

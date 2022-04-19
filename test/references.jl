@@ -1,7 +1,7 @@
 include("imports.jl")
 
 
-@testset ExtendedTestSet "referencetype" begin
+@testset "referencetype" begin
     @test referencetype(Main, nothing) == :module
     @test referencetype(Base, :π) == :const
     @test referencetype(Base, :sum) == :function

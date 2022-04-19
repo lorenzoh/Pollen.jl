@@ -1,9 +1,9 @@
 include("imports.jl")
 
 
-@testset ExtendedTestSet "Server updates" begin
+@testset "Server updates" begin
     server = testserver()
-    @test_nowarn addsource!(server, p"hello.md", XNode(:body, [XLeaf("Hello")]))
+    @test_nowarn addsource!(server, p"hello.md", Node(:body, [Leaf("Hello")]))
     @test_nowarn addrewrite!(server, p"hello.md")
     @test_nowarn addbuild!(server, p"hello.md")
     @test !haskey(server.project.sources, p"hello.md")
@@ -14,7 +14,7 @@ include("imports.jl")
 end
 
 
-@testset ExtendedTestSet "FileServer" begin
+@testset "FileServer" begin
     dir = Path(mktempdir())
     fs = FileServer(dir)
     start(fs)
@@ -22,20 +22,20 @@ end
 end
 
 
-@testset ExtendedTestSet "ServeFiles" begin
+@testset "ServeFiles" begin
     server = testserver()
     mode = ServeFiles()
     @test geteventsource(mode, server, Channel()) isa Pollen.FileServer
 end
 
-@testset ExtendedTestSet "ServeFilesLazy" begin
+@testset "ServeFilesLazy" begin
     server = testserver()
     mode = ServeFilesLazy()
     @test geteventsource(mode, server, Channel()) isa Pollen.FileServer
 end
 
 
-@testset ExtendedTestSet "servereventsources" begin
+@testset "servereventsources" begin
     server = testserver()
     mode = ServeFiles()
     @test Pollen.servereventsources(server, mode, Channel()) |> length == 2

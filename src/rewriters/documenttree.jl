@@ -1,18 +1,18 @@
 
 
 function makedoctree(d::Dict)
-    return XNode(:doctree, [XNode(:ul, [makedoctree(name, val) for (name, val) in d])])
+    return Node(:doctree, [Node(:ul, [makedoctree(name, val) for (name, val) in d])])
 
 end
 
 function makedoctree(name::String, path)
-    link = XNode(:a, Dict(:href => "/$path"), [XLeaf(name)])
-    return XNode(:li, [link])
+    link = Node(:a, Dict(:href => "/$path"), [Leaf(name)])
+    return Node(:li, [link])
 end
 
 
 function makedoctree(name::String, d::Dict)
-    return XNode(:li, [XLeaf(name), XNode(:ul, [makedoctree(n, val) for (n, val) in d])])
+    return Node(:li, [Leaf(name), Node(:ul, [makedoctree(n, val) for (n, val) in d])])
 end
 
 
@@ -26,5 +26,5 @@ function loaddoctree(p::AbstractPath)
         attributes(x)[:href] = href
         return x
     end
-    return XNode(:doctree, [xdoctree])
+    return Node(:doctree, [xdoctree])
 end

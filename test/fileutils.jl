@@ -1,6 +1,6 @@
 include("imports.jl")
 
-@testset ExtendedTestSet "changehrefextension" begin
+@testset "changehrefextension" begin
     ext = "html"
     @test changehrefextension("./hello.md", ext) == "./hello.md.html"
     @test changehrefextension("#", ext) == "#"

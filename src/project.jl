@@ -1,24 +1,22 @@
 
 
-#= TODO: remove
-function findfiles(dir::AbstractPath; exts = ("md", "ipynb"), includehidden = false)
-    it = filter(collect((relative(p, dir) for p in walkpath(dir)))) do p
-        (extension(p) in exts) && (includehidden || !startswith(filename(p), '.'))
-    end
-    return it
-end
-=#
+"""
+    Project(rewriters)
 
+A project manages the loading, parsing and rewriting of a set of
+documents.
 
-mutable struct Project
-    sources::Dict{AbstractPath, XTree}
-    outputs::Dict{AbstractPath, XTree}
+"""
+struct Project
+    sources::ThreadSafeDict{String, Node}
+    outputs::ThreadSafeDict{String, Node}
     rewriters::Vector{<:Rewriter}
 end
 
 function Project(rewriters)
-    sources = merge(Dict{AbstractPath, XTree}(), [createsources!(rewriter) for rewriter in rewriters]...)
-    outputs = Dict{AbstractPath, XTree}()
+    sources = ThreadSafeDict{String, Node}()
+    merge!(sources, [createsources!(rewriter) for rewriter in rewriters]...)
+    outputs = ThreadSafeDict{String, Node}()
     return Project(sources, outputs, rewriters)
 end
 
@@ -27,26 +25,27 @@ Base.show(io::IO, project::Project) = print(io, "Project($(length(project.source
 
 
 """
-    rewritesources!(project, paths) -> paths
+    rewritesources!(project, docids) -> rewritten_docids
 
-Rewrite source documents named by `paths` as well as new source documents
-recursively created by rewriters. Return a list of all rewritten paths.
+Rewrite source documents named by `docids` as well as new source documents
+recursively created by rewriters. Return a list of all rewritten document ids.
 """
-function rewritesources!(project, paths = Set(keys(project.sources)))
-    rewritesources!(project.sources, project.outputs, project.rewriters, paths)
+function rewritesources!(project::Project, docids = Set(keys(project.sources)))
+    rewritesources!(project.sources, project.outputs, project.rewriters, docids)
 end
 
-function rewritesources!(sources::Dict, outputs::Dict, rewriters::Vector{<:Rewriter}, paths)
-    dirtypaths = []
-    docs = filter(((k, v),) -> k in paths, sources)
+function rewritesources!(sourcedocs, outputdocs, rewriters::Vector{<:Rewriter}, docids)
+    docs = filter(((k, v),) -> k in docids, sourcedocs)
 
     while !isempty(docs)
-        merge!(outputs, rewritedocs(docs, rewriters))
+        merge!(outputdocs, rewritedocs(docs, rewriters))
         docs = createsources!(rewriters)
-        paths = union(paths, keys(docs))
+        docids = union(docids, keys(docs))
     end
 
-    return paths
+    merge!(outputdocs, rewriteoutputs!(Dict(docid => outputdocs[docid] for docid in docids), rewriters))
+
+    return docids
 end
 
 
@@ -56,18 +55,26 @@ end
 Applies `rewriters` to a collection of `sources`.
 """
 function rewritedocs(sources, rewriters)
-    outputs = Dict{AbstractPath, XTree}()
-    paths = collect(keys(sources))
-    Threads.@threads for i in 1:length(paths)
-        p = paths[i]
-        xtree = sources[p]
+    outputs = ThreadSafeDict{String, XTree}()
+    docids = collect(keys(sources))
+    Threads.@threads for i in 1:length(docids)
+        docid = docids[i]
+        xtree = sources[docid]
         for rewriter in rewriters
-            xtree = rewritedoc(rewriter, p, xtree)
+            xtree = rewritedoc(rewriter, docid, xtree)
         end
-        outputs[p] = xtree
+        outputs[docid] = xtree
     end
     return outputs
 end
+
+function rewriteoutputs!(outputs, rewriters::Vector)
+    for r in rewriters
+        outputs = rewriteoutputs!(outputs, r)
+    end
+    outputs
+end
+rewriteoutputs!(outputs, rewriter::Rewriter) = outputs
 
 
 """
@@ -76,7 +83,7 @@ end
 Creates new source documents from `rewriters`
 """
 function createsources!(rewriters::Vector{<:Rewriter})
-    docs = Vector{Dict{AbstractPath, XTree}}(undef, length(rewriters))
+    docs = Vector{Dict{String, Node}}(undef, length(rewriters))
     docs = []
     Threads.@threads for i in 1:length(rewriters)
         #docs[i] = createsources!(rewriters[i])
@@ -84,69 +91,19 @@ function createsources!(rewriters::Vector{<:Rewriter})
     end
     return merge(docs...)
 end
-#=
-
-function addfiles(
-        sources::Dict,
-        outputs::Dict,
-        rewriters,
-        newsources;
-        dirtypaths = Set())
-    sources = copy(sources)
-    outputs = copy(outputs)
-    dirtypaths = addfiles!(sources, outputs, rewriters, newsources; dirtypaths = dirtypaths)
-    return sources, outputs, dirtypaths
-end
 
 
-"""
-    addfiles(sources, outputs, rewriters, newsources) -> (sources', outputs', dirtypaths)
-    addfiles!(sources, outputs, rewriters, newsources) -> dirtypaths
-
-Updates `sources` and `outputs` based on new or updated `changedsources`
-using `rewriters`.
-"""
-function addfiles!(
-        sources::Dict,
-        outputs::Dict,
-        rewriters,
-        newsources::Dict;
-        dirtypaths = Set())
-
-    isempty(newsources) && return dirtypaths
-
-    # Process new/changed files on document-level
-    for (p, xtree) in newsources
-        sources[p] = xtree
-        for rewriter in rewriters
-            xtree = rewritedoc(rewriter, p, xtree)
-        end
-        outputs[p] = xtree
-        push!(dirtypaths, p)
-    end
-
-    # Apply project-level changes like updating tree elements,
-    # and creating new files.
-    newersources = Dict{AbstractPath, XNode}()
-    for rewriter in rewriters
-        new = createdocs(rewriter)
-        newersources = merge(newersources, new)
-    end
-
-    # Run recursively with new documents
-    return addfiles!(sources, outputs, rewriters, newersources; dirtypaths = dirtypaths)
-end
-
-
-function addfiles!(project::Project, newsources)
-    dirtypaths = addfiles!(project.sources, project.outputs, project.rewriters, newsources)
-    return dirtypaths
-end
-
-
-=#
 function reset!(project::Project)
     foreach(k -> delete!(project.sources, k), keys(project.sources))
     foreach(k -> delete!(project.outputs, k), keys(project.outputs))
     foreach(reset!, project.rewriters)
+end
+
+
+@testset "Project" begin
+    # sources are loaded on project creation
+
+    # reset! works
+
+    # createsources! is idempotent
 end

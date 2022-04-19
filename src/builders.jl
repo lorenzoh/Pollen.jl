@@ -24,9 +24,9 @@ end
 """
     build(project)
 
-Build project to a temporary directory with [`HTML`](#) format.
+Build project to a temporary directory with [`HTMLFormat`](#) format.
 """
-build(project) = build(project, FileBuilder(HTML(), Path(mktempdir())))
+build(project) = build(project, FileBuilder(HTMLFormat(), Path(mktempdir())))
 
 
 function fullbuild(project, builder)
@@ -51,12 +51,13 @@ struct FileBuilder <: Builder
     format::Format
     dir::AbstractPath
 end
+FileBuilder(format::Format, p::String) = FileBuilder(format, Path(p))
 
 
-function build(builder::FileBuilder, project::Project, dirtypaths = keys(project.outputs))
-    # TODO: make threadable for performance
-    for p in collect(dirtypaths)
-        buildtofile(project.outputs[p], p, builder.dir, builder.format)
+function build(builder::FileBuilder, project::Project, dirtydocids = collect(keys(project.outputs)))
+    # TODO: make threadable for performance. issue is paths not being created
+    for docid in dirtydocids
+        buildtofile(project.outputs[docid], docid, builder.dir, builder.format)
     end
 
     # TODO: make threadable for performance
@@ -66,8 +67,8 @@ function build(builder::FileBuilder, project::Project, dirtypaths = keys(project
 end
 
 
-function buildtofile(xtree, p, dir, format)
-    fullpath = withext(joinpath(dir, p), formatextension(format))
+function buildtofile(xtree, docid::String, dir, format)
+    fullpath = Path("$(joinpath(dir, docid)).$(formatextension(format))")
     try
         mkpath(parent(fullpath))
     catch end

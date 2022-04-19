@@ -1,7 +1,7 @@
 include("../imports.jl")
 
 
-@testset ExtendedTestSet "DocumentFolder" begin
+@testset "DocumentFolder" begin
     dir = Path(mktempdir())
     try
         write(joinpath(dir, "hi.md"), "Hello")

@@ -1,6 +1,6 @@
 using Pollen
 using Pollen: changehrefextension, referencetype, Reference, FileBuilder
-using Pollen: XTree, XNode, tag, attributes, children, XLeaf, cata, catafold, foldleaves
+using Pollen: XTree, Node, tag, attributes, children, Leaf, cata, catafold, foldleaves
 using Pollen: matches, Selector, SelectOr, SelectAnd, SelectNode, SelectLeaf,
     SelectNot, SelectAttrEq, SelectHasAttr, SelectTag
 using Pollen: catafirst, replace, replacefirst, insert, insertfirst, NthChild, After, Before

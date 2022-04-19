@@ -1,5 +1,7 @@
 
-struct ServeFiles <: ServerMode end
+Base.@kwdef struct ServeFiles <: ServerMode
+    port::Int = 8000
+end
 
 
 function handle(server, ::ServeFiles, event::DocUpdated)
@@ -8,8 +10,11 @@ function handle(server, ::ServeFiles, event::DocUpdated)
     addbuild!(server, event.name)
 end
 
-function geteventsource(::ServeFiles, server, ch)
-    return FileServer(server.builder.dir)
+function geteventhandler(serve::ServeFiles, server, ch)
+    return FileServer(
+        server.builder.dir,
+        port=serve.port,
+        allow_cors=true)
 end
 
 function initialize(::ServeFiles, server)
@@ -18,7 +23,10 @@ function initialize(::ServeFiles, server)
     @info "Done."
 end
 
-struct ServeFilesLazy <: ServerMode end
+Base.@kwdef struct ServeFilesLazy <: ServerMode
+    port::Int = 8000
+end
+
 
 
 function initialize(::ServeFilesLazy, server)
@@ -44,14 +52,19 @@ function handle(server, ::ServeFilesLazy, event::DocRequested)
 end
 
 
-function geteventsource(::ServeFilesLazy, server, ch)
+function geteventhandler(serve::ServeFilesLazy, server, ch)
     builddir = server.builder.dir
-    return FileServer(builddir, preprocess_request = req -> _lazyservecallback(req, ch, builddir))
+    return FileServer(
+        builddir,
+        port=serve.port,
+        allow_cors=true,
+        preprocess_request = req -> _lazyservecallback(req, ch, builddir),
+    )
 end
 
 
 function _lazyservecallback(req, ch, builddir)
-    if !endswith(req.target, ".html")
+    if !(endswith(req.target, ".html") || endswith(req.target, ".json"))
         return req
     else
         buildpath = joinpath(builddir, req.target[2:end])

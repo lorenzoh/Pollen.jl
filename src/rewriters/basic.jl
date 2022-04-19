@@ -44,7 +44,7 @@ function htmlify(doc, htmltag=:div)
     if tag(doc) in HTMLTAGS
         return doc
     else
-        return XNode(
+        return Node(
             htmltag,
             # TODO: add to classes if exist
             merge(attributes(doc), Dict(:class => string(tag(doc)))),
@@ -61,7 +61,7 @@ function ChangeLinkExtension(ext, sel::Selector = SelectTag(:a); linkattr = :hre
 end
 
 
-function changelinkextension(doc::XNode, ext; attr = :href)
+function changelinkextension(doc::Node, ext; attr = :href)
     if haskey(attributes(doc), attr)
         href = doc.attributes[attr]
         if startswith(href, "http") || startswith(href, "www")
@@ -99,7 +99,7 @@ function formatcodeblock(doc)
         catch
             @info "Parsing error when formatting code snippet: \n\n$code"
         end
-        return withchildren(doc, [XNode(:code, XLeaf(code))])
+        return withchildren(doc, [Node(:code, Leaf(code))])
     else
         return doc
     end
@@ -140,7 +140,7 @@ function createtitle(p, x)
     else
         string(filename(p))
     end
-    return XNode(:title, [XLeaf(title)])
+    return Node(:title, [Leaf(title)])
 end
 
 
