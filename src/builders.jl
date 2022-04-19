@@ -54,9 +54,9 @@ end
 FileBuilder(format::Format, p::String) = FileBuilder(format, Path(p))
 
 
-function build(builder::FileBuilder, project::Project, dirtydocids = keys(project.outputs))
+function build(builder::FileBuilder, project::Project, dirtydocids = collect(keys(project.outputs)))
     # TODO: make threadable for performance. issue is paths not being created
-    for docid in collect(dirtydocids)
+    for docid in dirtydocids
         buildtofile(project.outputs[docid], docid, builder.dir, builder.format)
     end
 
@@ -67,8 +67,8 @@ function build(builder::FileBuilder, project::Project, dirtydocids = keys(projec
 end
 
 
-function buildtofile(xtree, p, dir, format)
-    fullpath = withext(joinpath(dir, p), formatextension(format))
+function buildtofile(xtree, docid::String, dir, format)
+    fullpath = Path("$(joinpath(dir, docid)).$(formatextension(format))")
     try
         mkpath(parent(fullpath))
     catch end

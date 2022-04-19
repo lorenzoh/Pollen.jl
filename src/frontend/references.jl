@@ -254,6 +254,7 @@ end
 # TODO: gather information from submodules
 function referencedata(symbol, info, ::Val{:module})
     moduleid = ModuleInfo.getmoduleid(symbol.instance)
+    row_module = info[:modules][findfirst(==(moduleid), info[:modules].module_id), :]
     msymbols = info[:symbols][info[:symbols].module_id.==moduleid, :]
     symbols = [
         Dict(
@@ -264,7 +265,9 @@ function referencedata(symbol, info, ::Val{:module})
         ) for row in eachrow(msymbols) if row.symbol_id != moduleid
     ]
     joinedfiles = innerjoin(info[:sourcefiles], info[:packages], on = :package_id)
-    files = [joinpath(row.basedir, row.file) for row in eachrow(joinedfiles)]
+    files = [joinpath(row.basedir, row.file)
+                for row in eachrow(joinedfiles)
+                    if row.package_id == row_module.package_id]
     return Dict(:symbols => symbols, :files => files)
 end
 
