@@ -32,6 +32,7 @@ TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 ThreadSafeDicts = "4239201d-c60e-5e0a-9702-85d713665ba7"
 
 [compat]
+Graphs = "1"
 IOCapture = "0.2"
 JuliaFormatter = "0.22"
 julia = "1"
