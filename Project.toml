@@ -34,4 +34,5 @@ ThreadSafeDicts = "4239201d-c60e-5e0a-9702-85d713665ba7"
 [compat]
 IOCapture = "0.2"
 JuliaFormatter = "0.22"
+ThreadSafeDicts = "0.0.6"
 julia = "1"
