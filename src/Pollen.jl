@@ -28,6 +28,10 @@ using JSON3
 using ThreadSafeDicts
 import Random
 using Revise
+using PkgTemplates
+using PkgTemplates: @plugin, @with_kw_noshow, Plugin, hook, getplugin, with_project,
+    render_file, gen_file
+using Pkg
 
 
 
@@ -53,9 +57,6 @@ include("formats/json.jl")
 include("formats/juliasyntax.jl")
 include("formats/html.jl")
 include("formats/jupyter.jl")
-#include("formats/julia.jl")
-#include("formats/juliacode.jl")
-#include("formats/cst.jl")
 
 export MarkdownFormat, JSONFormat, HTMLFormat, JuliaSyntaxFormat, JupyterFormat
 
@@ -86,7 +87,7 @@ include("frontend/saveattributes.jl")
 include("frontend/loadfrontendconfig.jl")
 include("frontend/staticresources.jl")
 
-
+include("pkgtemplate.jl")
 
 export select, selectfirst,
     XTree, Node, Leaf,
