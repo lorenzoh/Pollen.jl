@@ -15,6 +15,9 @@ Performs the following steps:
 
 - creates a `docs/` folder with default files `project.jl`, `serve.jl`, `make.jl`
     and `toc.json`
+- creates the GitHub actions for building the documentation data and the frontend
+- creates an empty (orphan) branch "pollen" where documentation data will be built to
+    by GitHub Actions
 """
 @plugin struct PollenPlugin <: Plugin
     folder::String = "docs"
@@ -26,7 +29,7 @@ end
 function PkgTemplates.validate(::PollenPlugin, t::Template)
 end
 
-function PkgTemplates.prehook(p::PollenPlugin, t::Template, pkg_dir::AbstractString)
+function PkgTemplates.prehook(p::PollenPlugin, ::Template, pkg_dir::AbstractString)
     createorphanbranch(pkg_dir, p.branch_data)
 end
 
@@ -40,6 +43,7 @@ function createorphanbranch(repo::String, branch::String)
             readchomp(Git.git(["commit", "--allow-empty", "-m", "Empty branch for Pollen.jl data"])) |> println
         catch e
             @error "Failed to create orphan branch $branch" e=e
+            rethrow()
         finally
             Git.git(["checkout", prevbranch])
         end
