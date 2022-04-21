@@ -94,13 +94,13 @@ export select, selectfirst,
     SelectNode,
     Replacer, Inserter, HTMLTemplater, ExecuteCode,
     NthChild, FirstChild, Before, After,
-    Project, build,
+    Project, build, FileBuilder,
     SelectTag, SelectOr, XExpr, ChangeTag, htmlify, AddSlugID, AddTableOfContents, SelectAttrEq,
-    Selector, parse, resolveidentifier, serve,
+    Selector, resolveidentifier, serve,
     # rewriters
     AddID, HTMLify, ChangeLinkExtension, FormatCode, AddTableOfContents, Referencer, DocumentFolder,
     documentationproject, Server, runserver, ServeFiles, ServeFilesLazy,
-    PackageWatcher, StaticResources,
-    RelativeLinks
+    PackageWatcher, StaticResources, ParseCode, PackageDocumentation,
+    RelativeLinks, DocumentGraph, SearchIndex, SaveAttributes, LoadFrontendConfig
 
 end
