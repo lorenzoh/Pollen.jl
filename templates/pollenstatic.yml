@@ -11,12 +11,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: pollen
+          ref: <<BRANCH_DATA>>
           path: data
       - uses: actions/checkout@v2
         with:
-          ref: "gh-pages"
-          path: "pages"
+          ref: "<<BRANCH_PAGE>>"
+          path: pages
       - uses: actions/checkout@v2
         with:
           repository: lorenzoh/pollenjl-frontend

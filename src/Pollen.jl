@@ -28,6 +28,7 @@ using JSON3
 using ThreadSafeDicts
 import Random
 using Revise
+import Git
 using PkgTemplates
 using PkgTemplates: @plugin, @with_kw_noshow, Plugin, hook, getplugin, with_project,
     render_file, gen_file
