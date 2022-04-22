@@ -19,7 +19,6 @@ using MetaGraphs
 using Mustache
 using LiveServer
 import LiveServer
-using HTTP
 using TOML
 using IOCapture
 using ModuleInfo
@@ -30,9 +29,11 @@ import Random
 using Revise
 import Git
 import PkgTemplates
-import PkgTemplates: @plugin, @with_kw_noshow, Plugin, hook, getplugin, with_project,
-    render_file, gen_file
+import PkgTemplates: @plugin, @with_kw_noshow, Template, Plugin,
+    hook, getplugin, with_project, render_file, gen_file
 using Pkg
+using Scratch
+using NodeJS
 
 
 
@@ -70,24 +71,34 @@ include("serve/server.jl")
 include("serve/servefiles.jl")
 
 include("rewriters/documentfolder.jl")
-include("rewriters/documenttree.jl")
 include("rewriters/basic.jl")
-include("rewriters/assets.jl")
-include("rewriters/templater.jl")
 include("rewriters/coderunner.jl")
-include("rewriters/inserter.jl")
-include("rewriters/toc.jl")
 include("rewriters/packagewatcher.jl")
 include("rewriters/parsecode.jl")
 include("rewriters/parseansi.jl")
+include("rewriters/references.jl")
+include("rewriters/documentgraph.jl")
+include("rewriters/searchindex.jl")
+include("rewriters/saveattributes.jl")
+include("rewriters/loadfrontendconfig.jl")
+include("rewriters/staticresources.jl")
 
-include("frontend/references.jl")
-include("frontend/documentgraph.jl")
-include("frontend/searchindex.jl")
-include("frontend/saveattributes.jl")
-include("frontend/loadfrontendconfig.jl")
-include("frontend/staticresources.jl")
+#old
+#include("rewriters/assets.jl")
+#include("rewriters/templater.jl")
+#include("rewriters/inserter.jl")
+#include("rewriters/toc.jl")
+#
 
+
+FRONTENDDIR::String = ""
+
+function __init__()
+    global FRONTENDDIR = @get_scratch!("frontend")
+end
+
+
+include("frontend.jl")
 include("pkgtemplate.jl")
 
 export select, selectfirst,
