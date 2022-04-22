@@ -17,8 +17,8 @@ end
 
 @testset "ParseCode [rewriter]" begin
     rewriter = ParseCode()
-    @test rewritedoc(rewriter, "", Node(:md, "hi", Node(:codeblock, "x"))) == Node(:codeblock, Node(:md,
-        "hi",
-        Node(:julia, Node(:IDENTIFIER, "x")))
-    )
+    @test rewritedoc(
+        rewriter, "",
+        Node(:md, "hi", Node(:codeblock, "x", lang = "julia"))) == Node(:md, "hi", Node(:codeblock,
+            Node(:julia, Node(:IDENTIFIER, "x")), lang = "julia"))
 end

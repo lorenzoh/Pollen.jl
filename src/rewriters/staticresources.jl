@@ -9,7 +9,9 @@ function rewritedoc(rewriter::StaticResources, _, doc::Node)
     if haskey(attributes(doc), :path)
         doc_folder = parent(absolute(Path(attributes(doc)[:path])))
         return cata(doc, SelectTag(:img) & SelectHasAttr(:src)) do node
-            file = string(absolute(joinpath(doc_folder, Path(attributes(node)[:src]))))
+            src = attributes(node)[:src]
+            startswith(src, "http") && return node
+            file = string(absolute(joinpath(doc_folder, Path(src))))
             key = "$(rewriter.folder)/$(string(hash(file))).$(extension(Path(file)))"
             rewriter.resources[key] = file
             return withattributes(node, merge(attributes(node), Dict(:src => key)))

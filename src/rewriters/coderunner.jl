@@ -196,7 +196,7 @@ end
         doc = Node(:md, Node(:codeblock, "1 + 1"))
         @test Pollen.rewritedoc(rewriter, "path", doc) == Node(:md, Node(:codecell,
             Node(:codeinput, Node(:codeblock, "1 + 1")),
-            Node(:coderesult, 2)
+            Node(:coderesult, Node(:codeblock, ANSI(2)))
         ))
     end
     @testset "Output" begin
@@ -204,7 +204,7 @@ end
         doc = Node(:md, Node(:codeblock, "print(\"hi\")"))
         @test Pollen.rewritedoc(rewriter, "path", doc) == Node(:md, Node(:codecell,
             Node(:codeinput, Node(:codeblock, "print(\"hi\")")),
-            Node(:codeoutput, Node(:codeblock, "hi"))
+            Node(:codeoutput, Node(:codeblock, ANSI("hi")))
         ))
     end
     @testset "Cache" begin
@@ -212,15 +212,15 @@ end
         rewriter = ExecuteCode(codeblocksel = SelectTag(:codeblock))
         doc = Node(:md, Node(:codeblock, "rand()"))
         outdoc = Pollen.rewritedoc(rewriter, "path", doc)
-        val = only(children(selectfirst(outdoc, SelectTag(:coderesult))))[]
+        val = only(children(selectfirst(outdoc, SelectTag(:coderesult))))
         outdoc2 = Pollen.rewritedoc(rewriter, "path", doc)
-        val2 = only(children(selectfirst(outdoc2, SelectTag(:coderesult))))[]
+        val2 = only(children(selectfirst(outdoc2, SelectTag(:coderesult))))
         @test val == val2
 
         # After a reset, the caches should be cleared
         reset!(rewriter)
         outdoc3 = Pollen.rewritedoc(rewriter, "path", doc)
-        val3 = only(children(selectfirst(outdoc3, SelectTag(:coderesult))))[]
+        val3 = only(children(selectfirst(outdoc3, SelectTag(:coderesult))))
         @test val != val3
     end
 end

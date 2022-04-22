@@ -70,6 +70,16 @@ function createsources!(pkgdoc::PackageDocumentation)
     return docs
 end
 
+# TODO: implement source file reloading
+#=
+function geteventhandler(folder::PackageDocumentation, ch)
+    documents = Dict{String, String}(string(_getpath(folder, docid)) => docid for docid in keys(folder.documents))
+    return createfilewatcher(documents, ch) do file
+        loadfile(folder, file)
+    end
+end
+=#
+
 function createsourcefiledoc(path, name)
     title = joinpath(splitpath(string(name))[2:end]...)
     doc = Pollen.parse(String(read(path)), JuliaSyntaxFormat())
@@ -270,6 +280,7 @@ function referencedata(symbol, info, ::Val{:module})
                     if row.package_id == row_module.package_id]
     return Dict(:symbols => symbols, :files => files)
 end
+
 
 
 function _getmethods(info, symbol_id)

@@ -8,6 +8,13 @@ struct DocumentFolder <: Rewriter
     filterfn
 end
 
+function Base.show(io::IO, rewriter::DocumentFolder)
+    print(io, "DocumentFolder(\"", rewriter.dir, "\"")
+    if !isnothing(rewriter.prefix)
+        print(", prefix = \"", rewriter.prefix, "\"")
+    end
+    print(")")
+end
 
 """
     DocumentFolder(dir) <: Rewriter
@@ -52,7 +59,7 @@ function createsources!(rewriter::DocumentFolder)
         if isdirty
             # (re)load document
             p_abs = absolute(joinpath(rewriter.dir, p))
-            document = _newdocument(p_abs, Pollen.parse(p_abs))
+            document = loadfile(rewriter, p_abs)
             sources[docid] = rewriter.documents[docid] = document
             rewriter.dirty[docid] = false
         end
@@ -61,32 +68,50 @@ function createsources!(rewriter::DocumentFolder)
     return sources
 end
 
-function _newdocument(path, doc)
+function loadfile(::DocumentFolder, filepath)
+    doc = Pollen.parse(Path(filepath))
     xtitle = selectfirst(doc, SelectTag(:h1))
-    title = isnothing(xtitle) ? filename(path) : gettext(xtitle)
-    attrs = Dict(:path => string(path), :title => title)
+    title = isnothing(xtitle) ? filename(filepath) : gettext(xtitle)
+    attrs = Dict(:path => string(filepath), :title => title)
     return Node(:document, [doc], attrs)
 end
 
 function geteventhandler(folder::DocumentFolder, ch)
-    watcher = LiveServer.SimpleWatcher() do filename
-        try
-            @info "$filename was updated"
-            srcpath = Path(filename)
-            doc = _newdocument(srcpath, Pollen.parse(srcpath))
+    documents = Dict{String, String}(string(_getpath(folder, docid)) => docid for docid in keys(folder.documents))
+    return createfilewatcher(documents, ch) do file
+        loadfile(folder, file)
+    end
+end
 
-            docpath = relative(srcpath, folder.dir)
-            if !isnothing(folder.prefix)
-                docpath = joinpath(Path(folder.prefix), docpath)
-            end
-            event = DocUpdated(docpath, doc)
+function _getpath(folder::DocumentFolder, docid)
+    if isnothing(folder.prefix)
+            joinpath(folder.dir, docid)
+    else
+        joinpath(folder.dir, docid[length(folder.prefix)+2:end])
+    end
+end
+
+
+"""
+    createfilewatcher(documents, channel)
+
+Create a file watcher that can be used as an event source when serving.
+`documents` is a `Dict` with entries `filepath => docid`.
+"""
+function createfilewatcher(loadfn, documents::Dict{String, String}, ch::Channel)
+    watcher = LiveServer.SimpleWatcher() do filepath
+        try
+            @info "Source file $filepath was updated"
+            doc = loadfn(filepath)
+            docid = documents[filepath]
+            event = DocUpdated(docid, doc)
             put!(ch, event)
         catch e
-            @error "Error while processing file update for \"$filename\"" e=e
+            @error "Error while processing file update for \"$filepath\" (document ID \"$(documents[filepath])\"" e=e
         end
     end
-    for docid in keys(folder.documents)
-        LiveServer.watch_file!(watcher, string(joinpath(folder.dir, docid)))
+    for (filepath, docid) in  documents
+        LiveServer.watch_file!(watcher, filepath)
     end
     return watcher
 end

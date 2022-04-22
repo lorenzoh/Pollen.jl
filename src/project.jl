@@ -43,7 +43,7 @@ function rewritesources!(sourcedocs, outputdocs, rewriters::Vector{<:Rewriter}, 
         docids = union(docids, keys(docs))
     end
 
-    merge!(outputdocs, rewriteoutputs!(Dict(docid => outputdocs[docid] for docid in docids), rewriters))
+    merge!(outputdocs, rewriteoutputs!(Dict{String, Any}(docid => outputdocs[docid] for docid in docids), rewriters))
 
     return docids
 end
