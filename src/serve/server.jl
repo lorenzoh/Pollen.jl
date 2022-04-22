@@ -49,7 +49,7 @@ function runserver(server, mode; dt = 1 / 60)
     initialize(mode, server)
     @async begin
         for event in eventch
-            @debug "Received $(typeof(event))"
+            @debug "Received $(typeof(event))" event=event
             try
                 handle(server, mode, event)
                 foreach(r -> handle(r, event), eventhandlers)
@@ -161,7 +161,7 @@ end
 
 function addbuild!(server, docid)
     lock(server.lock) do
-        if haskey(server.project.outputs, docid) || path in server.updates.torewrite
+        if haskey(server.project.outputs, docid) || docid in server.updates.torewrite
             push!(server.updates.torebuild, docid)
         else
             error("Cannot find output document $docid to build!")
