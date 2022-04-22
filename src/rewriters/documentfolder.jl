@@ -8,6 +8,13 @@ struct DocumentFolder <: Rewriter
     filterfn
 end
 
+function Base.show(io::IO, rewriter::DocumentFolder)
+    print(io, "DocumentFolder(\"", rewriter.dir, "\"")
+    if !isnothing(rewriter.prefix)
+        print(", prefix = \"", rewriter.prefix, "\"")
+    end
+    print(")")
+end
 
 """
     DocumentFolder(dir) <: Rewriter
@@ -70,6 +77,7 @@ end
 
 function geteventhandler(folder::DocumentFolder, ch)
     watcher = LiveServer.SimpleWatcher() do filename
+        @show filename
         try
             @info "$filename was updated"
             srcpath = Path(filename)
@@ -86,7 +94,12 @@ function geteventhandler(folder::DocumentFolder, ch)
         end
     end
     for docid in keys(folder.documents)
-        LiveServer.watch_file!(watcher, string(joinpath(folder.dir, docid)))
+        path = if isnothing(folder.prefix)
+            joinpath(folder.dir, docid)
+        else
+            joinpath(folder.dir, docid[length(folder.prefix)+2:end])
+        end
+        LiveServer.watch_file!(watcher, string(path))
     end
     return watcher
 end
