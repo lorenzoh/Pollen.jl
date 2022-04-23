@@ -91,7 +91,7 @@ include("rewriters/staticresources.jl")
 #
 
 
-FRONTENDDIR::String = ""
+FRONTENDDIR = ""
 
 function __init__()
     global FRONTENDDIR = @get_scratch!("frontend")
