@@ -1,0 +1,89 @@
+{
+  ".svelte-kit/runtime/client/start.js": {
+    "file": "start-b2c365e3.js",
+    "src": ".svelte-kit/runtime/client/start.js",
+    "isEntry": true,
+    "imports": [
+      "_vendor-82c3ebfd.js",
+      "_paths-4b3c6e7e.js"
+    ],
+    "dynamicImports": [
+      "src/routes/__layout.svelte",
+      ".svelte-kit/runtime/components/error.svelte",
+      "src/routes/index.svelte",
+      "src/routes/[version]/i.svelte",
+      "src/routes/[version]/[...documentId].svelte"
+    ]
+  },
+  "src/routes/__layout.svelte": {
+    "file": "pages/__layout.svelte-4bac7188.js",
+    "src": "src/routes/__layout.svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-82c3ebfd.js"
+    ],
+    "css": [
+      "assets/pages/__layout.svelte-1c625fee.css"
+    ]
+  },
+  ".svelte-kit/runtime/components/error.svelte": {
+    "file": "error.svelte-f1e1e6dd.js",
+    "src": ".svelte-kit/runtime/components/error.svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-82c3ebfd.js"
+    ]
+  },
+  "src/routes/index.svelte": {
+    "file": "pages/index.svelte-85b8d127.js",
+    "src": "src/routes/index.svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-82c3ebfd.js",
+      "_paths-4b3c6e7e.js"
+    ]
+  },
+  "src/routes/[version]/i.svelte": {
+    "file": "pages/_version_/i.svelte-0d3c5068.js",
+    "src": "src/routes/[version]/i.svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-82c3ebfd.js",
+      "_paths-4b3c6e7e.js",
+      "_documentloader-b1f4fbd0.js"
+    ],
+    "css": [
+      "assets/pages/_version_/i.svelte-d1360655.css"
+    ]
+  },
+  "src/routes/[version]/[...documentId].svelte": {
+    "file": "pages/_version_/_...documentId_.svelte-f4b528d0.js",
+    "src": "src/routes/[version]/[...documentId].svelte",
+    "isEntry": true,
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-82c3ebfd.js",
+      "_documentloader-b1f4fbd0.js",
+      "_paths-4b3c6e7e.js"
+    ]
+  },
+  "_vendor-82c3ebfd.js": {
+    "file": "chunks/vendor-82c3ebfd.js"
+  },
+  "_paths-4b3c6e7e.js": {
+    "file": "chunks/paths-4b3c6e7e.js"
+  },
+  "_documentloader-b1f4fbd0.js": {
+    "file": "chunks/documentloader-b1f4fbd0.js",
+    "imports": [
+      "_vendor-82c3ebfd.js"
+    ],
+    "css": [
+      "assets/documentloader-de4e99d0.css"
+    ]
+  }
+}
