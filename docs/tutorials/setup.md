@@ -92,3 +92,11 @@ Now, you'll need to create a GitHub repository at `/$username/PollenExample.jl`.
 > git checkout gh-pages && git push --set-upstream origin main
 > git checkout main && git push --set-upstream origin main
 ```
+
+That's it! After about 10 minutes, you'll have a documentation page built at `$username.github.io/PollenExample.jl/dev/i`.
+
+Now, every time you push changes to your package's `main` branch, the documentation page will be updated!
+
+---
+
+Now that we've built a workflow for publishing documentation, it's time to find out how you to organize your documentation! (follow-up tutorial coming soon 👀)
