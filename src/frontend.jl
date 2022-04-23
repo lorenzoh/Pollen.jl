@@ -7,6 +7,7 @@ function frontend_install(
     #isdir(dir) || throw(ArgumentError("Expected $dir to be a valid directory"))
     force && rm(dir; recursive=true, force=true)
     if !isdir(dir)
+        @info "Cloning Pollen.jl frontend code from $url..."
         readchomp(Git.git(
             ["clone", url, "-b", branch, dir]
         )) |> println
@@ -14,6 +15,7 @@ function frontend_install(
     cd(dir) do
         Git.git(["checkout", branch]) |> readchomp |> println
         if force || !("node_modules" in readdir(dir))
+            @info "Installing Pollen.jl frontend dependencies..."
             run(`$(npm_cmd()) install`)
         end
     end

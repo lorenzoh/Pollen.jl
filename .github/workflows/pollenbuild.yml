@@ -12,17 +12,17 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
-          ref: <<BRANCH_DATA>>
+          ref: pollen
           path: pollen
       - uses: julia-actions/setup-julia@latest
         with:
           version: '1.7'
       - name: "Install package and docs dependencies"
         run: |
-          julia --color=yes --project=./<<DOCS_FOLDER>> -e 'using Pkg; Pkg.add([Pkg.PackageSpec(path="."), Pkg.PackageSpec(url="https://github.com/c42f/JuliaSyntax.jl"), Pkg.PackageSpec(url="https://github.com/lorenzoh/ModuleInfo.jl"), Pkg.PackageSpec(url="https://github.com/lorenzoh/Pollen.jl", rev="main")]); Pkg.instantiate();'
+          julia --color=yes --project=./docs -e 'using Pkg; Pkg.add([Pkg.PackageSpec(path="."), Pkg.PackageSpec(url="https://github.com/c42f/JuliaSyntax.jl"), Pkg.PackageSpec(url="https://github.com/lorenzoh/ModuleInfo.jl")]); Pkg.develop(path="."); Pkg.instantiate();'
       - name: Build
         run: |
-          julia --color=yes --project=./<<DOCS_FOLDER>> ./<<DOCS_FOLDER>>/make.jl ./pollen/dev/
+          julia --color=yes --project=./docs ./docs/make.jl ./pollen/dev/
       - name: Deploy
         run: |
           cd pollen

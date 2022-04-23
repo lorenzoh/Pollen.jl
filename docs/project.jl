@@ -2,8 +2,8 @@ using Pollen
 using Pkg
 
 # The main package you are documenting
-using <<PKG>>
-m = <<PKG>>
+using Pollen
+m = Pollen
 
 
 # Packages that will be indexed in the documentation. Add additional modules

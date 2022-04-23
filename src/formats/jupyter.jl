@@ -12,9 +12,9 @@ Parsd code cells have the following structure:
 
 ```julia
 Node(:codecell,
-    Node(:codeblock, ...),  # source code
-    Node(:codeoutput, ...)  # printed output
-    Node(:coderesult, ...)  # return value of cell
+    Node(:codeblock, _)  # source code
+    Node(:codeoutput, _)  # printed output
+    Node(:coderesult, _)  # return value of cell
 )
 ```
 """

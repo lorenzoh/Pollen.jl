@@ -85,9 +85,21 @@ end
 """
     serve(project)
 """
-function serve(project::Project, path = mktempdir(); lazy = true, format = JSONFormat(), port = 8000)
+function serve(project::Project, path = mktempdir(); lazy = true, format = JSONFormat(), port = 8000, frontend=true)
     builder = FileBuilder(format, Path(path))
     server = Server(project, builder)
     mode = lazy ? ServeFilesLazy(port) : ServeFiles(port)
-    runserver(server, mode)
+    if frontend
+        task = @async frontend_serve()
+        try
+            runserver(server, mode)
+        finally
+            # stop frontend server
+            if !(istaskdone(task) || istaskfailed(task))
+                schedule(task, InterruptException(), error=true)
+            end
+        end
+    else
+        runserver(server, mode)
+    end
 end

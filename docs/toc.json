@@ -1,0 +1,13 @@
+{
+    "README": "documents/README.md",
+    "Tutorials": {
+        "Documenting a package": "documents/docs/tutorials/setup.md"
+    },
+    "How-to": {
+        "Install": "documents/docs/howto/install.md",
+        "Set up package documentation": "documents/docs/howto/setup.md"
+    },
+    "Reference": {
+        "Module reference": "references/Pollen"
+    }
+}
