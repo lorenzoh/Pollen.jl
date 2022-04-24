@@ -12,7 +12,6 @@ See the following methods:
 - [`createsources!`](#) allow rewriters to create new source documents
 - [`reset!`](#)
 - [`postbuild`](#)
-- [`getfilehandlers`](#)
 """
 abstract type Rewriter end
 

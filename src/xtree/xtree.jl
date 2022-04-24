@@ -84,8 +84,8 @@ Base.iterate(xnode::Node, state) = iterate(children(xnode), state)
 Base.IteratorSize(::Type{Node{T}}) where T = Base.SizeUnknown()
 Base.eltype(::Type{Node{T}}) where T = T
 
-Base.eltype(::Type{<:TreeIterator{Node{T}}}) where T = T
-Base.IteratorEltype(::Type{<:TreeIterator{Node{T}}}) where T = Base.HasEltype()
+Base.eltype(::Type{<:TreeIterator{<:Node{T}}}) where T = T
+Base.IteratorEltype(::Type{<:TreeIterator{<:Node{T}}}) where T = Base.HasEltype()
 
 withchildren(xnode::Node, children) = Node(tag(xnode), children, attributes(xnode))
 withtag(xnode::Node, tag) = Node(tag, children(xnode), attributes(xnode))

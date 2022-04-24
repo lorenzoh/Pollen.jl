@@ -30,7 +30,7 @@ template = Template(plugins=[
         Tests(project=true),
         Git(ssh=true),
         GitHubActions(),
-        #Develop(),
+        Develop(),
         ProjectFile(),
     ],
     user="lorenzoh", julia=v"1.6")
