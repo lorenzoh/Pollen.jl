@@ -71,7 +71,7 @@ end
 function loadfile(::DocumentFolder, filepath)
     doc = Pollen.parse(Path(filepath))
     xtitle = selectfirst(doc, SelectTag(:h1))
-    title = isnothing(xtitle) ? filename(filepath) : gettext(xtitle)
+    title = isnothing(xtitle) ? filename(Path(filepath)) : gettext(xtitle)
     attrs = Dict(:path => string(filepath), :title => title)
     return Node(:document, [doc], attrs)
 end

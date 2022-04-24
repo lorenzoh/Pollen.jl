@@ -103,12 +103,12 @@ include("pkgtemplate.jl")
 
 export select, selectfirst,
     XTree, Node, Leaf,
-    cata, catafirst, replace, replacefirst, fold, catafold,
-    SelectNode,
+    cata, catafirst, replace, replacefirst, fold, catafold, children,
+    SelectNode, withtag,
     Replacer, Inserter, HTMLTemplater, ExecuteCode,
     NthChild, FirstChild, Before, After,
     Project, build, FileBuilder,
-    SelectTag, SelectOr, XExpr, ChangeTag, htmlify, AddSlugID, AddTableOfContents, SelectAttrEq,
+    SelectTag, SelectLeaf, SelectOr, XExpr, ChangeTag, htmlify, AddSlugID, AddTableOfContents, SelectAttrEq,
     Selector, resolveidentifier, serve,
     # rewriters
     AddID, HTMLify, ChangeLinkExtension, FormatCode, AddTableOfContents, Referencer, DocumentFolder,

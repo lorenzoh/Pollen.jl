@@ -58,20 +58,10 @@ const HTML_MIMES = [
 ]
 
 function render!(io, x::Leaf, ::HTMLFormat)
-    val = x[]
-
-    for m in HTML_MIMES
-        try
-            if IJulia._showable(m, val)
-                s = htmlstr(m, val)
-                print(io, s)
-                return
-            end
-        catch
-            if m == MIME("text/plain")
-                rethrow() # text/plain is required
-            end
-        end
+    if showable(MIME"text/html"(), x)
+        show(io, MIME"text/html"(), x[])
+    else
+        show(io, MIME"text/plain"(), x[])
     end
 end
 

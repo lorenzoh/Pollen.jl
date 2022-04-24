@@ -3,7 +3,10 @@ name: pollenstatic
 on:
   push:
     branches: ['pollen']
-
+  workflow_run:
+    workflows: ["pollenbuild"]
+    types:
+      - completed
 jobs:
   pollen:
     name: "Pollen - Prerender static frontend and deploy"

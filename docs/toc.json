@@ -1,7 +1,8 @@
 {
     "README": "documents/README.md",
     "Tutorials": {
-        "Documenting a package": "documents/docs/tutorials/setup.md"
+        "Documenting a package": "documents/docs/tutorials/setup.md",
+        "Working with documents": "documents/docs/tutorials/documents.md"
     },
     "How-to": {
         "Install": "documents/docs/howto/install.md",
