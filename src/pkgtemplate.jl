@@ -23,6 +23,7 @@ Performs the following steps:
     folder::String = "docs"
     branch_data::String = "pollen"
     branch_page::String = "gh-pages"
+    branch_primary::String = "main"
 end
 
 PkgTemplates.priority(::PollenPlugin) = -1000
@@ -73,7 +74,7 @@ function PkgTemplates.hook(p::PollenPlugin, t::Template, pkg_dir::AbstractString
     rendertemplate("pollenbuild.yml", folder_actions)
     rendertemplate("pollenstatic.yml", folder_actions)
 
-    _withbranch(pkg_dir, "main") do
+    _withbranch(pkg_dir, p.branch_primary) do
         Git.git(["add", "."]) |> readchomp |> println
         Git.git(["commit", "-m", "'Setup Pollen.jl template files'"]) |> readchomp |> println
     end
@@ -122,7 +123,7 @@ function PkgTemplates.view(p::PollenPlugin, ::Template, pkg_dir::AbstractString)
 end
 
 function setuppollenenv(dir::String, pkgdir::String)
-    _withbranch(pkgdir, "main") do
+    cd(pkgdir) do
         PkgTemplates.with_project(dir) do
             Pkg.add([
                 Pkg.PackageSpec(url="https://github.com/c42f/JuliaSyntax.jl"),
