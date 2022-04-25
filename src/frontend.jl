@@ -6,7 +6,7 @@ function frontend_install(
         force = false)
     #isdir(dir) || throw(ArgumentError("Expected $dir to be a valid directory"))
     force && rm(dir; recursive=true, force=true)
-    if !isdir(dir)
+    if !isdir(joinpath(dir, ".git"))
         @info "Cloning Pollen.jl frontend code from $url..."
         readchomp(Git.git(
             ["clone", url, "-b", branch, dir]
@@ -40,8 +40,9 @@ end
 function _runsafe(cmd; verbose = true)
     p = nothing
     io = IOBuffer()
+    io_err = IOBuffer()
     try
-        p = run(pipeline(ignorestatus(cmd); stdout=IOContext(io, :color => true)); wait = false)
+        p = run(pipeline(ignorestatus(cmd); stderr=io_err, stdout=IOContext(io, :color => true)); wait = false)
         while !(Base.process_exited(p))
             sleep(0.05)
             verbose && print(String(take!(io)))
@@ -51,9 +52,9 @@ function _runsafe(cmd; verbose = true)
             isnothing(p) || kill(p, Base.SIGINT)
             verbose && println(String(take!(io)))
         else
-            print(String(take!(io)))
             rethrow()
         end
     end
+    #print(String(take!(io_err)))
     return p
 end
