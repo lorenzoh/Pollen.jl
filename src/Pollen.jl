@@ -99,6 +99,7 @@ end
 
 
 include("frontend.jl")
+include("docs.jl")
 include("pkgtemplate.jl")
 
 export select, selectfirst,

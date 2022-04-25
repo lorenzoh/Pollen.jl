@@ -49,19 +49,12 @@ Once this is done, you'll have a brand new package ready to use Pollen.jl's docu
 
 ## Writing documentation interactively
 
-Now, we'll work on the documentation and preview it locally. The package files were generated in Julia's package development directory:
-
-{cell}
-```julia
-using Pkg
-dir = joinpath(Pkg.devdir(), "PollenExample")
-```
-
-We'll activate the package's documentation environment so that we can load the created package and Pollen itself, and then start the documentation development server:
+Now, we'll work on the documentation and preview it locally. If a package has Pollen documentation set up, you can run an preview server with live reload using [`servedocs`](#):
 
 ```julia
-using Pkg; Pkg.activate(joinpath(dir, "docs"))
-include(joinpath(dir, "docs/serve.jl"))
+using PollenExample
+
+servedocs(PollenExample)
 ```
 
 Once you see messages that two servers are running on ports 3000 and 8000, you can click the first link ([http://localhost:3000/dev/i](http://localhost:3000/dev/i)) to see a preview of the documentation. The first time, we run this, Pollen has to install the frontend, but subsequent runs will be much faster. The opened page should look like this:
