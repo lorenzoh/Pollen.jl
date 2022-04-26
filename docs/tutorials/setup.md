@@ -81,8 +81,8 @@ If you used the template from the first part of this tutorial, the package direc
 Now, you'll need to create a GitHub repository at `/$username/PollenExample.jl`. If you used your GitHub user in the template above, the local repository's remote should be set up correctly. Now we'll push our changes, and also two helper branches that Pollen uses to host a page:
 
 ```sh
-> git checkout pollen && git push --set-upstream origin main
-> git checkout gh-pages && git push --set-upstream origin main
+> git checkout pollen && git push --set-upstream origin pollen
+> git checkout gh-pages && git push --set-upstream origin gh-pages
 > git checkout main && git push --set-upstream origin main
 ```
 
