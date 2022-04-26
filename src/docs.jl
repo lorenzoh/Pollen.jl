@@ -7,6 +7,7 @@ Serve the documentation for a package.
 Will fail if the documentation is not set up properly.
 """
 function servedocs(
+        encm::Module,
         pkgdir::String;
         subdir = "docs",
         lazy = get(ENV, "POLLEN_LAZY", "false") == "true",
@@ -19,7 +20,7 @@ function servedocs(
     end
     PkgTemplates.with_project(joinpath(pkgdir, subdir)) do
         @info "Loading project configuration"
-        include(joinpath(pkgdir, subdir, "project.jl"))
+        project = Base.include(encm, joinpath(pkgdir, subdir, "project.jl"))
         Pollen.serve(
             project;
             lazy,
@@ -32,7 +33,7 @@ function servedocs(
 end
 
 
-servedocs(m::Module; kwargs...) = servedocs(Pkg.pkgdir(m); kwargs...)
+servedocs(encm::Module, pkg::Module, args...; kwargs...) = servedocs(encm, Pkg.pkgdir(pkg), args...; kwargs...)
 
 
 """

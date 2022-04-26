@@ -54,10 +54,10 @@ Now, we'll work on the documentation and preview it locally. If a package has Po
 ```julia
 using PollenExample
 
-servedocs(PollenExample)
+servedocs(@__MODULE__, PollenExample)
 ```
 
-Once you see messages that two servers are running on ports 3000 and 8000, you can click the first link ([http://localhost:3000/dev/i](http://localhost:3000/dev/i)) to see a preview of the documentation. The first time, we run this, Pollen has to install the frontend, but subsequent runs will be much faster. The opened page should look like this:
+Once you see messages that two servers are running on ports 3000 and 8000, you can click the first link ([http://localhost:3000/dev/i](http://localhost:3000/dev/i)) to see a preview of the documentation. The first time we run this, Pollen has to install the frontend, but subsequent runs will be much faster. The opened page should look like this:
 
 ![](./setup_screenshot_empty.png)
 
