@@ -12,7 +12,6 @@ function servedocs(
         subdir = "docs",
         lazy = get(ENV, "POLLEN_LAZY", "false") == "true",
         port = Base.parse(Int, get(ENV, "POLLEN_PORT", "8000")),
-        format = JSONFormat(),
         kwargs...)
     try validatedocs(pkgdir; subdir) catch e
         @error "Failed to detect a proper documentation setup for package directory \"$pkgdir\""
@@ -25,7 +24,8 @@ function servedocs(
             project;
             lazy,
             port,
-            format
+            kwargs...
+
         )
 
     end
