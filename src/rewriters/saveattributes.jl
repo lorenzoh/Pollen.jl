@@ -1,13 +1,19 @@
 struct SaveAttributes <: Rewriter
     path::Any
     keys::Any
+    useoutputs::Bool
 end
-SaveAttributes(keys = nothing) = SaveAttributes(Path("attributes.json"), keys)
+function SaveAttributes(
+        keys = nothing;
+        path = "attributes.json",
+        useoutputs = true)
+    SaveAttributes(Path(path), keys, useoutputs)
+end
 
 
 function postbuild(save::SaveAttributes, project, builder::FileBuilder)
     attrs = Dict{String,Dict}()
-    for (p, doc) in project.outputs
+    for (p, doc) in (save.useoutputs ? project.outputs : project.sources)
         a::Dict = attributes(doc)
         ks = isnothing(save.keys) ? keys(a) : save.keys
         d = Dict{Symbol,Any}(k => a[k] for k in ks)
