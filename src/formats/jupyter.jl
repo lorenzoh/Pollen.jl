@@ -33,13 +33,6 @@ function parse(data::JSON3.Object, format::JupyterFormat)
         Dict(data[:metadata]),
         Dict(:nbformat => (data[:nbformat], data[:nbformat_minor]))
     )
-    #=
-    cs = XTree[]
-    lang = get(get(get(obj, :metadata, Dict()), :language_info, Dict()), :name, "")
-    for cell in obj[:cells]
-        cs = vcat(cs, children(parsejupytercell(cell, lang)))
-    end
-    =#
     return Node(
         :jupyter,
         [parsejupytercell(cell, attrs) for cell in data[:cells]],

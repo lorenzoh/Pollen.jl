@@ -49,10 +49,6 @@ end
 
 
 function PkgTemplates.hook(p::PollenPlugin, t::Template, pkg_dir::AbstractString)
-
-
-    println("hook", cd(() -> readchomp(Git.git(["branch", "--show-current"])), pkg_dir))
-
     # create template files
     folder_docs = mkpath(joinpath(pkg_dir, p.folder))
 
