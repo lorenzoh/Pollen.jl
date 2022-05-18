@@ -7,11 +7,13 @@ for a reference.
 """
 struct MarkdownFormat <: Format
     parser::CM.Parser
+    concatstrings::Bool
 end
-MarkdownFormat() = MarkdownFormat(default_md_parser())
+MarkdownFormat(parser = default_md_parser(); concatstrings = true) =
+    MarkdownFormat(default_md_parser(), concatstrings)
 
 
-function parse(io::IO, format::MarkdownFormat; parser = default_md_parser())
+function parse(io::IO, format::MarkdownFormat)
     ast = format.parser(io)
     #if format.concatstrings
 
@@ -56,7 +58,37 @@ function mdchildren(node::CM.Node)
         child = child.nxt
         push!(childs, child)
     end
-    return childs
+    return combine(childs, c -> c.t isa CM.Text) do cs
+        textnode(string(getfield.(cs, :literal)...))
+    end
+end
+
+function textnode(str)
+    node = CM.Node(CM.Text())
+    node.literal = str
+    return node
+end
+
+function combine(f, v::AbstractVector, predicate)
+    buf = []
+    res = []
+
+    for x in v
+        if predicate(x)
+            push!(buf, x)
+        else
+            if !isempty(buf)
+                push!(res, f(buf))
+                buf = []
+            end
+            push!(res, x)
+        end
+    end
+    if !isempty(buf)
+        push!(res, f(buf))
+        buf = []
+    end
+    return res
 end
 
 function mdchildrenattrs(node::CM.Node)
