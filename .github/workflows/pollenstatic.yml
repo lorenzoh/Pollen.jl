@@ -24,7 +24,7 @@ jobs:
         with:
           repository: lorenzoh/pollenjl-frontend
           path: frontend
-          ref: main
+          ref: navigation
       - name: Move Pollen data to static folder
         run: |
           ls
@@ -39,10 +39,6 @@ jobs:
         run: |
           cd frontend
           npm run build
-      - name: Build search index
-        run: |
-          cd frontend
-          cat static/data/dev/documents.json | node buildindex.cjs > ../data/dev/searchindex.json
       - name: Deploy changes
         run: |
           ls -lt
