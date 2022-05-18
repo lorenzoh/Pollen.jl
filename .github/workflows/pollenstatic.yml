@@ -24,7 +24,7 @@ jobs:
         with:
           repository: lorenzoh/pollenjl-frontend
           path: frontend
-          ref: navigation
+          ref: main
       - name: Move Pollen data to static folder
         run: |
           ls
