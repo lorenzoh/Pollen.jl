@@ -120,7 +120,13 @@ function rewritedoc(executecode::ExecuteCode, p, doc)
 
     newblocks = Node[]
     for (i, block) in enumerate(blocks)
-        push!(newblocks, createcodecell(block, outputs[i], results[i]))
+        cell = createcodecell(block, outputs[i], results[i])
+        # ensure no empty code cells are written out
+        if isempty(children(cell))
+            push!(newblocks, Node(:span))
+        else
+            push!(newblocks, cell)
+        end
     end
 
     return replacemany(doc, newblocks, executecode.codeblocksel)
@@ -193,14 +199,23 @@ function __parsecodeattributes(attrs::Dict{Symbol})
     codeattrs = Dict{Symbol, Any}()
     outputattrs = Dict{Symbol, Any}()
     resultattrs = Dict{Symbol, Any}()
+    parseval(x) = if x == "true"
+        true
+    elseif x == "false"
+        false
+    else
+        x
+    end
+
     for (attr, val) in attrs
+        val = parseval(val)
         sattr = string(attr)
         if attr == :show
-            codeattrs[:show] = Base.parse(Bool, val)
+            codeattrs[:show] = val
         elseif attr == :output
-            outputattrs[:show] = Base.parse(Bool, val)
+            outputattrs[:show] = val
         elseif attr == :result
-            resultattrs[:show] = Base.parse(Bool, val)
+            resultattrs[:show] = val
         elseif startswith(string(attr), "output")
             outputattrs[Symbol(@view sattr[7:end])] = val
         elseif startswith(string(attr), "result")
