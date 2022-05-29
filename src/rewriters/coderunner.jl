@@ -120,25 +120,7 @@ function rewritedoc(executecode::ExecuteCode, p, doc)
 
     newblocks = Node[]
     for (i, block) in enumerate(blocks)
-        chs = Node[Node(:codeinput, block)]
-
-        includeoutput = get(attributes(block), :output, "true") == "true"
-        if includeoutput && !isempty(outputs[i])
-            node_output = Node(:codeoutput, Node(:codeblock, [Leaf(ANSI(outputs[i]))]))
-            push!(chs, node_output)
-        end
-
-        include_result = get(attributes(block), :result, "true") == "true"
-        if include_result && !isnothing(results[i])
-            node_result = if hasrichdisplay(results[i])
-                Node(:coderesult, results[i])
-            else
-                Node(:coderesult, Node(:codeblock, ANSI(results[i])))
-            end
-            push!(chs, node_result)
-        end
-
-        push!(newblocks, Node(:codecell, chs, attributes(block)))
+        push!(newblocks, createcodecell(block, outputs[i], results[i]))
     end
 
     return replacemany(doc, newblocks, executecode.codeblocksel)
@@ -161,7 +143,7 @@ function executegrouped!(caches, codes, groupids)
     is = []
     codesgrouped = Dict{Symbol, Vector{String}}()
 
-    for (i, (gid, code)) in enumerate(zip(groupids, codes))
+    for (gid, code) in zip(groupids, codes)
         groupcodes = get!(codesgrouped, gid, String[])
         push!(groupcodes, code)
         push!(is, (gid, length(groupcodes)))
@@ -180,6 +162,55 @@ end
 
 creategroupid(path, groupname) = Symbol("$(CM.slugify(string(path)))_$groupname")
 
+# A :codecell node is created from the original :codeblock, the
+# printed output, and the result.
+
+function createcodecell(codeblock::Node, output, result)
+    chs = Node[]
+    codeattrs, outputattrs, resultattrs = __parsecodeattributes(attributes(codeblock))
+    if get(codeattrs, :show, true)
+        push!(chs, Node(:codeinput, [codeblock], codeattrs))
+    end
+    if get(outputattrs, :show, true) && !isempty(output)
+        push!(chs, Node(:codeoutput, [Node(:codeblock, [Leaf(ANSI(output))])], outputattrs))
+    end
+    if get(resultattrs, :show, true) && !isnothing(result)
+        node = if hasrichdisplay(result)
+            Node(:coderesult, result)
+        else
+            Node(:coderesult, Node(:codeblock, ANSI(result)))
+        end
+        push!(chs, withattributes(node, resultattrs))
+    end
+    return Node(:codecell, chs)
+end
+
+# To allow passing attributes through to the result and output nodes of a code cell,
+# attributes starting with "result" or "output" are shortened and moved from the code
+# block to the result and output nodes.
+
+function __parsecodeattributes(attrs::Dict{Symbol})
+    codeattrs = Dict{Symbol, Any}()
+    outputattrs = Dict{Symbol, Any}()
+    resultattrs = Dict{Symbol, Any}()
+    for (attr, val) in attrs
+        sattr = string(attr)
+        if attr == :show
+            codeattrs[:show] = Base.parse(Bool, val)
+        elseif attr == :output
+            outputattrs[:show] = Base.parse(Bool, val)
+        elseif attr == :result
+            resultattrs[:show] = Base.parse(Bool, val)
+        elseif startswith(string(attr), "output")
+            outputattrs[Symbol(@view sattr[7:end])] = val
+        elseif startswith(string(attr), "result")
+            resultattrs[Symbol(@view sattr[7:end])] = val
+        else
+            codeattrs[attr] = val
+        end
+    end
+    return codeattrs, outputattrs, resultattrs
+end
 
 # Resetting the rewriter clears the caches:
 
@@ -222,5 +253,13 @@ end
         outdoc3 = Pollen.rewritedoc(rewriter, "path", doc)
         val3 = only(children(selectfirst(outdoc3, SelectTag(:coderesult))))
         @test val != val3
+    end
+
+    @testset "__parsecodeattributes" begin
+        @test __parsecodeattributes(Dict(:style => "red")) == (Dict(:style => "red"), Dict(), Dict())
+        @test __parsecodeattributes(Dict(:style => "red", :output => "false")) == (
+            Dict(:style => "red"), Dict(:show => false), Dict())
+        @test __parsecodeattributes(Dict(:style => "red", :output => "false", :resultstyle => "blue")) == (
+            Dict(:style => "red"), Dict(:show => false), Dict(:style => "blue"))
     end
 end

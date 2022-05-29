@@ -36,7 +36,6 @@ function default_md_parser()
         cm.MathRule(),
         cm.RawContentRule(),
         cm.TableRule(),
-        cm.TypographyRule(),
     ])
     return parser
 end
@@ -146,6 +145,9 @@ const BLOCK_TO_TAG = Dict(
     CM.TableCell => :td,
     CM.FrontMatter => :fm,
     CM.HtmlInline => :span,
+    CM.FootnoteLink => :footnotelink,
+    CM.FootnoteDefinition => :footnotedef,
+    CM.Backslash => :backslash,
 )
 
 function xtree(node::CM.Node, c::CM.AbstractContainer, attrs = Dict{Symbol, String}())

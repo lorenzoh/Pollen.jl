@@ -19,7 +19,7 @@ If you have worked with HTML before, you'll know that it uses a tree-like data f
 
 Pollen similarly represents documents as a tree. We can represent the above HTML as follows using Pollen:
 
-{cell}
+{cell output=false}
 ```julia
 using Pollen
 

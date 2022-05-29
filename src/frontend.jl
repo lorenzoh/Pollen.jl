@@ -29,7 +29,7 @@ end
 function frontend_serve(dir = FRONTENDDIR; verbose=false)
     frontend_loaded(dir) || frontend_install(dir)
     cd(dir) do
-        @info "Starting frontend dev server on http://localhost:3000/dev/i"
+        @info "Starting frontend dev server at http://localhost:3000"
         p = _runsafe(`$(npm_cmd()) run dev`; verbose)
         @info "Stopped frontend dev server"
         return p
