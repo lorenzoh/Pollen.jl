@@ -59,7 +59,7 @@ function createsources!(rewriter::DocumentFolder)
         if isdirty
             # (re)load document
             p_abs = absolute(joinpath(rewriter.dir, p))
-            document = loadfile(rewriter, p_abs)
+            document = __loadfile(p_abs)
             sources[docid] = rewriter.documents[docid] = document
             rewriter.dirty[docid] = false
         end
@@ -68,7 +68,7 @@ function createsources!(rewriter::DocumentFolder)
     return sources
 end
 
-function loadfile(::DocumentFolder, filepath)
+function __loadfile(filepath)
     doc = Pollen.parse(Path(filepath))
     xtitle = selectfirst(doc, SelectTag(:h1))
     title = isnothing(xtitle) ? filename(Path(filepath)) : gettext(xtitle)
@@ -79,7 +79,7 @@ end
 function geteventhandler(folder::DocumentFolder, ch)
     documents = Dict{String, String}(string(_getpath(folder, docid)) => docid for docid in keys(folder.documents))
     return createfilewatcher(documents, ch) do file
-        loadfile(folder, file)
+        __loadfile(file)
     end
 end
 
