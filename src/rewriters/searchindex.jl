@@ -18,14 +18,7 @@ end
 
 function lunr_document(path, doc)
     id = string(path)
-    if startswith(id, "documents")
-        return Dict(
-            "id" => id,
-            "text" => join(getsearchindexterms(doc), " "),
-            "title" => get(attributes(doc), :title, string(path)),
-            "doctype" => "document",
-        )
-    elseif startswith(id, "references")
+    if startswith(id, "references")
         return Dict(
             "id" => id,
             "text" => join(getsearchindexterms(doc), " "),
@@ -38,6 +31,13 @@ function lunr_document(path, doc)
             "text" => join(getsearchindexterms(doc), " "),
             "title" => get(attributes(doc), :title, string(path)),
             "doctype" => "sourcefile",
+        )
+    else
+        return Dict(
+            "id" => id,
+            "text" => join(getsearchindexterms(doc), " "),
+            "title" => get(attributes(doc), :title, string(path)),
+            "doctype" => "document",
         )
     end
 
