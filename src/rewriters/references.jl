@@ -42,7 +42,7 @@ function createsources!(pkgdoc::PackageDocumentation)
     # Documents for symbols
     symboldocs = Dict{String,Node}()
     df_docstrings = outerjoin(
-        pkgdoc.info[:symbols][:, [:symbol_id, :name]],
+        pkgdoc.info[:symbols][:, [:symbol_id, :name, :kind, :instance]],
         pkgdoc.info[:docstrings],
         on = :symbol_id,
     )
@@ -53,6 +53,15 @@ function createsources!(pkgdoc::PackageDocumentation)
         catch e
             @error "Could not parse docstring for symbol $(row.symbol_id)" docstring=row.docstring
             rethrow()
+        end
+        if row.kind == "const"
+            push!(children,
+                  createcodecell(
+                      Node(:codeblock, Leaf(string(row.symbol_id)), lang = "julia"),
+                      "",
+                      row.instance,
+                  )
+            )
         end
         doc = Node(
             :documentation,
@@ -87,7 +96,8 @@ function createsourcefiledoc(path, name)
     return Node(
             :sourcefile,
             [doc],
-            Dict{Symbol,Any}(:path => string(path), :title => title),
+            Dict{Symbol,Any}(:path => string(path), :title => title,
+                             :module => split(name, "/")[2]),
         )
 end
 
@@ -274,26 +284,46 @@ function referencedata(symbol, info, ::Val{:module})
             :kind => row.kind,
         ) for row in eachrow(msymbols) if row.symbol_id != moduleid
     ]
-    joinedfiles = innerjoin(info[:sourcefiles], info[:packages], on = :package_id)
+    joinedfiles = innerjoin(info[:sourcefiles],
+                            info[:packages][info[:packages].package_id .== row_module.package_id, :];
+                            on = :package_id)
     files = [joinpath(row.basedir, row.file)
                 for row in eachrow(joinedfiles)
                     if row.package_id == row_module.package_id]
-    return Dict(:symbols => symbols, :files => files)
+    # document IDs of source files
+    filedocs = [
+        joinpath(["sourcefiles", row.name, row.file])
+            for row in eachrow(joinedfiles)]
+    return Dict(:symbols => symbols, :files => files, :filedocs => filedocs)
 end
 
 
 
 function _getmethods(info, symbol_id)
     methods = info[:methods][info[:methods].symbol_id.==symbol_id, :]
+
     return [
         Dict(
             :line => row.line,
             :file => row.file,
+            :filedoc => __getfiledoc(row),
             :method_id => row.method_id,
             :symbol_id => row.symbol_id,
             :signature => row.signature,
         ) for row in eachrow(methods)
     ]
+end
+
+function __getfiledoc(row)
+    pkg = split(row.symbol_id, '.')[1]
+    parts = split(row.file, "/")
+    i = findfirst(==("src"), parts)
+    if !isnothing(i)
+        joinpath("sourcefiles", pkg, parts[i:end]...)
+    else
+        i = findfirst(==("julia"), parts)
+        joinpath("sourcefiles", pkg, parts[i:end]...)
+    end
 end
 
 function referencedata(symbol, info, ::Val)
