@@ -134,7 +134,6 @@ const BLOCK_TO_TAG = Dict(
     CM.Paragraph => :p,
     CM.Text => :span,
     CM.Emph => :em,
-    CM.SoftBreak => :span,
     CM.ThematicBreak => :hr,
     CM.BlockQuote => :blockquote,
     CM.Admonition => :admonition,
@@ -160,6 +159,7 @@ end
 
 
 xtree(node::CM.Node, ::CM.Text, attrs) = Leaf(node.literal)
+xtree(::CM.Node, ::CM.SoftBreak, attrs) = Leaf(" ")
 xtree(node::CM.Node, ::CM.Code, attrs) = Node(:code, [Leaf(node.literal)], attrs)
 xtree(node::CM.Node, ::CM.Math, attrs) = Node(:math, [Leaf(node.literal)], attrs)
 xtree(node::CM.Node, ::CM.DisplayMath, attrs) = Node(:mathblock, [Leaf(node.literal)], attrs)
