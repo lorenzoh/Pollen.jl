@@ -49,7 +49,7 @@ function createsources!(pkgdoc::PackageDocumentation)
 
     for row in eachrow(df_docstrings)
         children = try
-            ismissing(row.docstring) ? Node[] : [parse(row.docstring, MarkdownFormat())]
+            ismissing(row.docstring) ? XTree[] : XTree[parse(row.docstring, MarkdownFormat())]
         catch e
             @error "Could not parse docstring for symbol $(row.symbol_id)" docstring=row.docstring
             rethrow()
