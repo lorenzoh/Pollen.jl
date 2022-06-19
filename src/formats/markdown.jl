@@ -124,7 +124,7 @@ end
 
 function childrenxtrees(node::CM.Node)
     cs, attrs = mdchildrenattrs(node)
-    return [xtree(c, as) for (c, as) in zip(cs, attrs)]
+    return XTree[xtree(c, as) for (c, as) in zip(cs, attrs)]
 end
 
 xtree(node::CM.Node, attrs::Dict = Dict{Symbol, Any}()) = xtree(node, node.t, attrs)
@@ -169,7 +169,7 @@ xtree(node::CM.Node, ::CM.HtmlBlock, attrs) = withattributes(parse(node.literal,
 
 
 function xtree(node::CM.Node, ::CM.Paragraph, attrs)
-    chs = Union{Leaf{String}, Node}[]
+    chs = XTree[]
     s = ""
     for ch in childrenxtrees(node)
         if ch isa Leaf{String}
