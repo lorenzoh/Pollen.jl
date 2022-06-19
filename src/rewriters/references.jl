@@ -322,7 +322,11 @@ function __getfiledoc(row)
         joinpath("sourcefiles", pkg, parts[i:end]...)
     else
         i = findfirst(==("julia"), parts)
-        joinpath("sourcefiles", pkg, parts[i:end]...)
+        if !isnothing(i)
+            return joinpath("sourcefiles", pkg, parts[i:end]...)
+        else
+            return joinpath("sourcefiles/unknown/$(parts[end])")
+        end
     end
 end
 
