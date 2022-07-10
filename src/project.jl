@@ -15,7 +15,9 @@ end
 
 function Project(rewriters)
     sources = ThreadSafeDict{String, Node}()
-    merge!(sources, [createsources!(rewriter) for rewriter in rewriters]...)
+    foreach(rewriters) do rewriter
+        merge!(sources, createsources!(rewriter))
+    end
     outputs = ThreadSafeDict{String, Node}()
     return Project(sources, outputs, rewriters)
 end
@@ -57,13 +59,14 @@ Applies `rewriters` to a collection of `sources`.
 function rewritedocs(sources, rewriters)
     outputs = ThreadSafeDict{String, XTree}()
     docids = collect(keys(sources))
-    Threads.@threads for i in 1:length(docids)
+    foreachprogress(eachindex(docids), description = "Rewriting documents...",
+                    parallel=true) do i
         docid = docids[i]
-        xtree = sources[docid]
-        for rewriter in rewriters
-            xtree = rewritedoc(rewriter, docid, xtree)
+        doc = sources[docid]
+        foreach(rewriters) do rewriter
+            doc = rewritedoc(rewriter, docid, doc)
         end
-        outputs[docid] = xtree
+        outputs[docid] = doc
     end
     return outputs
 end
@@ -74,7 +77,7 @@ function rewriteoutputs!(outputs, rewriters::Vector)
     end
     outputs
 end
-rewriteoutputs!(outputs, rewriter::Rewriter) = outputs
+rewriteoutputs!(outputs, ::Rewriter) = outputs
 
 
 """

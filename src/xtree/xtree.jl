@@ -57,7 +57,7 @@ struct Node{T<:XTree, D<:Dict{Symbol}} <: XTree
     attributes::D
 end
 
-Base.show(io::IO, xnode::Node) = print_tree(io, xnode, 3)
+Base.show(io::IO, xnode::Node) = print_tree(io, xnode; maxdepth=3)
 
 function Node(tag::Symbol, children...; attributes...)
     return Node(
@@ -86,6 +86,11 @@ Base.eltype(::Type{Node{T}}) where T = T
 
 Base.eltype(::Type{<:TreeIterator{<:Node{T}}}) where T = T
 Base.IteratorEltype(::Type{<:TreeIterator{<:Node{T}}}) where T = Base.HasEltype()
+
+# from AbstractTrees >= v0.4
+if isdefined(AbstractTrees, :ChildIndexing)
+    AbstractTrees.ChildIndexing(::Type{<:XTree}) = AbstractTrees.IndexedChildren()
+end
 
 withchildren(xnode::Node, children) = Node(tag(xnode), children, attributes(xnode))
 withtag(xnode::Node, tag) = Node(tag, children(xnode), attributes(xnode))

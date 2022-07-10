@@ -11,7 +11,7 @@ function Pollen.parse(io::IO, ::JuliaSyntaxFormat)
         ast = JuliaSyntax.parseall(JuliaSyntax.GreenNode, s, ignore_trivia=false)
         return withtag(xtree(ast, s), :julia)
     catch e
-        @warn "Could not parse code block:\n$s" error = e
+        @debug "Could not parse code block:\n$s" error = e
         return Node(:julia, s)
     end
 

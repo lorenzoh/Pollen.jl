@@ -37,7 +37,7 @@ ThreadSafeDicts = "4239201d-c60e-5e0a-9702-85d713665ba7"
 
 [compat]
 ANSIColoredPrinters = "0.0"
-AbstractTrees = "0.3"
+AbstractTrees = "0.3, 0.4"
 CSTParser = "3"
 CommonMark = "0.8"
 Crayons = "4"

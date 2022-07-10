@@ -56,11 +56,10 @@ FileBuilder(format::Format, p::String) = FileBuilder(format, Path(p))
 
 function build(builder::FileBuilder, project::Project, dirtydocids = collect(keys(project.outputs)))
     # TODO: make threadable for performance. issue is paths not being created
-    for docid in dirtydocids
+    foreach(dirtydocids) do docid
         buildtofile(project.outputs[docid], docid, builder.dir, builder.format)
     end
 
-    # TODO: make threadable for performance
     for rewriter in project.rewriters
         postbuild(rewriter, project, builder)
     end
