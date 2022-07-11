@@ -48,6 +48,8 @@ For example `extensionformat(Val(:html)) == HTMLFormat()`, so `parse(p"index.htm
 dispatches to `parse(p"index.html", HTMLFormat())`
 """
 function extensionformat(::Val{:ext}) end
+extensionformat(file::String) = extensionformat(Val(Symbol(extension(Path(file)))))
+
 function formatextension end
 
 # output interface

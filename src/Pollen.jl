@@ -12,6 +12,7 @@ using DataFrames
 using FilePathsBase
 using DataStructures: DefaultDict, OrderedDict
 import Gumbo
+import Glob: glob
 using InlineTest
 using JuliaFormatter
 using Graphs
@@ -67,6 +68,7 @@ include("project.jl")
 include("builders.jl")
 
 include("serve/events.jl")
+include("serve/filewatching.jl")
 include("serve/server.jl")
 include("serve/servefiles.jl")
 
@@ -83,20 +85,13 @@ include("rewriters/saveattributes.jl")
 include("rewriters/loadfrontendconfig.jl")
 include("rewriters/staticresources.jl")
 
-#old
-#include("rewriters/assets.jl")
-#include("rewriters/templater.jl")
-#include("rewriters/inserter.jl")
-#include("rewriters/toc.jl")
-#
-
-
 FRONTENDDIR = ""
 
 function __init__()
     global FRONTENDDIR = @get_scratch!("frontend")
 end
 
+include("documentation/docstyles.jl")
 
 include("frontend.jl")
 include("docs.jl")
