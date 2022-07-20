@@ -2,11 +2,11 @@
 struct FileLoader
     path::String
     id::String
-    load
+    load::Any
 end
 
-
-function makefilewatcher(ch::Channel, loaders::Vector{FileLoader}, dirs::Vector{String})
+function makefilewatcher(ch::Channel, loaders::Vector{FileLoader},
+                         dirs::Vector{String} = []; filterfn = Returns(true))
     # TODO: watch `dirs` for any added files
     pathtoloader = Dict{String, FileLoader}(loader.path => loader for loader in loaders)
     watcher = LiveServer.SimpleWatcher() do path
@@ -15,7 +15,8 @@ function makefilewatcher(ch::Channel, loaders::Vector{FileLoader}, dirs::Vector{
             loader = pathtoloader[path]
             put!(ch, DocUpdated(loader.id, loader.load()))
         catch e
-            @error "Error while processing file update for \"$filepath\" (document ID \"$(documents[filepath])\"" e=e
+            loader = pathtoloader[path]
+            @error "Error while processing file update for \"$path\" (document ID \"$(loader.id)\"" e=e
         end
     end
     for loader in loaders

@@ -1,11 +1,10 @@
 
 struct LoadFrontendConfig <: Rewriter
-    config::Dict{String,Any}
+    config::Dict{String, Any}
     dstpath::Any
 end
 
-
-function LoadFrontendConfig(path::Union{String,AbstractPath}, dstpath = "config.json")
+function LoadFrontendConfig(path::Union{String, AbstractPath}, dstpath = "config.json")
     file = joinpath(path, "Project.toml")
     isfile(file) || throw(SystemError("loading conifg: \"$file\": No such file"))
     projectconfig = TOML.parsefile(file)
@@ -22,7 +21,6 @@ function LoadFrontendConfig(path::Union{String,AbstractPath}, dstpath = "config.
     return LoadFrontendConfig(config, dstpath)
 end
 
-
 function postbuild(rewriter::LoadFrontendConfig, _, builder::FileBuilder)
     dst = joinpath(builder.dir, rewriter.dstpath)
     open(dst, "w") do f
@@ -30,22 +28,13 @@ function postbuild(rewriter::LoadFrontendConfig, _, builder::FileBuilder)
     end
 end
 
-
 function loaddefaults(project::Dict)
-    return Dict(
-        "title" => project["name"],
-        "defaultDocument" => "documents/README.md",
-        "columnWidth" => 650,
-    )
+    return Dict("title" => project["name"],
+                "defaultDocument" => "documents/README.md",
+                "columnWidth" => 650)
 end
 
-
 function defaulttoc(projectconfig)
-    return OrderedDict(
-        "Overview" => "documents/README.md",
-        "Reference" => Dict(
-            "Module" => "references/$(projectconfig["name"])"
-        )
-    )
-
+    return OrderedDict("Overview" => "documents/README.md",
+                       "Reference" => Dict("Module" => "references/$(projectconfig["name"])"))
 end

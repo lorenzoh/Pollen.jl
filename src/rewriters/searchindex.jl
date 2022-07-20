@@ -3,7 +3,6 @@ struct SearchIndex <: Rewriter
 end
 SearchIndex() = SearchIndex("documents.json")
 
-
 function postbuild(searchindex::SearchIndex, project, builder::FileBuilder)
     docs = filter(((p, doc),) -> !startswith(string(p), "source"), project.outputs)
     index = map(lunr_document, keys(docs), values(docs))
@@ -19,30 +18,22 @@ end
 function lunr_document(path, doc)
     id = string(path)
     if startswith(id, "references")
-        return Dict(
-            "id" => id,
-            "text" => join(getsearchindexterms(doc), " "),
-            "title" => get(attributes(doc), :title, string(path)),
-            "doctype" => "documentation",
-        )
+        return Dict("id" => id,
+                    "text" => join(getsearchindexterms(doc), " "),
+                    "title" => get(attributes(doc), :title, string(path)),
+                    "doctype" => "documentation")
     elseif startswith(id, "sourcefiles")
-        return Dict(
-            "id" => id,
-            "text" => join(getsearchindexterms(doc), " "),
-            "title" => get(attributes(doc), :title, string(path)),
-            "doctype" => "sourcefile",
-        )
+        return Dict("id" => id,
+                    "text" => join(getsearchindexterms(doc), " "),
+                    "title" => get(attributes(doc), :title, string(path)),
+                    "doctype" => "sourcefile")
     else
-        return Dict(
-            "id" => id,
-            "text" => join(getsearchindexterms(doc), " "),
-            "title" => get(attributes(doc), :title, string(path)),
-            "doctype" => "document",
-        )
+        return Dict("id" => id,
+                    "text" => join(getsearchindexterms(doc), " "),
+                    "title" => get(attributes(doc), :title, string(path)),
+                    "doctype" => "document")
     end
-
 end
-
 
 function getsearchindexterms(doc::Node)
     terms = String[]
@@ -68,5 +59,4 @@ function _getterms(str::String)
     return (strip(s, PUNCTUATION) for s in split(str, " "))
 end
 
-
-const PUNCTUATION = Char.(codeunits( "!\"#\$%&\'()*+,-./:;<=>?@[\\]^_`{|}~"))
+const PUNCTUATION = Char.(codeunits("!\"#\$%&\'()*+,-./:;<=>?@[\\]^_`{|}~"))

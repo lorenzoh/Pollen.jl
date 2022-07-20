@@ -14,7 +14,6 @@ abstract type DocumentationStyle end
 struct PollenStyle <: DocumentationStyle end
 struct DocumenterStyle <: DocumentationStyle end
 
-
 function finddocumentationfiles(dir::String, ::PollenStyle, extensions)
     # TODO: Detect whether Pollen or Documenter-style is used
     # for now, assume Pollen.jl
@@ -30,7 +29,6 @@ function findpageindex(dir::String, ::PollenStyle)
     end
 end
 
-
 function detectdocstyle(dir::String)
     docproj = TOML.readfile(joinpath(dir, "docs", "Project.toml"))
     docdeps = get(docproj, "deps", String[])
@@ -43,11 +41,9 @@ function detectdocstyle(dir::String)
     end
 end
 
-
 function findpageindex(dir::String, ::DocumenterStyle)
     error("Not implemented!!")
 end
-
 
 function rglob(filepattern = "*", dir = pwd(), depth = 5)
     patterns = ["$(repeat("*/", i))$filepattern" for i in 0:depth]

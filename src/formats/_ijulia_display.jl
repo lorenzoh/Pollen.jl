@@ -23,7 +23,6 @@
 #     WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-
 # Default mimetypes in decreasing richness
 const MIMES = [
     MIME"text/html"(),
@@ -34,7 +33,6 @@ const MIMES = [
     MIME"text/plain"(),
     MIME"text/markdown"(),
 ]
-
 
 function asmimestrings(x, mimes = MIMES; firstonly = false)
     mimestrings = Dict{MIME, String}()
@@ -49,22 +47,22 @@ end
 
 function asmimestring(x, mimes::Vector{<:MIME} = MIMES)
     i = findfirst(m -> showable(m, x), mimes)
-    isnothing(i) && throw(ArgumentError("Could not find a valid mimetype to display $x in mimes $mimes!"))
+    isnothing(i) &&
+        throw(ArgumentError("Could not find a valid mimetype to display $x in mimes $mimes!"))
     mime = mimes[i]
     return mime, asmimestring(x, mime)
 end
-
 
 # IJulia inline.jl
 israwtext(::MIME, x::AbstractString) = true
 israwtext(::MIME"text/plain", x::AbstractString) = false
 israwtext(::MIME, x) = false
 
-InlineIOContext(io, KVs::Pair...) = IOContext(
-    io,
-    :limit=>true, :color=>true, :jupyter=>true,
-    KVs...
-)
+function InlineIOContext(io, KVs::Pair...)
+    IOContext(io,
+              :limit => true, :color => true, :jupyter => true,
+              KVs...)
+end
 function asmimestring(x, mime::MIME)
     buf = IOBuffer()
     if istextmime(mime)

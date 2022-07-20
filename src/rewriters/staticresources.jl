@@ -4,7 +4,6 @@ Base.@kwdef struct StaticResources <: Rewriter
     folder::String = "resources"
 end
 
-
 function rewritedoc(rewriter::StaticResources, _, doc::Node)
     if haskey(attributes(doc), :path)
         doc_folder = parent(absolute(Path(attributes(doc)[:path])))
@@ -31,12 +30,9 @@ function postbuild(rewriter::StaticResources, _, builder::FileBuilder)
     end
 end
 
-
-@testset "StaticResources [rewriter]" begin
-    mktempdir() do dir
-        doc = Node(:md, Node(:img, src = "bla.png"), path = "$dir/doc.md")
-        rewriter = StaticResources()
-        outdoc = rewritedoc(rewriter, "", doc)
-        @test startswith(attributes(selectfirst(outdoc, SelectTag(:img)))[:src], "resources")
-    end
-end
+@testset "StaticResources [rewriter]" begin mktempdir() do dir
+    doc = Node(:md, Node(:img, src = "bla.png"), path = "$dir/doc.md")
+    rewriter = StaticResources()
+    outdoc = rewritedoc(rewriter, "", doc)
+    @test startswith(attributes(selectfirst(outdoc, SelectTag(:img)))[:src], "resources")
+end end

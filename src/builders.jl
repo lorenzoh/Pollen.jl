@@ -1,6 +1,5 @@
 abstract type Builder end
 
-
 """
     build(project, builder[, docs])
 
@@ -10,7 +9,6 @@ want to rebuild previously built files, use [`rebuild`](#).
 """
 function build(project::Project, builder::Builder)
     return project
-
 
     # Build all documents
     dirtypaths = addfiles!(project, project.sources)
@@ -27,7 +25,6 @@ end
 Build project to a temporary directory with [`HTMLFormat`](#) format.
 """
 build(project) = build(project, FileBuilder(HTMLFormat(), Path(mktempdir())))
-
 
 function fullbuild(project, builder)
     paths = rewritesources!(project)
@@ -53,8 +50,8 @@ struct FileBuilder <: Builder
 end
 FileBuilder(format::Format, p::String) = FileBuilder(format, Path(p))
 
-
-function build(builder::FileBuilder, project::Project, dirtydocids = collect(keys(project.outputs)))
+function build(builder::FileBuilder, project::Project,
+               dirtydocids = collect(keys(project.outputs)))
     # TODO: make threadable for performance. issue is paths not being created
     foreach(dirtydocids) do docid
         buildtofile(project.outputs[docid], docid, builder.dir, builder.format)
@@ -65,11 +62,11 @@ function build(builder::FileBuilder, project::Project, dirtydocids = collect(key
     end
 end
 
-
 function buildtofile(xtree, docid::String, dir, format)
     fullpath = Path("$(joinpath(dir, docid)).$(formatextension(format))")
     try
         mkpath(parent(fullpath))
-    catch end
+    catch
+    end
     render!(fullpath, xtree, format)
 end

@@ -3,9 +3,9 @@ struct DocumentFolder <: Rewriter
     documents::Dict{String, Node}
     dirty::Dict{String, Bool}
     prefix::Any
-    extensions
-    includehidden
-    filterfn
+    extensions::Any
+    includehidden::Any
+    filterfn::Any
 end
 
 function Base.show(io::IO, rewriter::DocumentFolder)
@@ -33,23 +33,21 @@ is added to a project.
 - `filterfn = p -> true`: Filter applied to every path. Return `false` for a path to not
     load it.
 """
-DocumentFolder(
-    dir::AbstractPath;
-    prefix = nothing,
-    extensions = ("ipynb", "md"),
-    includehidden = false,
-    filterfn = (p) -> true,
-) = return DocumentFolder(
-        absolute(dir),
-        Dict{String, Node}(),
-        Dict{String, Bool}(),
-        prefix,
-        extensions,
-        includehidden,
-        filterfn)
+function DocumentFolder(dir::AbstractPath;
+                        prefix = nothing,
+                        extensions = ("ipynb", "md"),
+                        includehidden = false,
+                        filterfn = (p) -> true)
+    return DocumentFolder(absolute(dir),
+                          Dict{String, Node}(),
+                          Dict{String, Bool}(),
+                          prefix,
+                          extensions,
+                          includehidden,
+                          filterfn)
+end
 
 DocumentFolder(p::String, args...; kwargs...) = DocumentFolder(Path(p), args...; kwargs...)
-
 
 function createsources!(rewriter::DocumentFolder)
     sources = Dict{String, Node}()
@@ -80,10 +78,10 @@ end
 
 geteventhandler(_, _) = getfilewatcher(folder.documentfiles)
 
-
 =#
 function geteventhandler(folder::DocumentFolder, ch)
-    documents = Dict{String, String}(string(_getpath(folder, docid)) => docid for docid in keys(folder.documents))
+    documents = Dict{String, String}(string(_getpath(folder, docid)) => docid
+                                     for docid in keys(folder.documents))
     return createfilewatcher(documents, ch) do file
         __loadfile(file)
     end
@@ -91,12 +89,11 @@ end
 
 function _getpath(folder::DocumentFolder, docid)
     if isnothing(folder.prefix)
-            joinpath(folder.dir, docid)
+        joinpath(folder.dir, docid)
     else
-        joinpath(folder.dir, docid[length(folder.prefix)+2:end])
+        joinpath(folder.dir, docid[(length(folder.prefix) + 2):end])
     end
 end
-
 
 """
     createfilewatcher(documents, channel)
@@ -116,50 +113,44 @@ function createfilewatcher(loadfn, documents::Dict{String, String}, ch::Channel)
             @error "Error while processing file update for \"$filepath\" (document ID \"$(documents[filepath])\"" e=e
         end
     end
-    for (filepath, docid) in  documents
+    for (filepath, docid) in documents
         LiveServer.watch_file!(watcher, filepath)
     end
     return watcher
 end
 
-
 function filehandlers(folder::DocumentFolder, ::Project, ::Builder)
-    return Dict(
-        () => Dict(relative(p, folder.dir) => Pollen.parse(p)) for p in folder.paths
-    )
+    return Dict(() => Dict(relative(p, folder.dir) => Pollen.parse(p))
+                for p in folder.paths)
 end
 
-
-
-
-@testset "DocumentFolder [rewriter]" begin
-    mktempdir() do dir
-        open(joinpath(dir, "test.md"), "w") do f
-            write(f, "# Test")
-        end
-        rewriter = DocumentFolder(Path(dir))
-        sources = createsources!(rewriter)
-        @test haskey(sources, "test.md")
-        doc = sources["test.md"]
-        @test tag(doc) == :document
-        @test haskey(attributes(doc), :path)
-        @test children(doc)[1] == Node(:md, Node(:h1, "Test"))
+@testset "DocumentFolder [rewriter]" begin mktempdir() do dir
+    open(joinpath(dir, "test.md"), "w") do f
+        write(f, "# Test")
     end
-end
+    rewriter = DocumentFolder(Path(dir))
+    sources = createsources!(rewriter)
+    @test haskey(sources, "test.md")
+    doc = sources["test.md"]
+    @test tag(doc) == :document
+    @test haskey(attributes(doc), :path)
+    @test children(doc)[1] == Node(:md, Node(:h1, "Test"))
+end end
 
 # ## Helpers
 
 # iterates over paths in the document folder, respectig the filter rules
-_iterpaths(rewriter::DocumentFolder) = (
-    joinpath(relative(absolute(p), rewriter.dir))
-        for p in walkpath(rewriter.dir)
-            if extension(p) in rewriter.extensions &&
-                rewriter.filterfn(p) &&
-                (rewriter.includehidden || !_ishidden(relative(absolute(p), rewriter.dir))))
+function _iterpaths(rewriter::DocumentFolder)
+    (joinpath(relative(absolute(p), rewriter.dir))
+     for p in walkpath(rewriter.dir)
+     if extension(p) in rewriter.extensions &&
+        rewriter.filterfn(p) &&
+        (rewriter.includehidden || !_ishidden(relative(absolute(p), rewriter.dir))))
+end
 
 # form a document ID string for a path
-_getdocid(rewriter::DocumentFolder, p::AbstractPath) =
+function _getdocid(rewriter::DocumentFolder, p::AbstractPath)
     string(isnothing(rewriter.prefix) ? p : joinpath(Path(rewriter.prefix), p))
-
+end
 
 _ishidden(p::AbstractPath) = any(startswith(s, '.') && s != "." for s in p.segments)

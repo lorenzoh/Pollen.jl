@@ -48,7 +48,7 @@ Base.show(io::IO, cache::RunCache) = print(io, "RunCache($(nameof(cache.module_)
 # [`runblock`](#).
 
 function runblock(m::Module, codeblock)
-    c = IOCapture.capture(rethrow=InterruptException, color=true) do
+    c = IOCapture.capture(rethrow = InterruptException, color = true) do
         Base.include_string(m, codeblock)
     end
     return c.output, c.value
@@ -74,7 +74,6 @@ function runblockscached(cache::RunCache, blocks)
     return RunCache(blocks, outputs, results, cache.module_)
 end
 
-
 ## Rewriter
 #
 # The rewriter for code execution finds code blocks matching a selector,
@@ -83,7 +82,8 @@ end
 # source code break examples.
 
 # The default selector mimicks the behavior of Publish.jl. "pre[lang="julia" cell]
-const PUBLISH_CODEBLOCK_SELECTOR = SelectTag(:codeblock) & SelectAttrEq(:lang, "julia") & SelectHasAttr(:cell)
+const PUBLISH_CODEBLOCK_SELECTOR = SelectTag(:codeblock) & SelectAttrEq(:lang, "julia") &
+                                   SelectHasAttr(:cell)
 
 Base.@kwdef struct ExecuteCode <: Rewriter
     # Execution caches for each group of code blocks
@@ -117,7 +117,6 @@ function rewritedoc(executecode::ExecuteCode, p, doc)
         end
     end
 
-
     newblocks = Node[]
     for (i, block) in enumerate(blocks)
         cell = createcodecell(block, outputs[i], results[i])
@@ -133,13 +132,14 @@ function rewritedoc(executecode::ExecuteCode, p, doc)
 end
 
 function hasrichdisplay(x)
-    return any(showable(m, x) for m in [
-        MIME"text/html"(),
-        MIME"text/latex"(),
-        MIME"image/svg+xml"(),
-        MIME"image/png"(),
-        MIME"image/jpeg"(),
-    ])
+    return any(showable(m, x)
+               for m in [
+                       MIME"text/html"(),
+                       MIME"text/latex"(),
+                       MIME"image/svg+xml"(),
+                       MIME"image/png"(),
+                       MIME"image/jpeg"(),
+                   ])
 end
 
 # We use a helper for executing the code blocks in groups and restoring the ordering
@@ -199,13 +199,14 @@ function __parsecodeattributes(attrs::Dict{Symbol})
     codeattrs = Dict{Symbol, Any}()
     outputattrs = Dict{Symbol, Any}()
     resultattrs = Dict{Symbol, Any}()
-    parseval(x) = if x == "true"
-        true
-    elseif x == "false"
-        false
-    else
-        x
-    end
+    parseval(x) =
+        if x == "true"
+            true
+        elseif x == "false"
+            false
+        else
+            x
+        end
 
     for (attr, val) in attrs
         val = parseval(val)
@@ -240,18 +241,18 @@ end
     @testset "Basic" begin
         rewriter = ExecuteCode(codeblocksel = SelectTag(:codeblock))
         doc = Node(:md, Node(:codeblock, "1 + 1"))
-        @test Pollen.rewritedoc(rewriter, "path", doc) == Node(:md, Node(:codecell,
-            Node(:codeinput, Node(:codeblock, "1 + 1")),
-            Node(:coderesult, Node(:codeblock, ANSI(2)))
-        ))
+        @test Pollen.rewritedoc(rewriter, "path", doc) == Node(:md,
+                   Node(:codecell,
+                        Node(:codeinput, Node(:codeblock, "1 + 1")),
+                        Node(:coderesult, Node(:codeblock, ANSI(2)))))
     end
     @testset "Output" begin
         rewriter = ExecuteCode(codeblocksel = SelectTag(:codeblock))
         doc = Node(:md, Node(:codeblock, "print(\"hi\")"))
-        @test Pollen.rewritedoc(rewriter, "path", doc) == Node(:md, Node(:codecell,
-            Node(:codeinput, Node(:codeblock, "print(\"hi\")")),
-            Node(:codeoutput, Node(:codeblock, ANSI("hi")))
-        ))
+        @test Pollen.rewritedoc(rewriter, "path", doc) == Node(:md,
+                   Node(:codecell,
+                        Node(:codeinput, Node(:codeblock, "print(\"hi\")")),
+                        Node(:codeoutput, Node(:codeblock, ANSI("hi")))))
     end
     @testset "Cache" begin
         # If a code block doesn't change, the result should be cached
@@ -271,10 +272,12 @@ end
     end
 
     @testset "__parsecodeattributes" begin
-        @test __parsecodeattributes(Dict(:style => "red")) == (Dict(:style => "red"), Dict(), Dict())
-        @test __parsecodeattributes(Dict(:style => "red", :output => "false")) == (
-            Dict(:style => "red"), Dict(:show => false), Dict())
-        @test __parsecodeattributes(Dict(:style => "red", :output => "false", :resultstyle => "blue")) == (
-            Dict(:style => "red"), Dict(:show => false), Dict(:style => "blue"))
+        @test __parsecodeattributes(Dict(:style => "red")) ==
+              (Dict(:style => "red"), Dict(), Dict())
+        @test __parsecodeattributes(Dict(:style => "red", :output => "false")) ==
+              (Dict(:style => "red"), Dict(:show => false), Dict())
+        @test __parsecodeattributes(Dict(:style => "red", :output => "false",
+                                         :resultstyle => "blue")) ==
+              (Dict(:style => "red"), Dict(:show => false), Dict(:style => "blue"))
     end
 end

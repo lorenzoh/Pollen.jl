@@ -1,6 +1,6 @@
 
-
-const POLLEN_TEMPLATE_DIR = Ref{String}(joinpath(dirname(dirname(pathof(Pollen))), "templates"))
+const POLLEN_TEMPLATE_DIR = Ref{String}(joinpath(dirname(dirname(pathof(Pollen))),
+                                                 "templates"))
 
 const git = Git.git()
 
@@ -28,9 +28,7 @@ end
 
 PkgTemplates.priority(::PollenPlugin) = -1000
 
-function PkgTemplates.validate(::PollenPlugin, t::Template)
-end
-
+function PkgTemplates.validate(::PollenPlugin, t::Template) end
 
 function PkgTemplates.prehook(p::PollenPlugin, ::Template, pkg_dir::AbstractString)
     # branch where Pollen output data will be stored (default "pollen")
@@ -39,27 +37,29 @@ function PkgTemplates.prehook(p::PollenPlugin, ::Template, pkg_dir::AbstractStri
     _hasbranch(pkg_dir, p.branch_page) || _createorphanbranch(pkg_dir, p.branch_page)
 end
 
-
 function _createorphanbranch(repo::String, branch::String)
-    return _withbranch(repo, branch, options=["--orphan"]) do
+    return _withbranch(repo, branch, options = ["--orphan"]) do
         readchomp(Git.git(["reset", "--hard"])) |> println
-        readchomp(Git.git(["commit", "--allow-empty", "-m", "Empty branch for Pollen.jl data"])) |> println
+        readchomp(Git.git([
+                              "commit",
+                              "--allow-empty",
+                              "-m",
+                              "Empty branch for Pollen.jl data",
+                          ])) |> println
     end
 end
-
 
 function PkgTemplates.hook(p::PollenPlugin, t::Template, pkg_dir::AbstractString)
     # create template files
     folder_docs = mkpath(joinpath(pkg_dir, p.folder))
 
     config = PkgTemplates.view(p, t, pkg_dir)
-    rendertemplate(templatename, dst) = gen_file(
-        joinpath(dst, templatename),
-        render_file(
-            joinpath(POLLEN_TEMPLATE_DIR[], templatename),
-            config,
-            ("<<", ">>"))
-    )
+    function rendertemplate(templatename, dst)
+        gen_file(joinpath(dst, templatename),
+                 render_file(joinpath(POLLEN_TEMPLATE_DIR[], templatename),
+                             config,
+                             ("<<", ">>")))
+    end
 
     rendertemplate("project.jl", folder_docs)
     rendertemplate("make.jl", folder_docs)
@@ -72,10 +72,10 @@ function PkgTemplates.hook(p::PollenPlugin, t::Template, pkg_dir::AbstractString
 
     _withbranch(pkg_dir, p.branch_primary) do
         Git.git(["add", "."]) |> readchomp |> println
-        Git.git(["commit", "-m", "'Setup Pollen.jl template files'"]) |> readchomp |> println
+        Git.git(["commit", "-m", "'Setup Pollen.jl template files'"]) |> readchomp |>
+        println
     end
 end
-
 
 function PkgTemplates.posthook(p::PollenPlugin, t::Template, pkg_dir::AbstractString)
     # Setup the environment for building the docs
@@ -84,15 +84,13 @@ function PkgTemplates.posthook(p::PollenPlugin, t::Template, pkg_dir::AbstractSt
 
     # Workflow needs to be on this branch as well
     config = PkgTemplates.view(p, t, pkg_dir)
-    rendertemplate(templatename, dst) = gen_file(
-        joinpath(dst, templatename),
-        render_file(
-            joinpath(POLLEN_TEMPLATE_DIR[], templatename),
-            config,
-            ("<<", ">>"))
-    )
+    function rendertemplate(templatename, dst)
+        gen_file(joinpath(dst, templatename),
+                 render_file(joinpath(POLLEN_TEMPLATE_DIR[], templatename),
+                             config,
+                             ("<<", ">>")))
+    end
     folder_actions = mkpath(joinpath(pkg_dir, ".github/workflows"))
-
 
     _withbranch(pkg_dir, p.branch_data) do
         rendertemplate("pollenbuild.yml", folder_actions)
@@ -108,37 +106,36 @@ function PkgTemplates.posthook(p::PollenPlugin, t::Template, pkg_dir::AbstractSt
     sleep(0.1)
 end
 
-
 function PkgTemplates.view(p::PollenPlugin, ::Template, pkg_dir::AbstractString)
-    return Dict{String, Any}(
-        "PKG" => split(pkg_dir, "/")[end],
-        "DOCS_FOLDER" => p.folder,
-        "BRANCH_DATA" => p.branch_data,
-        "BRANCH_PAGE" => p.branch_page,
-    )
+    return Dict{String, Any}("PKG" => split(pkg_dir, "/")[end],
+                             "DOCS_FOLDER" => p.folder,
+                             "BRANCH_DATA" => p.branch_data,
+                             "BRANCH_PAGE" => p.branch_page)
 end
 
 function setuppollenenv(dir::String, pkgdir::String)
     cd(pkgdir) do
         PkgTemplates.with_project(dir) do
             Pkg.add([
-                Pkg.PackageSpec(url="https://github.com/c42f/JuliaSyntax.jl"),
-                Pkg.PackageSpec(url="https://github.com/lorenzoh/ModuleInfo.jl"),
-                Pkg.PackageSpec(url="https://github.com/lorenzoh/Pollen.jl", rev="main"),
-            ])
-            Pkg.develop(Pkg.PackageSpec(path=pkgdir))
+                        Pkg.PackageSpec(url = "https://github.com/c42f/JuliaSyntax.jl"),
+                        Pkg.PackageSpec(url = "https://github.com/lorenzoh/ModuleInfo.jl"),
+                        Pkg.PackageSpec(url = "https://github.com/lorenzoh/Pollen.jl",
+                                        rev = "main"),
+                    ])
+            Pkg.develop(Pkg.PackageSpec(path = pkgdir))
         end
         Git.git(["add", "."]) |> readchomp |> println
-        Git.git(["commit", "-m", "'Pollen.jl: setup docs/ project'"]) |> readchomp |> println
+        Git.git(["commit", "-m", "'Pollen.jl: setup docs/ project'"]) |> readchomp |>
+        println
     end
 end
-
 
 function _withbranch(f, dir, branch; options = String[], verbose = true)
     _println(args...) = verbose ? println(args...) : nothing
 
     isdir(dir) || throw(ArgumentError("\"$dir\" is not an existing directory!"))
-    isdir(joinpath(dir, ".git")) || throw(ArgumentError("\"$dir\" is not a git repository!"))
+    isdir(joinpath(dir, ".git")) ||
+        throw(ArgumentError("\"$dir\" is not a git repository!"))
 
     cd(dir) do
         prevbranch = readchomp(Git.git(["branch", "--show-current"]))
@@ -153,10 +150,12 @@ function _withbranch(f, dir, branch; options = String[], verbose = true)
     end
 end
 
-
-_hasbranch(dir, branch) = try
-    cd(() -> pipeline(Git.git(["rev-parse", "--quiet", "--verify", branch])) |> readchomp, dir)
-    return true
-catch
-    return false
+function _hasbranch(dir, branch)
+    try
+        cd(() -> pipeline(Git.git(["rev-parse", "--quiet", "--verify", branch])) |>
+                 readchomp, dir)
+        return true
+    catch
+        return false
+    end
 end

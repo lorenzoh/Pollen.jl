@@ -13,7 +13,6 @@ function withext(path::AbstractPath, ext)
     return joinpath(parent(path), newname)
 end
 
-
 const RE_HREF = r"(.*)#(.*)"
 
 # TODO: refactor
@@ -26,7 +25,7 @@ function changehrefextension(href, ext)
         else
             return string(withext(Path(href), ext))
         end
-    # Has an ID
+        # Has an ID
     else
         ref, id = m[1], m[2]
         if ref == ""
@@ -37,7 +36,6 @@ function changehrefextension(href, ext)
         end
     end
 end
-
 
 function nodehref(node)
     return "/" * string(relative(path(node), path(root(node))))

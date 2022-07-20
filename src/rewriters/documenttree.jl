@@ -1,8 +1,6 @@
 
-
 function makedoctree(d::Dict)
     return Node(:doctree, [Node(:ul, [makedoctree(name, val) for (name, val) in d])])
-
 end
 
 function makedoctree(name::String, path)
@@ -10,11 +8,9 @@ function makedoctree(name::String, path)
     return Node(:li, [link])
 end
 
-
 function makedoctree(name::String, d::Dict)
     return Node(:li, [Leaf(name), Node(:ul, [makedoctree(n, val) for (n, val) in d])])
 end
-
 
 function loaddoctree(p::AbstractPath)
     xdoctree = Pollen.parse(p)

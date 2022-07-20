@@ -4,10 +4,9 @@ end
 
 function DocumentGraph()
     g = MetaDiGraph(SimpleDiGraph(0))
-    set_prop!(g, :idxs, Dict{String,Int}())
+    set_prop!(g, :idxs, Dict{String, Int}())
     return DocumentGraph(g)
 end
-
 
 function rewriteoutputs!(docdict, docgraph::DocumentGraph)
     g = docgraph.graph
@@ -26,7 +25,6 @@ function rewriteoutputs!(docdict, docgraph::DocumentGraph)
         end
     end
 
-
     # Add edges
     for (p, doc) in docdict
         _addrefedges!(g, doc, p)
@@ -34,10 +32,12 @@ function rewriteoutputs!(docdict, docgraph::DocumentGraph)
 
     for (docid, doc) in docdict
         v = get_prop(g, :idxs)[docid]
-        docdict[docid] = withattributes(doc, merge(
-            attributes(doc),
-            Dict(:backlinks => [backlinkdata(g, v_) for v_ in inneighbors(g, v) if v_ != v])
-        ))
+        docdict[docid] = withattributes(doc,
+                                        merge(attributes(doc),
+                                              Dict(:backlinks => [backlinkdata(g, v_)
+                                                                  for v_ in inneighbors(g,
+                                                                                        v)
+                                                                  if v_ != v])))
     end
 
     return docdict
@@ -47,7 +47,6 @@ function backlinkdata(g, v_)
     d = props(g, v_)
     return d
 end
-
 
 function _documentgraph(docdict)
     paths, docs = keys(docdict), collect(values(docdict))
@@ -62,8 +61,6 @@ function _documentgraph(docdict)
     return g
 end
 
-
-
 function _addrefedges!(g, doc, path)
     idxs = get_prop(g, :idxs)
     v = idxs[string(path)]
@@ -74,7 +71,6 @@ function _addrefedges!(g, doc, path)
         add_edge!(g, v, v_)
     end
 end
-
 
 function _findreferences(doc)
     refs = Set{FilePathsBase.PATH_TYPES[1]}()

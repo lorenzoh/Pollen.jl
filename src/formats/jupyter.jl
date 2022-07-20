@@ -22,60 +22,41 @@ struct JupyterFormat <: Format end
 
 extensionformat(::Val{:ipynb}) = JupyterFormat()
 
-
 function parse(io::IO, format::JupyterFormat)
     return parse(JSON3.read(io), format)
 end
 
-
 function parse(data::JSON3.Object, format::JupyterFormat)
-    attrs = merge(
-        Dict(data[:metadata]),
-        Dict(:nbformat => (data[:nbformat], data[:nbformat_minor]))
-    )
-    return Node(
-        :jupyter,
-        [parsejupytercell(cell, attrs) for cell in data[:cells]],
-        attrs,
-    )
+    attrs = merge(Dict(data[:metadata]),
+                  Dict(:nbformat => (data[:nbformat], data[:nbformat_minor])))
+    return Node(:jupyter,
+                [parsejupytercell(cell, attrs) for cell in data[:cells]],
+                attrs)
 end
 
-
-
-parsejupytercell(cell, nbattrs) =
+function parsejupytercell(cell, nbattrs)
     parsejupytercell(cell, nbattrs, Val(Symbol(cell[:cell_type])))
-
+end
 
 function parsejupytercell(cell, nbattrs, ::Val{:markdown})
-    return withattributes(
-        parse(join(cell[:source], "\n"), MarkdownFormat()),
-        merge(cell[:metadata], Dict(:id => get(cell, :id, nothing)))
-    )
+    return withattributes(parse(join(cell[:source], "\n"), MarkdownFormat()),
+                          merge(cell[:metadata], Dict(:id => get(cell, :id, nothing))))
 end
 
 function parsejupytercell(cell, nbattrs, ::Val{:code})
     code = join(cell[:source])
-    codeblock = Node(:codeinput, Node(:codeblock, code; lang = nbattrs[:kernelspec][:language]))
+    codeblock = Node(:codeinput,
+                     Node(:codeblock, code; lang = nbattrs[:kernelspec][:language]))
     chs = XTree[codeblock]
 
-
-    return Node(
-        :codecell, [
-            codeblock,
-            _parsecelloutputs(cell[:outputs])...
-        ],
-        merge(
-            Dict(cell[:metadata]),
-            Dict(
-                :id => get(cell, :id, nothing),
-                :execution_count => cell[:execution_count],
-            )
-        )
-    )
-
-
+    return Node(:codecell, [
+                    codeblock,
+                    _parsecelloutputs(cell[:outputs])...,
+                ],
+                merge(Dict(cell[:metadata]),
+                      Dict(:id => get(cell, :id, nothing),
+                           :execution_count => cell[:execution_count])))
 end
-
 
 function _parsecelloutputs(outputs)
     cs = Node[]
@@ -104,6 +85,5 @@ function _parsecelloutputs(outputs)
     end
     return cs
 end
-
 
 #dict(x::Leaf{PreRendered}) = Dict(:mimes => x[].reprs)

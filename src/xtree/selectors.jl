@@ -25,7 +25,7 @@ matches(sel::Selector, x) = false
 Selects all nodes or leaves for which function `f` returns `true`.
 """
 struct SelectCondition <: Selector
-    f
+    f::Any
 end
 matches(sel::SelectCondition, x) = sel.f(x)
 
@@ -56,7 +56,7 @@ end
 
 matches(sel::SelectTag, x::Node) = sel.tag == tag(x)
 
-struct SelectOr{T<:Tuple} <: Selector
+struct SelectOr{T <: Tuple} <: Selector
     selectors::T
 end
 
@@ -65,13 +65,12 @@ Base.:(|)(selor::SelectOr, sel::Selector) = SelectOr((selor.seletors..., sel))
 
 matches(sel::SelectOr, x) = any(matches(s, x) for s in sel.selectors)
 
-struct SelectAnd{T<:Tuple} <: Selector
+struct SelectAnd{T <: Tuple} <: Selector
     selectors::T
 end
 
 Base.:(&)(sel1::Selector, sel2::Selector) = SelectAnd((sel1, sel2))
 Base.:(&)(seland::SelectAnd, sel::Selector) = SelectAnd((seland.selectors..., sel))
-
 
 matches(sel::SelectAnd, x) = all(matches(s, x) for s in sel.selectors)
 
@@ -97,9 +96,9 @@ struct SelectAttrEq{T} <: Selector
     val::T
 end
 
-matches(sel::SelectAttrEq, node::Node) =
+function matches(sel::SelectAttrEq, node::Node)
     haskey(attributes(node), sel.attr) && attributes(node)[sel.attr] == sel.val
-
+end
 
 """
     SelectHasAttr(name)
@@ -111,7 +110,6 @@ struct SelectHasAttr <: Selector
 end
 
 matches(sel::SelectHasAttr, x::Node) = haskey(attributes(x), sel.attr)
-
 
 ## API
 
@@ -132,7 +130,6 @@ select(node, Pollen.SelectLeaf()) |> collect
 """
 select(xtree::XTree, sel::Selector) = (x for x in PostOrderDFS(xtree) if matches(sel, x))
 
-
 """
     selectfirst(tree, selector)
 
@@ -147,8 +144,6 @@ function selectfirst(xtree::XTree, sel::Selector)
     end
     return nothing
 end
-
-
 
 @testset "Selectors" begin
     leaf = Leaf(1)

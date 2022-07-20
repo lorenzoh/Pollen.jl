@@ -1,5 +1,4 @@
 
-
 """
     Project(rewriters)
 
@@ -22,9 +21,10 @@ function Project(rewriters)
     return Project(sources, outputs, rewriters)
 end
 
-
-Base.show(io::IO, project::Project) = print(io, "Project($(length(project.sources)) documents, $(length(project.rewriters)) rewriters)")
-
+function Base.show(io::IO, project::Project)
+    print(io,
+          "Project($(length(project.sources)) documents, $(length(project.rewriters)) rewriters)")
+end
 
 """
     rewritesources!(project, docids) -> rewritten_docids
@@ -45,11 +45,12 @@ function rewritesources!(sourcedocs, outputdocs, rewriters::Vector{<:Rewriter}, 
         docids = union(docids, keys(docs))
     end
 
-    merge!(outputdocs, rewriteoutputs!(Dict{String, Any}(docid => outputdocs[docid] for docid in docids), rewriters))
+    merge!(outputdocs,
+           rewriteoutputs!(Dict{String, Any}(docid => outputdocs[docid] for docid in docids),
+                           rewriters))
 
     return docids
 end
-
 
 """
     rewritedocs(sources, rewriters) -> outputs
@@ -59,8 +60,7 @@ Applies `rewriters` to a collection of `sources`.
 function rewritedocs(sources, rewriters)
     outputs = ThreadSafeDict{String, XTree}()
     docids = collect(keys(sources))
-    foreachprogress(eachindex(docids), description = "Rewriting documents...",
-                    parallel=true) do i
+    Threads.@threads for i in eachindex(docids)
         docid = docids[i]
         doc = sources[docid]
         foreach(rewriters) do rewriter
@@ -79,7 +79,6 @@ function rewriteoutputs!(outputs, rewriters::Vector)
 end
 rewriteoutputs!(outputs, ::Rewriter) = outputs
 
-
 """
     createsources!(rewriters) -> sources
 
@@ -93,13 +92,11 @@ function createsources!(rewriters::Vector{<:Rewriter})
     return merge(docs...)
 end
 
-
 function reset!(project::Project)
     foreach(k -> delete!(project.sources, k), keys(project.sources))
     foreach(k -> delete!(project.outputs, k), keys(project.outputs))
     foreach(reset!, project.rewriters)
 end
-
 
 @testset "Project" begin
     # sources are loaded on project creation

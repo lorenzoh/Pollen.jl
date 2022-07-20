@@ -1,47 +1,61 @@
 Base.@kwdef struct DocumentFolder <: Rewriter
     dirs::Vector{Pair{String, String}}
     filterfn = hasextension(["md", "ipynb"])
-    formatfn = extensionformat
+    loadfn = _defaultload
     files::Dict{String, FileLoader} = Dict{String, FileLoader}()
 end
+_defaultload(file, _) = Pollen.parse(Path(file))
 
-DocumentFolder(dirs::Vector; kwargs...) =
+function DocumentFolder(dirs::Vector; kwargs...)
     DocumentFolder(; dirs = map(d -> d isa Pair ? d : "" => d, dirs), kwargs...)
+end
 DocumentFolder(dir::String; kwargs...) = DocumentFolder([dir]; kwargs...)
-
 
 function createsources!(rewriter::DocumentFolder)
     sources = Dict{String, Node}()
     for (prefix, dir) in rewriter.dirs
-        for file in filter(rewriter.filterfn, rglob("*", dir))
-            docid = "$prefix$(relpath(file, dir))"
+        for file::String in filter(rewriter.filterfn, rglob("*", dir))
+            docid = "$(prefix)$(relpath(file, dir))"
 
             # Skip if already created
             docid in keys(rewriter.files) && continue
-
-            loadfn() = Pollen.parse(Path(file), rewriter.formatfn(file))
-            rewriter.files[docid] = FileLoader(file, docid, loadfn)
-            sources[docid] = loadfn()
+            rewriter.files[docid] = FileLoader(file, docid,
+                                               () -> rewriter.loadfn(file, docid))
+            sources[docid] = rewriter.loadfn(file, docid)
         end
     end
     return sources
 end
-
 
 function reset!(rewriter::DocumentFolder)
     # Clear the dictionary with collected files, so they can be recreated
     empty!(rewriter.files)
 end
 
-
 function geteventhandler(rewriter::DocumentFolder, ch)
-    return makefilewatcher(ch, rewriter.files, last.(rewriter.dirs))
+    return makefilewatcher(ch, collect(values(rewriter.files)), last.(rewriter.dirs))
 end
 
-
-function DocumentationFiles(ms::Module; extensions = ["md", "ipynb"], kwargs...)
+function DocumentationFiles(ms::Vector{Module}; extensions = ["md", "ipynb"], kwargs...)
     filterfn = hasextension(extensions)
-    return DocumentFolder(["$m/doc/" => pkgdir(m) for m in ms]; filterfn, kwargs...)
+    pkgdirs = pkgdir.(ms)
+    pkgids = ["$m@$(ModuleInfo.packageversion(m))" for m in ms]
+    if any(isnothing, pkgdirs)
+        i::Int = findfirst(isnothing, pkgdirs)
+        throw(ArgumentError("Could not find a package directory for module '$(ms[i])'"))
+    end
+    return DocumentFolder(["$pkgid/doc/" => dir for (pkgid, dir) in zip(pkgids, pkgdirs)];
+                          filterfn, loadfn = __load_documentation_file, kwargs...)
+end
+DocumentationFiles(m::Module; kwargs...) = DocumentationFiles([m]; kwargs...)
+
+function __load_documentation_file(file, id)
+    pfile = Path(file)
+    doc = Pollen.parse(pfile)
+    node_title = selectfirst(doc, SelectTag(:h1))
+    title = isnothing(node_title) ? filename(pfile) : gettext(node_title)
+    attrs = Dict(:path => string(file), :title => title)
+    return Node(:document, [doc], attrs)
 end
 
 # Utilities
