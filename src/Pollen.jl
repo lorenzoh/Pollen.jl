@@ -113,6 +113,7 @@ export select, selectfirst,
        DocumentFolder,
        documentationproject, Server, runserver, ServeFiles, ServeFilesLazy,
        PackageWatcher, StaticResources, ParseCode, PackageDocumentation,
-       RelativeLinks, DocumentGraph, SearchIndex, SaveAttributes, LoadFrontendConfig
+       RelativeLinks, DocumentGraph, SearchIndex, SaveAttributes, LoadFrontendConfig,
+       ResolveReferences
 
 end

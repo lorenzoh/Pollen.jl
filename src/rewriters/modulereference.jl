@@ -27,13 +27,14 @@ end
 
 function __make_reference_file(I::PackageIndex, symbol::ModuleInfo.SymbolInfo)
     children = map(__parse_docstring, ModuleInfo.getdocstrings(I, symbol_id = symbol.id))
-    attrs = Dict{Symbol, Any}(:symbol_id => symbol.id, :title => symbol.name)
+    attrs = Dict{Symbol, Any}(:symbol_id => symbol.id, :title => symbol.name,
+                              :module => symbol.module_id)
     return Node(:documentation, children, attrs)
 end
 
 function __parse_docstring(doc::ModuleInfo.DocstringInfo)
     node = parse(doc.docstring, MarkdownFormat())
-    return Node(:docstring, [node],
-                Dict(:module => doc.module_id, :symbol => doc.symbol_id, :file => doc.file,
+    return Node(:docstring, Node[node],
+                Dict{Symbol, Any}(:module => doc.module_id, :symbol => doc.symbol_id, :file => doc.file,
                      :line => doc.line))
 end

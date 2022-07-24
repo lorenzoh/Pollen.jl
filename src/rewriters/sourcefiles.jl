@@ -18,7 +18,7 @@ function __load_source_file(file::String, id)
     return Node(:sourcefile,
                 [doc],
                 Dict{Symbol, Any}(:path => file, :title => title,
-                                  :module => split(id, "/")[1]))
+                                  :module => split(split(id, "/")[1], "@")[1]))
 end
 
 # Some helpers for loading source files, ensuring
