@@ -51,11 +51,14 @@ function geteventhandler(serve::ServeFilesLazy, server, ch)
     return FileServer(builddir,
                       port = serve.port,
                       allow_cors = true,
-                      preprocess_request = req -> _lazyservecallback(req, ch, builddir))
+                      preprocess_request = req -> _lazyservecallback(req, ch, builddir, server.project))
 end
 
-function _lazyservecallback(req, ch, builddir)
-    if !(endswith(req.target, ".html") || endswith(req.target, ".json"))
+function _lazyservecallback(req, ch, builddir, project)
+    # TODO FIXME this will break for extensions without exactly 4 characters
+    documentid = req.target[2:(end - 5)]
+    if !(endswith(req.target, ".html") || endswith(req.target, ".json")) || !(documentid in keys(project.sources))
+        LiveServer.HTTP.setheader(req, "Access-Control-Allow-Origin" => "*")
         return req
     else
         buildpath = joinpath(builddir, req.target[2:end])
@@ -69,7 +72,7 @@ function _lazyservecallback(req, ch, builddir)
             write(f, "Building...")
         end
         =#
-        sourcepath = Path(req.target[2:(end - 5)])  # cut off / and .html
+        sourcepath = Path(documentid)  # cut off / and .html
         put!(ch, DocRequested(sourcepath))
         # Give time to build so file server doesn't instantly return a 404
         sleep(0.05)

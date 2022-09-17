@@ -80,10 +80,11 @@ include("rewriters/parsecode.jl")
 include("rewriters/parseansi.jl")
 #include("rewriters/references.jl")
 include("rewriters/resolvereferences.jl")
-include("rewriters/documentgraph.jl")
+include("rewriters/backlinks.jl")
 include("rewriters/searchindex.jl")
 include("rewriters/saveattributes.jl")
-include("rewriters/loadfrontendconfig.jl")
+include("rewriters/docversions.jl")
+#include("rewriters/loadfrontendconfig.jl")
 include("rewriters/staticresources.jl")
 
 FRONTENDDIR = ""
@@ -105,7 +106,7 @@ export select, selectfirst,
        Replacer, Inserter, HTMLTemplater, ExecuteCode,
        NthChild, FirstChild, Before, After,
        Project, build, FileBuilder,
-       SelectTag, SelectLeaf, SelectOr, XExpr, ChangeTag, htmlify, AddSlugID,
+       SelectTag, SelectLeaf, SelectOr, XExpr, ChangeTag, htmlify,
        AddTableOfContents, SelectAttrEq,
        Selector, resolveidentifier, serve,
 # rewriters
@@ -113,7 +114,9 @@ export select, selectfirst,
        DocumentFolder,
        documentationproject, Server, runserver, ServeFiles, ServeFilesLazy,
        PackageWatcher, StaticResources, ParseCode, PackageDocumentation,
-       RelativeLinks, DocumentGraph, SearchIndex, SaveAttributes, LoadFrontendConfig,
-       ResolveReferences
+       RelativeLinks, Backlinks, SearchIndex, SaveAttributes, LoadFrontendConfig,
+       ResolveReferences,
+
+       PackageIndex
 
 end

@@ -1,14 +1,14 @@
-struct DocumentGraph <: Rewriter
+struct Backlinks <: Rewriter
     graph::Any
 end
 
-function DocumentGraph()
+function Backlinks()
     g = MetaDiGraph(SimpleDiGraph(0))
     set_prop!(g, :idxs, Dict{String, Int}())
-    return DocumentGraph(g)
+    return Backlinks(g)
 end
 
-function rewriteoutputs!(docdict, docgraph::DocumentGraph)
+function rewriteoutputs!(docdict, docgraph::Backlinks)
     g = docgraph.graph
     idxs = get_prop(g, :idxs)
 
@@ -48,19 +48,6 @@ function backlinkdata(g, v_)
     return d
 end
 
-function _documentgraph(docdict)
-    paths, docs = keys(docdict), collect(values(docdict))
-    idxs = Dict(string(p) => i for (i, p) in enumerate(paths))
-    g = MetaDiGraph(SimpleDiGraph(length(idxs)))
-    set_prop!(g, :idxs, idxs)
-    for (p, i) in idxs
-        set_prop!(g, i, :docid, p)
-        set_prop!(g, i, :title, get(attributes(docs[i]), :title, string(i)))
-        set_prop!(g, i, :tag, tag(docs[i]))
-    end
-    return g
-end
-
 function _addrefedges!(g, doc, path)
     idxs = get_prop(g, :idxs)
     v = idxs[string(path)]
@@ -72,15 +59,6 @@ function _addrefedges!(g, doc, path)
     end
 end
 
-function _findreferences(doc)
-    refs = Set{FilePathsBase.PATH_TYPES[1]}()
-
-    for xref in select(doc, SelectDocumentReference())
-        push!(refs, Path(attributes(xref)[:document_id]))
-    end
-    for xref in select(doc, SelectSymbolReference())
-        document_id = attributes(xref)[:document_id]
-        push!(refs, document_id)
-    end
-    return refs
-end
+SelectReference() = SelectTag(:reference) & SelectHasAttr(:document_id)
+SelectSymbolReference() = SelectReference() & SelectAttrEq(:reftype, "symbol")
+SelectDocumentReference() = SelectReference() & SelectAttrEq(:reftype, "document")

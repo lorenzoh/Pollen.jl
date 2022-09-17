@@ -32,7 +32,7 @@ children nodes and key-value attributes.
 You can access and modify these using
 
 - [`tag`](#) and [`withtag`](#)
-- [`children`](#) and [`withchildren`](#)
+- [`AbstractTrees.children`](#) and [`withchildren`](#)
 - [`attributes`](#) and [`withattributes`](#)
 
 ## Examples
@@ -48,7 +48,7 @@ Node(:paragraph,
     Dict(:class => "tight"))
 ```
 """
-struct Node{T <: XTree, D <: Dict{Symbol}} <: XTree
+Base.@kwdef struct Node{T <: XTree, D <: Dict{Symbol}} <: XTree
     tag::Symbol
     children::Vector{T}
     attributes::D

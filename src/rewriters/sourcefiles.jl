@@ -1,11 +1,11 @@
 
-function SourceFiles(ms::Vector{Module})
+function SourceFiles(ms::Vector{Module}; pkgtags = Dict{String, String}())
     pkgdirs = pkgdir.(ms)
     if any(isnothing, pkgdirs)
         i::Int = findfirst(isnothing, pkgdirs)
         throw(ArgumentError("Could not find a package directory for module '$(ms[i])'"))
     end
-    pkgids = ["$m@$(ModuleInfo.packageversion(m))" for m in ms]
+    pkgids = __getpkgids(ms; pkgtags)
     return DocumentFolder(["$pkgid/src/" => joinpath(dir, "src")
                            for (pkgid, dir) in zip(pkgids, pkgdirs)];
                           filterfn = hasextension("jl"), loadfn = __load_source_file)

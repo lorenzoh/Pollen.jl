@@ -49,7 +49,7 @@ Once this is done, you'll have a brand new package ready to use Pollen.jl's docu
 
 ## Writing documentation interactively
 
-Now, we'll work on the documentation and preview it locally. If a package has Pollen documentation set up, you can run an preview server with live reload using [`servedocs`](#):
+Now, we'll work on the documentation and preview it locally. If a package has Pollen documentation set up, you can run an preview server with live reload using [`Pollen.servedocs`](#):
 
 ```julia
 using PollenExample

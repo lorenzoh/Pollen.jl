@@ -10,10 +10,14 @@ function SaveAttributes(keys = nothing;
 end
 
 function postbuild(save::SaveAttributes, project, builder::FileBuilder)
-    attrs = Dict{String, Dict}()
-    for (p, doc) in (save.useoutputs ? project.outputs : project.sources)
-        a::Dict = attributes(doc)
+
+    attrss = Dict{String, Dict}()
+
+    for (id, doc) in (save.useoutputs ? project.outputs : project.sources)
+        pkg = first(splitpath(id))
+        attrs = get!(attrss, pkg, Dict{String, Dict}())
         ks = isnothing(save.keys) ? keys(a) : save.keys
+        a = attributes(doc)
         d = Dict{Symbol, Any}()
         for k in ks
             if k isa Pair
@@ -24,11 +28,14 @@ function postbuild(save::SaveAttributes, project, builder::FileBuilder)
             end
         end
         d[:tag] = tag(doc)
-        attrs[string(p)] = d
+        attrs[id] = d
     end
 
-    dst = joinpath(builder.dir, save.path)
-    open(dst, "w") do f
-        JSON3.write(f, attrs)
+    for (pkg, attrs) in attrss
+        dst = joinpath(builder.dir, pkg, "index.json")
+        open(dst, "w") do f
+            JSON3.write(f, attrs)
+        end
     end
+    return
 end

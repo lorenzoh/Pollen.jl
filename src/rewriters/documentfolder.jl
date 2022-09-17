@@ -6,6 +6,11 @@ Base.@kwdef struct DocumentFolder <: Rewriter
 end
 _defaultload(file, _) = Pollen.parse(Path(file))
 
+function Base.show(io::IO, df::DocumentFolder)
+    print(io, "DocumentFolder(", length(keys(df.files)), " files, ", length(df.dirs),
+          " folders)")
+end
+
 function DocumentFolder(dirs::Vector; kwargs...)
     DocumentFolder(; dirs = map(d -> d isa Pair ? d : "" => d, dirs), kwargs...)
 end
@@ -36,10 +41,11 @@ function geteventhandler(rewriter::DocumentFolder, ch)
     return makefilewatcher(ch, collect(values(rewriter.files)), last.(rewriter.dirs))
 end
 
-function DocumentationFiles(ms::Vector{Module}; extensions = ["md", "ipynb"], kwargs...)
+function DocumentationFiles(ms::Vector{Module}; extensions = ["md", "ipynb"],
+                            pkgtags = Dict{String, String}(), kwargs...)
     filterfn = hasextension(extensions)
     pkgdirs = pkgdir.(ms)
-    pkgids = ["$m@$(ModuleInfo.packageversion(m))" for m in ms]
+    pkgids = __getpkgids(ms; pkgtags)
     if any(isnothing, pkgdirs)
         i::Int = findfirst(isnothing, pkgdirs)
         throw(ArgumentError("Could not find a package directory for module '$(ms[i])'"))
@@ -59,6 +65,11 @@ function __load_documentation_file(file, id)
 end
 
 # Utilities
+
+function __getpkgids(ms; pkgtags = Dict{String, String}())
+    ["$m@$(ModuleInfo.packageversion(m, get(pkgtags, ModuleInfo.moduleid(m), nothing)))"
+     for m in ms]
+end
 
 hasextension(f, ext) = endswith(f, string(ext))
 hasextension(f, exts::Vector) = any(map(ext -> hasextension(f, ext), exts))

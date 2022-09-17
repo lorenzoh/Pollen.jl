@@ -19,7 +19,7 @@ project = Project(
         ExecuteCode(),
         PackageDocumentation(ms),
         StaticResources(),
-        DocumentGraph(),
+        Backlinks(),
         SearchIndex(),
         SaveAttributes((:title,)),
         LoadFrontendConfig(Pkg.pkgdir(m))

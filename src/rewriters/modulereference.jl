@@ -1,12 +1,31 @@
 
+"""
+    ModuleReference(modules)
+    ModuleReference(pkgindex)
+
+A [`Rewriter`](#) that creates a reference document for every symbol that
+is defined in the packages that define `modules` or is indexed in `pkgindex`.
+"""
 struct ModuleReference <: Rewriter
-    ms::Vector{Module}
     info::ModuleInfo.PackageIndex
     ids::Set{String}
 end
 
-function ModuleReference(ms)
-    ModuleReference(ms, PackageIndex(ms, verbose = true, cache = true), Set{String}())
+ModuleReference(pkgindex::ModuleInfo.PackageIndex) = ModuleReference(pkgindex, Set{String}())
+
+function ModuleReference(ms; kwargs...)
+    ModuleReference(PackageIndex(ms; kwargs...))
+end
+
+
+# TODO: make autoreload with Revise.jl
+
+function Base.show(io::IO, mr::ModuleReference)
+    print(io, "ModuleReference(")
+    show(io, mr.info.modules.id)
+    print(io, ", ")
+    show(io, mr.info)
+    print(io, ")")
 end
 
 function createsources!(rewriter::ModuleReference)
@@ -22,19 +41,28 @@ end
 
 function __get_ref_docid(I::ModuleInfo.PackageIndex, symbol::ModuleInfo.SymbolInfo)
     shortid = symbol.id[(length(symbol.module_id) + 2):end]
-    "$(ModuleInfo.getid(ModuleInfo.getpackage(I, symbol)))/ref/$shortid"
+    "$(ModuleInfo.getid(ModuleInfo.getpackage(I, symbol)))/ref/$(symbol.module_id).$shortid"
 end
 
 function __make_reference_file(I::PackageIndex, symbol::ModuleInfo.SymbolInfo)
-    children = map(__parse_docstring, ModuleInfo.getdocstrings(I, symbol_id = symbol.id))
-    attrs = Dict{Symbol, Any}(:symbol_id => symbol.id, :title => symbol.name,
-                              :module => symbol.module_id)
-    return Node(:documentation, children, attrs)
+    children = [__parse_docstring(d)
+                for d in ModuleInfo.getdocstrings(I, symbol_id = symbol.id)]
+    attributes = Dict{Symbol, Any}(:symbol_id => symbol.id, :title => symbol.name,
+                              :module_id => symbol.module_id, :kind => symbol.kind,
+                              :package_id => ModuleInfo.getid(ModuleInfo.getpackage(I, symbol)))
+    if symbol.kind != :module
+        # todo: change
+        attributes[:public] = true
+        attributes[:methods] = ModuleInfo.getmethods(I, symbol_id = symbol.id)
+    end
+    return Node(; tag=:documentation, children, attributes)
 end
 
-function __parse_docstring(doc::ModuleInfo.DocstringInfo)
+function __parse_docstring(doc::ModuleInfo.DocstringInfo)::Node
     node = parse(doc.docstring, MarkdownFormat())
-    return Node(:docstring, Node[node],
-                Dict{Symbol, Any}(:module => doc.module_id, :symbol => doc.symbol_id, :file => doc.file,
-                     :line => doc.line))
+    return Node(tag = :docstring, children = Node[node],
+                attributes = Dict{Symbol, Any}(:module => doc.module_id,
+                                               :symbol => doc.symbol_id,
+                                               :file => doc.file,
+                                               :line => doc.line))
 end

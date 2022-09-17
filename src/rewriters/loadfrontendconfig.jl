@@ -6,7 +6,7 @@ end
 
 function LoadFrontendConfig(path::Union{String, AbstractPath}, dstpath = "config.json")
     file = joinpath(path, "Project.toml")
-    isfile(file) || throw(SystemError("loading conifg: \"$file\": No such file"))
+    isfile(file) || throw(SystemError("loading config: \"$file\": No such file"))
     projectconfig = TOML.parsefile(file)
     pollenconfig = get(projectconfig, "pollen", Dict())
     config = merge(loaddefaults(projectconfig), pollenconfig)

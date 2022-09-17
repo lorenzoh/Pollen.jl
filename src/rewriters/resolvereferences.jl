@@ -92,8 +92,17 @@ link href and other context, and
 
 =#
 
+"""
+    LinkInfo(href, title, id, node, path, package, mod)
+
+Container that stores information on a link in a document
 
 
+
+    LinkInfo()
+
+
+"""
 Base.@kwdef struct LinkInfo
     # link target href
     href::String
@@ -111,9 +120,20 @@ Base.@kwdef struct LinkInfo
     mod::Union{Nothing, String} = nothing
 end
 
+"""
+    abstract type AbstractLinkRule
 
+
+## Extending
+
+A rule `R` must implement the following methods:
+
+- [`parselink`](#)`(::R, ::LinkInfo) -> String | Nothing` checks whether the rule applies
+    to the link, returning a target if it does, or `nothing` otherwise
+- [`resolvelink`](#)`(::R, ::LinkInfo, target)` takes a parsed target and returns a new
+    `Node` that replaces the original link node.
+"""
 abstract type AbstractLinkRule end
-
 
 """
     parselink(rule::AbstractLinkRule, link::LinkInfo)
@@ -128,11 +148,25 @@ function parselink end
 function resolvelink end
 
 #=
-If a rule does not match a given link, `parselink` should return `nothing`. We can
-match a link against several rules, returning the result of the first rule that matched it:
+If a rule does not match a given link, `parselink` should return `nothing`. The high-level
+call will use `parselink` to see if the rule matches.
 =#
 
-function resolvelink(rules::AbstractVector{<:AbstractLinkRule}, link::LinkInfo, node::Node)
+function resolvelink(rule::AbstractLinkRule, link::LinkInfo)
+    target = parselink(rule, link)
+    if isnothing(target)
+        return link.node
+    else
+        return resolvelink(rule, link, target)
+    end
+end
+
+#=
+We can match a link against several rules, returning the result of the first rule
+that matched (i.e. successfully parsed) it:
+=#
+
+function resolvelink(rules::AbstractVector{<:AbstractLinkRule}, link::LinkInfo)
     for rule in rules
         target = parselink(rule, link)
         if !isnothing(target)
@@ -140,18 +174,15 @@ function resolvelink(rules::AbstractVector{<:AbstractLinkRule}, link::LinkInfo, 
         end
     end
     # if no rules match, return the original node
-    return node
+    return link.node
 end
 
 # Before we start defining the rules, let's implement a helper that lets us easily construct
 # [`LinkInfo`](#)s from a link in a document.
 
-function LinkInfo(id::String, doc::Node, node)
-    package = first(splitpath(id))
-    href = get(attributes(node), :href, "")
-    title = gettext(node)
-    path = get(attributes(doc), :path, nothing)
-    mod = get(attributes(doc), :module, nothing)
+function LinkInfo(node::Node; id = "NULL/", href = get(attributes(node), :href, ""),
+                  title = gettext(node),
+                  path = nothing, mod = nothing, package = first(splitpath(id)), attrs...)
     return LinkInfo(; package, id, href, title, path, mod, node)
 end
 
@@ -176,11 +207,14 @@ end
 
 @testset "URLLinkRule [AbstractLinkRule]" begin
     resolve(info) = parselink(URLLinkRule(), info)
-    @test resolve(LinkInfo("https://github.com", "Github", "", nothing, "", nothing)) isa String
-    @test resolve(LinkInfo("./doc", "", "", nothing, "", nothing)) isa Nothing
-    @test resolve(LinkInfo("httpdoc", "", "", nothing, "", nothing)) isa Nothing
 
-    res = resolvelink(URLLinkRule(), Node(:a, "Text"), "https://github.com")
+    makeinfo(href) = LinkInfo(href, "title", "", Node(:o), "file.md", "", nothing)
+    @test resolve(makeinfo("https://github.com")) isa String
+    @test resolve(makeinfo("./doc")) isa Nothing
+    @test resolve(makeinfo("httpdoc")) isa Nothing
+
+    res = resolvelink(URLLinkRule(),
+                      LinkInfo(Node(:a, "Text"; href = "https://github.com")))
     @test res == Node(:a, "Text"; href = "https://github.com")
 end
 
@@ -217,7 +251,7 @@ function parselink(rule::InternalLinkRule, link::LinkInfo)
         # relative link (doesn't start with '/')
         srcparts = split(link.id, '/')
         doctype = srcparts[2]
-        srcpath = joinpath([".", srcparts[3:end-1]...])
+        srcpath = joinpath([".", srcparts[3:(end - 1)]...])
         path = normpath(joinpath(srcpath, link.href))
         # must not go outside folder
         startswith(path, "..") && return nothing
@@ -234,24 +268,37 @@ end
 @testset "InternalLinkRule [AbstractLinkRule]" begin
     resolve(info) = parselink(InternalLinkRule(), info)
     # full link
-    @test resolve(LinkInfo("Pollen@0.1.0/doc/README.md", "", "", nothing, "", nothing)) == "Pollen@0.1.0/doc/README.md"
+    @test resolve(LinkInfo("Pollen@0.1.0/doc/README.md", "", "", Node(:null), nothing, "",
+                           nothing)) ==
+          "Pollen@0.1.0/doc/README.md"
     # doc type given, package omitted
-    @test resolve(LinkInfo("/doc/README.md", "", "", nothing, "Pollen@0.1.0", nothing)) == "Pollen@0.1.0/doc/README.md"
+    @test resolve(LinkInfo("/doc/README.md", "", "", Node(:null), nothing, "Pollen@0.1.0",
+                           nothing)) ==
+          "Pollen@0.1.0/doc/README.md"
     # doc type omitted, package omitted
-    @test resolve(LinkInfo("/README.md", "", "Pkg@1/doc/bla.md", nothing, "Pollen@0.1.0", nothing)) == "Pollen@0.1.0/doc/README.md"
+    @test resolve(LinkInfo("/README.md", "", "Pkg@1/doc/bla.md", Node(:null), nothing,
+                           "Pollen@0.1.0",
+                           nothing)) == "Pollen@0.1.0/doc/README.md"
     # only relative path given
-    @test resolve(LinkInfo("README.md", "", "Pkg@1/doc/bla.md", nothing, "Pollen@0.1.0", nothing)) == "Pollen@0.1.0/doc/README.md"
-    @test resolve(LinkInfo("../README.md", "", "Pkg@1/doc/folder/bla.md", nothing, "Pollen@0.1.0", nothing)) == "Pollen@0.1.0/doc/README.md"
+    @test resolve(LinkInfo("README.md", "", "Pkg@1/doc/bla.md", Node(:null), nothing,
+                           "Pollen@0.1.0",
+                           nothing)) == "Pollen@0.1.0/doc/README.md"
+    @test resolve(LinkInfo("../README.md", "", "Pkg@1/doc/folder/bla.md", Node(:null),
+                           nothing,
+                           "Pollen@0.1.0", nothing)) == "Pollen@0.1.0/doc/README.md"
 
     # Cases where link is not resolvable
     # empty link target
-    @test resolve(LinkInfo("", "", "", nothing, "", nothing)) isa Nothing
-    @test resolve(LinkInfo("/", "", "", nothing, "", nothing)) isa Nothing
+    @test resolve(LinkInfo("", "", "", Node(:null), nothing, "", nothing)) isa Nothing
+    @test resolve(LinkInfo("/", "", "", Node(:null), nothing, "", nothing)) isa Nothing
     # relative link going above root folder
-    @test resolve(LinkInfo("../../README.md", "", "Pkg@1/doc/bla.md", nothing, "Pollen@0.1.0", nothing)) isa Nothing
+    @test resolve(LinkInfo("../../README.md", "", "Pkg@1/doc/bla.md", Node(:null), nothing,
+                           "Pollen@0.1.0", nothing)) isa Nothing
 
-    @test resolvelink(InternalLinkRule(), Node(:a, "Title"), "Pollen@0.1.0/doc/README.md"
-        ) == Node(:reference,"Title", document_id="Pollen@0.1.0/doc/README.md")
+    @test resolvelink(InternalLinkRule(),
+                      LinkInfo(Node(:a, "Title", href = "Pollen@0.1.0/doc/README.md"))) ==
+          Node(:reference, "Title", document_id = "Pollen@0.1.0/doc/README.md",
+               href = "Pollen@0.1.0/doc/README.md")
 end
 
 #=
@@ -271,16 +318,12 @@ Here, we implement a link rule that finds these links. Resolving the symbols bas
 relevant modules will be done later, in the rewriter that also modifies the documents.
 =#
 
-
 struct SymbolLinkRule <: AbstractLinkRule
     I::ModuleInfo.PackageIndex
-    prefixes
+    prefixes::Any
 end
 
-function SymbolLinkRule(ms; prefixes = ("#", "@ref"))
-    SymbolLinkRule(PackageIndex(ms, verbose = true, cache = true), prefixes)
-end
-
+SymbolLinkRule(pkgindex) = SymbolLinkRule(pkgindex, ("@ref", "#"))
 
 function parselink(rule::SymbolLinkRule, link::LinkInfo)
     parts = split(link.href, ' ')
@@ -292,55 +335,66 @@ function parselink(rule::SymbolLinkRule, link::LinkInfo)
             # symbol is given in link node content
             length(children(link.node)) == 1 || return nothing
             child = only(children(link.node))
-            if child isa Node && tag(child) === :code
-                return (; symbol = gettext(link.node), mod = link.mod)
-            end
+            child isa Node || return nothing
+            tag(child) == :code || return nothing
+
+            return (; symbol = gettext(child), mod = link.mod)
         end
     end
 end
 
 function resolvelink(rule::SymbolLinkRule, link::LinkInfo, target)
-    refid = __resolveidentifier(rule.I, target.symbol, target.mod)
-    if isnothing(refid)
-        @warn "Could not resolve symbol link!" target link
+    bindings = unique(b -> b.symbol_id, resolvesymbol(rule.I, target.symbol))
+    if isempty(bindings)
+        @debug "Could not resolve symbol link!" target link
+        # return unmodified link node
         return link.node
     else
-        title = gettext(link.node)
-        return Node(:reference, XTree[Leaf(title)], merge(attributes(link.node),
-                                    Dict(:document_id => refid)))
+        if length(bindings) > 1
+            @debug """Found multiple possible bindings for automatic hyperreference:
+                    $([b.id => b.symbol_id for b in bindings]). Using `$(bindings[begin].symbol_id)`""" target
+        end
+        return Node(:reference, children(link.node),
+                    merge(attributes(link.node),
+                          Dict(:document_id => __id_from_binding(rule.I, bindings[1]),
+                               :reftype => "symbol")))
     end
 end
 
-
-function __resolveidentifier(I::ModuleInfo.PackageIndex, identifier, m)
-    deps = if m isa String
-        pkg = ModuleInfo.getpackage(I, ModuleInfo.getmodule(I, m))
-        deps = Set(pkg.dependencies)
-        push!(deps, m)
-        deps
-    else
-        deps = 1
+function resolvesymbol(pkgindex::PackageIndex, symbol::String, modules = nothing)
+    if isnothing(modules)
+        modules = pkgindex.modules[pkgindex.modules.id .== pkgindex.modules.parent].id
     end
-    name = identifier
-    i = findfirst(s -> s.module_id in deps && s.name == name, I.symbols)
-    isnothing(i) && return nothing
-    return "$(ModuleInfo.getid(pkg))/ref/$(I.symbols.id[i])"
+    bindings = ModuleInfo.resolvebinding(pkgindex,
+                                         modules,
+                                         symbol)
+    filter(b -> haskey(pkgindex.index.symbols, b.symbol_id), bindings)
 end
 
-
+function __id_from_binding(I::ModuleInfo.PackageIndex, binding::ModuleInfo.BindingInfo)
+    symbol = ModuleInfo.getsymbol(I, binding)
+    isnothing(symbol) && @show binding
+    package = ModuleInfo.getpackage(I, symbol)
+    return "$(package.name)@$(package.version)/ref/$(symbol.id)"
+end
 
 @testset "SymbolLinkRule [AbstractLinkRule]" begin
     resolve(info) = parselink(SymbolLinkRule([Pollen]), info)
-    @test resolve(LinkInfo("#", "`sum`", "", nothing, "", nothing)).symbol == "sum"
-    @test resolve(LinkInfo("@ref", "`sum`", "", nothing, "", nothing)).symbol == "sum"
-    @test resolve(LinkInfo("#", "sum", "", nothing, "", nothing)) isa Nothing
-    @test resolve(LinkInfo("# sum", "bla", "", nothing, "", nothing)).symbol == "sum"
-    @test resolve(LinkInfo("@ref Pollen.serve", "bla", "", nothing, "", nothing)).symbol == "Pollen.serve"
-    @test resolve(LinkInfo("", "bla", "", nothing, "", nothing)) isa Nothing
-    @test resolve(LinkInfo("##", "bla", "", nothing, "", nothing)) isa Nothing
+    @test resolve(LinkInfo(Node(:a, Node(:code, "sum"), href = "#"))).symbol ==
+          "sum"
+    @test resolve(LinkInfo(Node(:a, Node(:code, "sum"), href = "@ref"))).symbol ==
+          "sum"
+    @test resolve(LinkInfo(Node(:a, Node(:code, "sum"), href = ""))) isa Nothing
+    @test resolve(LinkInfo(Node(:a, "the function", href = "# Pollen.serve"))).symbol ==
+          "Pollen.serve"
+    @test resolve(LinkInfo(Node(:a, "the function", href = ""))) isa Nothing
+    @test resolve(LinkInfo(Node(:a, Node(:code, "sum"), href = "##"))) isa Nothing
 
-    @test resolvelink(SymbolLinkRule([Pollen]), Node(:a, "`serve`", href = "#"), (symbol = "serve", mod = "Pollen")
-        ) == Node(:reference,"serve", document_id="Pollen@0.1.0/ref/Pollen.serve", href = "#")
+    @test resolvelink(SymbolLinkRule([Pollen]),
+                      LinkInfo(Node(:a, Node(:code, "serve"), href = "#")),
+                      (symbol = "serve", mod = "Pollen")) ==
+          Node(:reference, "serve", document_id = "Pollen@0.1.0/ref/Pollen.serve",
+               href = "#")
 end
 
 #=
@@ -360,21 +414,62 @@ struct ResolveReferences <: Rewriter
     selector::Selector
 end
 
-function ResolveReferences(ms = []; selector = DEFAULT_LINK_SELECTOR)
-    rules = if isempty(ms)
+function ResolveReferences(pkgindex = nothing; selector = DEFAULT_LINK_SELECTOR, prefixes = ("@ref", "#"))
+    rules = if isnothing(pkgindex)
         [URLLinkRule(), InternalLinkRule()]
     else
-        [URLLinkRule(), SymbolLinkRule(ms), InternalLinkRule()]
+        [URLLinkRule(), SymbolLinkRule(pkgindex, prefixes), InternalLinkRule()]
     end
     return ResolveReferences(rules, selector)
 end
 
 const DEFAULT_LINK_SELECTOR = SelectTag(:a) & SelectHasAttr(:href)
 
-
 function rewritedoc(rewriter::ResolveReferences, docid, doc::Node)
     cata(doc, rewriter.selector) do node
-        link = LinkInfo(docid, doc, node)
-        node_ = resolvelink(rewriter.rules[1:2], link, node)
+        link = LinkInfo(node; id = docid, mod = get(attributes(doc), :module, nothing),
+                        attributes(doc)...)
+        resolvelink(rewriter.rules, link)
+    end
+end
+
+function ResolveSymbols(pkgindex::PackageIndex)
+    selector = SelectTag(:IDENTIFIER)
+    rule = SymbolCodeRule(pkgindex)
+    return ResolveReferences([rule], selector)
+end
+
+struct SymbolCodeRule <: AbstractLinkRule
+    I::PackageIndex
+end
+
+function SymbolCodeRule(ms::Vector{Module}; kwargs...)
+    SymbolCodeRule(PackageIndex(ms; recurse = 1, cache = true, kwargs...))
+end
+
+function parselink(rule::SymbolCodeRule, link::LinkInfo)
+    @assert length(children(link.node)) == 1 && only(children(link.node)) isa Leaf{String}
+    idparts = splitpath(link.id)
+    mod = if length(idparts) >= 2 && idparts[2] == "src"
+        split(idparts[begin], '@')[begin]
+    else
+    end
+    return (identifier = only(children(link.node))[], mod = mod)
+end
+
+function resolvelink(rule::SymbolCodeRule, link::LinkInfo, target)
+    modules = if !isnothing(target.mod)
+        filter(m -> startswith(m.id, target.mod), rule.I.modules).id
+    else
+        nothing
+    end
+    bindings = resolvesymbol(rule.I, target.identifier, modules)
+    if isempty(bindings)
+        return link.node
+    else
+        return Node(:reference, children(link.node),
+                    merge(attributes(link.node),
+                          Dict(:document_id => __id_from_binding(rule.I, bindings[1]),
+                               :reftype => "symbol")))
     end
 end
