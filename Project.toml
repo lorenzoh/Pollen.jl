@@ -50,7 +50,7 @@ Gumbo = "0.8"
 IOCapture = "0.2"
 InlineTest = "0.2"
 JSON3 = "1.9"
-JuliaSyntax = "0.1"
+JuliaSyntax = "0.1, 0.2"
 LiveServer = "0.7, 0.8"
 julia = "1"
 
