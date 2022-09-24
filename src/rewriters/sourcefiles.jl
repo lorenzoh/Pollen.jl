@@ -12,13 +12,16 @@ function SourceFiles(ms::Vector{Module}; pkgtags = Dict{String, String}())
 end
 
 function __load_source_file(file::String, id)
-    title = joinpath(splitpath(file)[2:end]...)
+    parts = split(file, "src")
+    pkgid = split(id, "/")[1]
+    module_id = split(pkgid, "@")[1]
+    title = "$(module_id)$(parts[end])"
     doc = Pollen.parse(String(read(file)), JuliaSyntaxFormat())
     doc = preparesourcefile(doc)
     return Node(:sourcefile,
                 [doc],
                 Dict{Symbol, Any}(:path => file, :title => title,
-                                  :module => split(split(id, "/")[1], "@")[1]))
+                                  :module_id => module_id, :package_id => pkgid))
 end
 
 # Some helpers for loading source files, ensuring

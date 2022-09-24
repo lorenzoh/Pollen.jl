@@ -14,9 +14,12 @@ function DocVersions(pkgdir::String; tag = nothing, dependencies = String[])
     isfile(projectfile) || throw(SystemError("loading config: \"$file\": No such file"))
     projectconfig = TOML.parsefile(projectfile)
     pollenconfig = get(projectconfig, "pollen", Dict())
-    config = merge(loaddefaults(projectconfig), pollenconfig)
+    tag = isnothing(tag) ? string(projectconfig["version"]) : tag
+    pkgid = "$(projectconfig["name"])@$tag"
+
+    config = merge(loaddefaults(projectconfig, pkgid), pollenconfig)
     config["dependencies"] = dependencies
-    config["linktree"] = loadtoc(pkgdir, projectconfig)
+    config["linktree"] = loadtoc(pkgdir, projectconfig, pkgid)
     v = VersionNumber(projectconfig["version"])
     if !isnothing(tag)
         v = VersionNumber(v.major, v.minor, v.patch, (tag,), v.build)
@@ -41,24 +44,32 @@ function postbuild(rewriter::DocVersions, _, builder::FileBuilder)
     end
 end
 
-function loaddefaults(project::Dict)
+function loaddefaults(project::Dict, pkgid)
     return Dict("title" => project["name"],
-                "defaultDocument" => "documents/README.md",
+                "defaultDocument" => "$pkgid/doc/README.md",
                 "columnWidth" => 650)
 end
 
-function loadtoc(pkgdir::String, projectconfig::Dict)
+function loadtoc(pkgdir::String, projectconfig::Dict, pkgid)
     tocfile = joinpath(pkgdir, "docs/toc.json")
-    if isfile(tocfile)
+    tree = if isfile(tocfile)
         open(tocfile, "r") do f
-            return JSON3.read(f)
+            JSON3.read(f)
         end
     else
-        return defaulttoc(projectconfig)
+        defaulttoc(projectconfig, pkgid)
+    end
+    __mapdictleaves(tree) do link
+        linkinfo = LinkInfo(string(link), "", "$pkgid/doc/index.md", Node(:no), "", pkgid, projectconfig["name"])
+        parselink(InternalLinkRule(), linkinfo)
     end
 end
 
-function defaulttoc(projectconfig)
-    return OrderedDict("Overview" => "$(projectconfig["name"])@stable/doc/README.md",
-                       "Reference" => Dict("Module" => "references/$(projectconfig["name"])"))
+
+__mapdictleaves(f, d::Union{<:Dict, <:JSON3.Object}) = OrderedDict(map((k, v) -> (k => __mapdictleaves(f, v)), keys(d), values(d)))
+__mapdictleaves(f, x) = f(x)
+
+function defaulttoc(projectconfig, pkgid)
+    return OrderedDict("Overview" => "$pkgid/doc/README.md",
+                       "Reference" => Dict("Module" => "$pkgid/ref/$(projectconfig["name"])"))
 end

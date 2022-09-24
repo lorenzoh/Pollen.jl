@@ -98,7 +98,7 @@ Base.@kwdef struct ExecuteCode <: Rewriter
     lock::ReentrantLock = ReentrantLock()
 end
 
-# The rewriter acts on the document tree with [´rewritedoc`](#).
+# The rewriter acts on the document tree with [`rewritedoc`](#).
 
 function rewritedoc(executecode::ExecuteCode, p, doc)
     blocks = collect(select(doc, executecode.codeblocksel))

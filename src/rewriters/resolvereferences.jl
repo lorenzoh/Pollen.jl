@@ -232,6 +232,8 @@ Base.@kwdef struct InternalLinkRule <: AbstractLinkRule
 end
 
 function parselink(rule::InternalLinkRule, link::LinkInfo)
+    # TODO: add support for href syntax with (trailing) id, e.g."README.md/#Setup"
+    # that link to headings. Similarly support automatic header syntax using "@ref"
     isempty(link.href) && return nothing
     parts = splitpath(link.href)
     if parts[1] == "/"

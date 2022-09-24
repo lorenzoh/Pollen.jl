@@ -41,7 +41,13 @@ end
 
 function __get_ref_docid(I::ModuleInfo.PackageIndex, symbol::ModuleInfo.SymbolInfo)
     shortid = symbol.id[(length(symbol.module_id) + 2):end]
-    "$(ModuleInfo.getid(ModuleInfo.getpackage(I, symbol)))/ref/$(symbol.module_id).$shortid"
+    pkgid = ModuleInfo.getid(ModuleInfo.getpackage(I, symbol))
+    if symbol.kind == :module
+        "$pkgid/ref/$(symbol.module_id)"
+    else
+        "$pkgid/ref/$(symbol.module_id).$shortid"
+    end
+
 end
 
 function __make_reference_file(I::PackageIndex, symbol::ModuleInfo.SymbolInfo)
@@ -51,9 +57,16 @@ function __make_reference_file(I::PackageIndex, symbol::ModuleInfo.SymbolInfo)
                               :module_id => symbol.module_id, :kind => symbol.kind,
                               :package_id => ModuleInfo.getid(ModuleInfo.getpackage(I, symbol)))
     if symbol.kind != :module
-        # todo: change
-        attributes[:public] = true
+        # TODO: change
+        binding = ModuleInfo.getbinding(I, symbol.id)
+        attributes[:exported] = isnothing(binding) ? false : binding.exported
         attributes[:methods] = ModuleInfo.getmethods(I, symbol_id = symbol.id)
+    elseif symbol.kind == :module
+        pkgid = ModuleInfo.getid(ModuleInfo.getpackage(I, symbol))
+        attributes[:symbols] = ModuleInfo.getsymbols(I, module_id = symbol.id)
+        attributes[:files] = ModuleInfo.getfiles(I, package_id = pkgid)
+        # TODO: submodules
+        # TODO: exported bindings
     end
     return Node(; tag=:documentation, children, attributes)
 end

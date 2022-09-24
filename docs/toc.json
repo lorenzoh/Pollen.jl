@@ -1,14 +1,14 @@
 {
-    "README": "documents/README.md",
+    "README": "README.md",
     "Tutorials": {
-        "Documenting a package": "documents/docs/tutorials/setup.md",
-        "Working with documents": "documents/docs/tutorials/documents.md"
+        "Documenting a package": "docs/tutorials/setup.md",
+        "Working with documents": "docs/tutorials/documents.md"
     },
     "How-to": {
-        "Install": "documents/docs/howto/install.md",
-        "Set up package documentation": "documents/docs/howto/setup.md"
+        "Install": "docs/howto/install.md",
+        "Set up package documentation": "docs/howto/setup.md"
     },
     "Reference": {
-        "Module reference": "references/Pollen"
+        "Module reference": "/ref/Pollen"
     }
 }

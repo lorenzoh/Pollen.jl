@@ -17,7 +17,7 @@ You can see the resulting project and its documentation at [lorenzoh/PollenExamp
 
 !!! note "Documentation for an existing package"
 
-    This section describes how to add Pollen documentation when creating a new package. It is also possible to add Pollen.jl documentation to an existing package [as described here](/documents/docs/howto/setup.md).
+    This section describes how to add Pollen documentation when creating a new package. It is also possible to add Pollen.jl documentation to an existing package [as described here](/docs/howto/setup.md).
 
 The most commonly used tool for creating new Julia packages is [PkgTemplates.jl](https://github.com/invenia/PkgTemplates.jl). Pollen.jl provides a plugin for PkgTemplates.jl to spare you any arduous setup tasks.
 

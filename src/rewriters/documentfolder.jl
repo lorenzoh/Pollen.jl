@@ -67,7 +67,7 @@ end
 # Utilities
 
 function __getpkgids(ms; pkgtags = Dict{String, String}())
-    ["$m@$(ModuleInfo.packageversion(m, get(pkgtags, ModuleInfo.moduleid(m), nothing)))"
+    return ["$m@$(get(pkgtags, string(m), ModuleInfo.packageversion(m)))"
      for m in ms]
 end
 
