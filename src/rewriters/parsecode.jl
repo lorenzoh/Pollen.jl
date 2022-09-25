@@ -19,5 +19,5 @@ end
                      Node(:md, "hi", Node(:codeblock, "x", lang = "julia"))) ==
           Node(:md, "hi",
                Node(:codeblock,
-                    Node(:julia, Node(:IDENTIFIER, "x")), lang = "julia"))
+                    Node(:julia, Node(:Identifier, "x")), lang = "julia"))
 end

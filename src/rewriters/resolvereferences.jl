@@ -381,7 +381,7 @@ function __id_from_binding(I::ModuleInfo.PackageIndex, binding::ModuleInfo.Bindi
 end
 
 @testset "SymbolLinkRule [AbstractLinkRule]" begin
-    resolve(info) = parselink(SymbolLinkRule([Pollen]), info)
+    resolve(info) = parselink(SymbolLinkRule(PackageIndex([Pollen])), info)
     @test resolve(LinkInfo(Node(:a, Node(:code, "sum"), href = "#"))).symbol ==
           "sum"
     @test resolve(LinkInfo(Node(:a, Node(:code, "sum"), href = "@ref"))).symbol ==
@@ -392,11 +392,11 @@ end
     @test resolve(LinkInfo(Node(:a, "the function", href = ""))) isa Nothing
     @test resolve(LinkInfo(Node(:a, Node(:code, "sum"), href = "##"))) isa Nothing
 
-    @test resolvelink(SymbolLinkRule([Pollen]),
+    @test resolvelink(SymbolLinkRule(PackageIndex([Pollen])),
                       LinkInfo(Node(:a, Node(:code, "serve"), href = "#")),
                       (symbol = "serve", mod = "Pollen")) ==
-          Node(:reference, "serve", document_id = "Pollen@0.1.0/ref/Pollen.serve",
-               href = "#")
+          Node(:reference, Node(:code, "serve"), document_id = "Pollen@0.1.0/ref/Pollen.serve",
+               href = "#", reftype = "symbol")
 end
 
 #=

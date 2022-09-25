@@ -9,8 +9,9 @@ Use `./serve.jl` for interactive development.
 """
 
 # Create target folder
-isempty(ARGS) && error("Please pass a file path to make.jl:\n\t> julia docs/make.jl DIR ")
+len(ARGS) != 2 && error("Please pass a file path and a version tag to make.jl:\n\t> julia docs/make.jl \$DIR \$TAG ")
 DIR = abspath(mkpath(ARGS[1]))
+TAG = abspath(mkpath(ARGS[2]))
 
 # Create Project
 project = include("project.jl")

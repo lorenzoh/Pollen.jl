@@ -24,7 +24,28 @@ Performs the following steps:
     branch_data::String = "pollen"
     branch_page::String = "gh-pages"
     branch_primary::String = "main"
+    pollen_spec::Pkg.PackageSpec = Pkg.PackageSpec(url="https://github.com/lorenzoh/Pollen.jl", rev="main")
+    moduleinfo_spec::Pkg.PackageSpec = Pkg.PackageSpec(url="https://github.com/lorenzoh/ModuleInfo.jl", rev="main")
 end
+
+
+
+# Setup and validation steps
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Hooks for PkgTemplates
 
 PkgTemplates.priority(::PollenPlugin) = -1000
 

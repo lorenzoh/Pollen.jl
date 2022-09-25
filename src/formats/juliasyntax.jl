@@ -29,17 +29,17 @@ function xtree(ast::JuliaSyntax.GreenNode, source::String, offset = 1)
 end
 
 function _tokenname(ast::JuliaSyntax.GreenNode) where {T}
-    Base.Enums.namemap(JuliaSyntax.Tokenize.Tokens.Kind)[UInt64(ast.head.kind)]
+    Symbol(convert(String, ast.head.kind))
 end
 
 @testset "JuliaSyntaxFormat" begin
     format = JuliaSyntaxFormat()
 
     @test parse("x+1", format) == Node(:julia,
-               Node(:CALL,
-                    Node(:IDENTIFIER, "x"),
-                    Node(:PLUS, "+"),
-                    Node(:INTEGER, "1")))
+               Node(:call,
+                    Node(:Identifier, "x"),
+                    Node(:+, "+"),
+                    Node(:Integer, "1")))
 end
 
 function stringrange(s, i1, i2)
