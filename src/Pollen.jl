@@ -117,7 +117,8 @@ export select, selectfirst,
        documentationproject, Server, runserver, ServeFiles, ServeFilesLazy,
        PackageWatcher, StaticResources, ParseCode, PackageDocumentation,
        RelativeLinks, Backlinks, SearchIndex, SaveAttributes, LoadFrontendConfig,
-       ResolveReferences,
+       ResolveReferences, DocumentationFiles, SourceFiles, ModuleReference,
+       ResolveSymbols, CheckLinks, StorkSearchIndex, DocVersions,
 
        PackageIndex
 

@@ -10,13 +10,13 @@ m = <<PKG>>
 # to the list.
 ms = [m]
 
-function createpackageindex(; tag = "dev")
+function createpackageindex(; modules = ms, tag = "dev")
     pkgtags = Dict("<<PKG>>" => tag)
     return PackageIndex(ms; recurse = 1, pkgtags, cache = true, verbose = true)
 end
 
 
-function createproject(; tag = "dev")
+function createproject(; tag = "dev", modules = ms)
     pkgtags = Dict("<<PKG>>" => tag)
     pkgindex = createpackageindex(; tag)
     packages = [ModuleInfo.getid(pkgindex.packages[1]), pkgindex.packages[1].dependencies...]
@@ -24,7 +24,7 @@ function createproject(; tag = "dev")
     project = Project([
         # Add written documentation, source files, and symbol docstrings as pages
         DocumentationFiles([Pollen]; pkgtags),
-        SourceFiles(ms; pkgtags),
+        SourceFiles(modules; pkgtags),
         ModuleReference(pkgindex),
 
         # Parse and run code

@@ -1,0 +1,15 @@
+name: Pollen.jl build - PR preview
+
+on:
+  - pull_request
+
+jobs:
+  pollen:
+    name: "Pollen - Build documentation on push to main"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: "lorenzoh/Pollen.jl/.github/workflows/pollen.yml"
+        with:
+          tag: pr-${{github.event.pull_request.number}}
+    outputs:
+      preview: 'https://${{github.event.repository.owner.login}}.github.io/${{github.event.repository.name}}/pr-${{github.event.pull_request.number}}'

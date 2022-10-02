@@ -1,0 +1,14 @@
+name: Pollen.jl build - dev
+
+on:
+  push:
+    branches: [$default-branch]
+
+jobs:
+  pollen:
+    name: "Pollen - Build documentation on push to main"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: "lorenzoh/Pollen.jl/.github/workflows/pollen.yml"
+        with:
+          tag: dev
