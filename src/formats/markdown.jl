@@ -420,6 +420,14 @@ function to_commonmark_ast(node, ::Val{:p})
     append_ast_children!(n, node)
 end
 
+function to_commonmark_ast(node, ::Val{:a})
+    l = CM.Link()
+    l.destination = node.attributes[:href]
+    n = CM.Node(l)
+
+    append_ast_children!(n, node)
+end
+
 function to_commonmark_ast(node, ::Val{:h1})
     h = CM.Heading()
     h.level = 1
