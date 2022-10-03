@@ -379,3 +379,145 @@ end
         end
     end
 end
+
+
+function render!(io::IO, doc::Node, format::MarkdownFormat)
+    ast = to_commonmark_ast(doc, Val(doc.tag))
+    # CM.ast_dump(ast)
+    CM.markdown(io, ast)
+    # render!(io, doc, format, Val(doc.tag))
+end
+
+function to_commonmark_ast(node::Node)
+    if !isempty(node.attributes)
+        @show node.attributes
+    end
+    to_commonmark_ast(node, Val(node.tag))
+end
+
+to_commonmark_ast(node, ::Val{X}) where X = to_commonmark_ast(Node(:p, Leaf("Node type $X not implemented.")))
+
+function to_commonmark_ast(str::Leaf)
+    n = CM.Node(CM.Text())
+    n.literal = repr(MIME"text/plain"(), str[])
+    return n
+end
+function to_commonmark_ast(str::Leaf{<:AbstractString})
+    n = CM.Node(CM.Text())
+    n.literal = String(str[])
+    return n
+end
+
+function to_commonmark_ast(node, ::Val{:document})
+    n = CM.Node(CM.Document())
+    md = only(children(node))
+    append_ast_children!(n, md)
+    n
+end
+
+function to_commonmark_ast(node, ::Val{:p})
+    n = CM.Node(CM.Paragraph())
+    append_ast_children!(n, node)
+end
+
+function to_commonmark_ast(node, ::Val{:h1})
+    h = CM.Heading()
+    h.level = 1
+    n = CM.Node(h)
+    append_ast_children!(n, node)
+end
+
+function to_commonmark_ast(node, ::Val{:h2})
+    h = CM.Heading()
+    h.level = 2
+    n = CM.Node(h)
+    append_ast_children!(n, node)
+end
+
+function to_commonmark_ast(node, ::Val{:img})
+    n = CM.Node(CM.Paragraph())
+    img = CM.Image()
+    img.destination = node.attributes[:src]
+    n2 = CM.Node(img)
+    CM.append_child(n, n2)
+    append_ast_children!(n2, node)
+    n
+end
+
+function to_commonmark_ast(node, ::Val{:codecell})
+    map(to_commonmark_ast, children(node))
+end
+
+function to_commonmark_ast(node, ::Val{:codeinput})
+    cb = CM.CodeBlock()
+    cb.is_fenced = true
+    cb.fence_char = '`'
+    cb.fence_length = 3
+    n = CM.Node(cb)
+    n.literal = gettext(node) * '\n'
+    # display(node)
+    append_ast_children!(n, node)
+end
+
+function to_commonmark_ast(node, ::Val{:codeblock})
+    cb = CM.CodeBlock()
+    cb.is_fenced = true
+    cb.fence_char = '`'
+    cb.fence_length = 3
+    n = CM.Node(cb)
+    n.literal = gettext(node) * '\n'
+    # display(node)
+    append_ast_children!(n, node)
+end
+
+function to_commonmark_ast(node, ::Val{:code})
+    cb = CM.Code()
+    n = CM.Node(cb)
+    n.literal = gettext(node)
+    append_ast_children!(n, node)
+end
+
+function to_commonmark_ast(node, ::Val{:em})
+    n = CM.Node(CM.Emph())
+    n.literal = "_"
+    append_ast_children!(n, node)
+end
+
+function to_commonmark_ast(node, ::Val{:ul})
+    display(node)
+    n = CM.Node(CM.List())
+    append_ast_children!(n, node)
+end
+
+function to_commonmark_ast(node, ::Val{:li})
+    n = CM.Node(CM.Item())
+    append_ast_children!(n, node)
+end
+
+function to_commonmark_ast(node, ::Val{:coderesult})
+    cb = CM.CodeBlock()
+    cb.is_fenced = true
+    cb.fence_char = '`'
+    cb.fence_length = 3
+    n = CM.Node(cb)
+    n.literal = repr(only(children(only(children(node))))[]) * '\n'
+    display(node)
+    n
+end
+
+function append_ast_children!(commonmarknode, pollennode)
+    for c in children(pollennode)
+        cn = to_commonmark_ast(c)
+        if cn !== nothing
+            if cn isa AbstractArray
+                for _cn in cn
+                    # expand a vector of nodes
+                    CM.append_child(commonmarknode, _cn)
+                end
+            else
+                CM.append_child(commonmarknode, cn)
+            end
+        end
+    end
+    return commonmarknode
+end

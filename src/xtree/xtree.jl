@@ -57,7 +57,7 @@ struct Node{T<:XTree, D<:Dict{Symbol}} <: XTree
     attributes::D
 end
 
-Base.show(io::IO, xnode::Node) = print_tree(io, xnode, 3)
+Base.show(io::IO, xnode::Node) = print_tree(io, xnode; maxdepth = 10)
 
 function Node(tag::Symbol, children...; attributes...)
     return Node(

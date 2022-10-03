@@ -29,3 +29,9 @@ end
 function Base.print(io::IO, ansi::ANSI)
     print(io, ansi.value)
 end
+
+function render!(io, x::Leaf{<:ANSI}, ::MarkdownFormat)
+    print(io, "<pre><code>")
+    show(io, MIME("text/html"), x[])
+    print(io, "</code></pre>\n")
+end
