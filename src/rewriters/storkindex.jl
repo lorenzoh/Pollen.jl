@@ -46,9 +46,7 @@ function postbuild(stork::StorkSearchIndex, project, builder::FileBuilder)
 end
 
 function build_stork_index(stork_bin::String, config_file::String, output_file::String)
-
-    @info("$stork_bin build -t -i $config_file -o $output_file")
-    run(`$stork_bin build -t -i $config_file -o $output_file`)
+    run(`$stork_bin build -i $config_file -o $output_file`)
 end
 
 
