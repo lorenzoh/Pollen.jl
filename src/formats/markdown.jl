@@ -428,16 +428,10 @@ function to_commonmark_ast(node, ::Val{:a})
     append_ast_children!(n, node)
 end
 
-function to_commonmark_ast(node, ::Val{:h1})
+function to_commonmark_ast(node, V::Union{Val{:h1}, Val{:h2}, Val{:h3}, Val{:h4}, Val{:h5}, Val{:h6}, Val{:h7}, Val{:h8}, Val{:h9}})
+    _level(v::Val{X}) where X = Base.parse(Int, string(X)[2:end])
     h = CM.Heading()
-    h.level = 1
-    n = CM.Node(h)
-    append_ast_children!(n, node)
-end
-
-function to_commonmark_ast(node, ::Val{:h2})
-    h = CM.Heading()
-    h.level = 2
+    h.level = _level(V)
     n = CM.Node(h)
     append_ast_children!(n, node)
 end
