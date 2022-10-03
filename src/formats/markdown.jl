@@ -389,9 +389,9 @@ function render!(io::IO, doc::Node, format::MarkdownFormat)
 end
 
 function to_commonmark_ast(node::Node)
-    if !isempty(node.attributes)
-        @show node.attributes
-    end
+    # if !isempty(node.attributes)
+    #     @show node.attributes
+    # end
     to_commonmark_ast(node, Val(node.tag))
 end
 
@@ -484,7 +484,7 @@ function to_commonmark_ast(node, ::Val{:em})
 end
 
 function to_commonmark_ast(node, ::Val{:ul})
-    display(node)
+    # display(node)
     n = CM.Node(CM.List())
     append_ast_children!(n, node)
 end
