@@ -1,0 +1,14 @@
+name: Pollen.jl build - Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  pollen:
+    name: "Pollen - Build documentation on push to main"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: "lorenzoh/Pollen.jl/.github/workflows/pollen.yml"
+        with:
+          tag: ${{github.event.release.tag_name}}

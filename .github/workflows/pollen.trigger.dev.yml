@@ -1,0 +1,14 @@
+name: Pollen.jl build - dev
+
+on:
+  push:
+    branches: [$default-branch]
+
+jobs:
+  pollen:
+    name: "Pollen - Build documentation on push to main"
+    uses: "lorenzoh/Pollen.jl/.github/workflows/pollen.yml@lo/develop"
+    with:
+      tag: dev
+    secrets:
+      GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
