@@ -18,10 +18,12 @@ function servedocs(encm::Module,
         @error "Failed to detect a proper documentation setup for package directory \"$pkgdir\""
         rethrow()
     end
-    PkgTemplates.with_project(joinpath(pkgdir, subdir)) do
-        @info "Loading project configuration"
-        project = Base.include(encm, joinpath(pkgdir, subdir, "project.jl"))
-        Pollen.serve(project;
+    docdir = joinpath(pkgdir, subdir)
+    PkgTemplates.with_project(docdir) do
+        @info "Loading project configuration from $docdir"
+        createproject = Base.include(encm, joinpath(pkgdir, subdir, "project.jl"))
+        @info "Starting development server..."
+        Pollen.serve(createproject();
                      lazy,
                      port,
                      kwargs...)

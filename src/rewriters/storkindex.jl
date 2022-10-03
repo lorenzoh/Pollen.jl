@@ -74,7 +74,7 @@ end
 
 function extract_text!(s, node::Node, ::Val{:julia})
     # TODO: find :md blocks inside source files and parse them
-    for node in select(node, SelectTag(:IDENTIFIER) & SelectTag(:md))
+    for node in select(node, SelectTag(:Identifier) & SelectTag(:md))
         if tag(node) == :md
             extract_text!(s, node, Val(:md))
         else

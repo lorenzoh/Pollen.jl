@@ -111,7 +111,7 @@ function addlinkreferences(doc, path, symbols)
 end
 
 function addidentifierreferences(doc, symbols)
-    cata(doc, SelectTag(:IDENTIFIER)) do x
+    cata(doc, SelectTag(:Identifier)) do x
         s = strip(Pollen.gettext(x), [' ', '\n', ';'])
         symbolid = Pollen.resolvesymbol(symbols, s)
         return if isnothing(symbolid)

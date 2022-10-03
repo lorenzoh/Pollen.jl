@@ -52,7 +52,7 @@ function getsearchindexterms(doc::Node)
 end
 
 function _getjuliacodeterms(node::Node)
-    (only(children(id))[] for id in select(node, SelectTag(:IDENTIFIER)))
+    (only(children(id))[] for id in select(node, SelectTag(:Identifier)))
 end
 
 function _getterms(str::String)

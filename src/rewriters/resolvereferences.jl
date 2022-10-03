@@ -375,7 +375,6 @@ end
 
 function __id_from_binding(I::ModuleInfo.PackageIndex, binding::ModuleInfo.BindingInfo)
     symbol = ModuleInfo.getsymbol(I, binding)
-    isnothing(symbol) && @show binding
     package = ModuleInfo.getpackage(I, symbol)
     return "$(package.name)@$(package.version)/ref/$(symbol.id)"
 end
@@ -436,7 +435,7 @@ function rewritedoc(rewriter::ResolveReferences, docid, doc::Node)
 end
 
 function ResolveSymbols(pkgindex::PackageIndex)
-    selector = SelectTag(:IDENTIFIER)
+    selector = SelectTag(:Identifier)
     rule = SymbolCodeRule(pkgindex)
     return ResolveReferences([rule], selector)
 end

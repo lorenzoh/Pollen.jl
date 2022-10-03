@@ -40,14 +40,8 @@ function createsources!(rewriter::ModuleReference)
 end
 
 function __get_ref_docid(I::ModuleInfo.PackageIndex, symbol::ModuleInfo.SymbolInfo)
-    shortid = symbol.id[(length(symbol.module_id) + 2):end]
     pkgid = ModuleInfo.getid(ModuleInfo.getpackage(I, symbol))
-    if symbol.kind == :module
-        "$pkgid/ref/$(symbol.module_id)"
-    else
-        "$pkgid/ref/$(symbol.module_id).$shortid"
-    end
-
+    "$pkgid/ref/$(symbol.id)"
 end
 
 function __make_reference_file(I::PackageIndex, symbol::ModuleInfo.SymbolInfo)
