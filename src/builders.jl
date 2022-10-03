@@ -66,9 +66,18 @@ function build(builder::FileBuilder, project::Project, dirtydocids = collect(key
     end
 end
 
+function buildpath(dir, docid, format)
+    ext = formatextension(format)
+    docext = splitext(docid)[2][2:end]
+    path = joinpath(dir, docid)
+    if ext != docext
+        path *= ".$ext"
+    end
+    Path(path)
+end
 
 function buildtofile(xtree, docid::String, dir, format)
-    fullpath = Path("$(joinpath(dir, docid)).$(formatextension(format))")
+    fullpath = buildpath(dir, docid, format)
     try
         mkpath(parent(fullpath))
     catch end
