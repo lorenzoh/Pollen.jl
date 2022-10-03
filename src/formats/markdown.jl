@@ -97,11 +97,16 @@ function mdchildrenattrs(node::CM.Node)
     attrs = Dict{Symbol, String}[]
     as = Dict{Symbol, String}()
 
-    for c in allcs
+    for (i, c) in enumerate(allcs)
         if c.t isa CM.Attributes
             as = Dict{Symbol, Any}((Symbol(k), v) for (k, v) in c.t.dict)
             if haskey(as, :class)
                 as[:class] = join(as[:class], ';')
+            end
+            # last child
+            if i == length(allcs) && allcs[end-1].t isa CM.AbstractInline
+                attrs[end] = merge(attrs[end], as)
+                as = Dict{Symbol, String}()
             end
         else
             # Inline attributes come after the token
@@ -155,8 +160,9 @@ end
 
 # For some `AbstractContainer`s, the behavior is customized.
 
-xtree(node::CM.Node, ::CM.Text, attrs) = Leaf(node.literal)
-xtree(::CM.Node, ::CM.SoftBreak, attrs) = Leaf(" ")
+_maybespan(x, attrs) = isempty(attrs) ? x : Node(:span, [x], attrs)
+xtree(node::CM.Node, ::CM.Text, attrs) = _maybespan(Leaf(node.literal), attrs)
+xtree(::CM.Node, ::CM.SoftBreak, attrs) = _maybespan(Leaf(" "), attrs)
 xtree(node::CM.Node, ::CM.Code, attrs) = Node(:code, [Leaf(node.literal)], attrs)
 xtree(node::CM.Node, ::CM.Math, attrs) = Node(:math, [Leaf(node.literal)], attrs)
 function xtree(node::CM.Node, ::CM.DisplayMath, attrs)
@@ -205,24 +211,24 @@ end
 function xtree(node::CM.Node, i::CM.Image, attrs)
     return Node(:img,
                 childrenxtrees(node),
-                Dict(:src => i.destination, :alt => i.title))
+                merge(attrs, Dict(:src => i.destination, :alt => i.title)))
 end
 
 function xtree(node::CM.Node, c::CM.CodeBlock, attrs)
-    return Node(:codeblock,
-                node.literal;
-                attrs..., lang = c.info)
+    return Node(tag=:codeblock,
+                children=[Leaf(node.literal)];
+                attributes=merge(attrs, Dict(:lang => c.info)))
 end
 
 function xtree(node::CM.Node, c::CM.List, attrs)
     tag = c.list_data.type == :ordered ? :ol : :ul
-    return Node(tag, childrenxtrees(node))
+    return Node(tag, childrenxtrees(node), attrs)
 end
 
 function xtree(node::CM.Node, l::CM.Link, attrs)
     return Node(:a,
                 childrenxtrees(node),
-                Dict(:href => l.destination, :title => l.title))
+                merge(attrs, Dict(:href => l.destination, :title => l.title)))
 end
 
 function xtree(node::CM.Node, c::CM.Heading, attrs)
@@ -231,11 +237,11 @@ function xtree(node::CM.Node, c::CM.Heading, attrs)
 end
 
 function xtree(node::CM.Node, c::CM.Admonition, attrs)
-    return Node(:admonition,
-                [
+    return Node(tag=:admonition,
+                children=[
                     Node(:admonitiontitle, [Leaf(c.title)]),
                     Node(:admonitionbody, childrenxtrees(node)),
-                ], Dict(:class => c.category))
+                ], attributes=merge(attrs, Dict(:class => c.category)))
 end
 
 # tables
