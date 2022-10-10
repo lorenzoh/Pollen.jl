@@ -48,3 +48,11 @@ jobs:
       - name: Build
         run: |
           julia --color=yes --project=./${{inputs.docdir}} ./${{inputs.docdir}}/make.jl ./pollen/ ${{inputs.tag}}
+      - name: Deploy
+        run: |
+          cd pollen
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Build documentation data (Pollen.jl)"
+          git push
