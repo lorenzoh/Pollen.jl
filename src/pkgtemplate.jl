@@ -196,6 +196,7 @@ function _docs_config(dir::String, plugin::PollenPlugin)
         "DOCS_FOLDER" => plugin.folder,
         "BRANCH_DATA" => plugin.branch_data,
         "BRANCH_PAGE" => plugin.branch_page,
+        "BRANCH_PRIMARY" => plugin.branch_primary,
     )
 end
 
