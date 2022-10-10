@@ -149,12 +149,17 @@ function setup_docs_branches(dir::String, plugin = PollenPlugin(); force = false
     # TODO: Maybe add render workflow to this branch
     if !_hasbranch(dir, plugin.branch_data) || force
         _createorphanbranch(dir, plugin.branch_data, remote = plugin.remote)
-        # TODO: add .nojekyll file
     end
 
     # Create orhpaned branch that the website will be built to (default "gh-pages")
     if !_hasbranch(dir, plugin.branch_page) || force
         _createorphanbranch(dir, plugin.branch_page, remote = plugin.remote)
+        # TODO: add .nojekyll file
+        _withbranch(dir, plugin.branch_page) do
+            touch(".nojekyll")
+            Git.git(["add", "."]) |> readchomp |> println
+            Git.git(["commit", "-m", "'Add .nojekyll'"]) |> readchomp |> println
+        end
     end
 end
 
