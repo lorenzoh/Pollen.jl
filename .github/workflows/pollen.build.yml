@@ -1,5 +1,5 @@
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       tag:
         description: 'The version tag to associate with this documentation build, e.g. "dev", "stable", "pr-201"'
@@ -8,23 +8,23 @@ on:
         type: string
       docdir:
         description: "Path of the subdirectory where Pollen's Project.toml, make.jl, and project.jl are stored."
-        required: true
+        required: false
         default: "docs/"
         type: string
       databranch:
         description: "Branch where the generated documentation is stored"
-        required: true
+        required: false
         default: "pollen"
         type: string
       juliaversion:
         description: "Julia version to use when building the documentation"
-        required: true
+        required: false
         default: "1.8"
         type: string
 
 jobs:
   pollen:
-    name: "Pollen - Build documentationd ata"
+    name: "Pollen - Build documentation data"
     runs-on: ubuntu-latest
     steps:
       # Check out the package directory at the branch that triggered
@@ -43,8 +43,8 @@ jobs:
       # Install the package to-be-documented and its dependencies. Also adds
       - name: "Install package and docs dependencies"
         run: |
-          julia --color=yes --project=./${{inputs.docdir}} -e 'using Pkg; Pkg.add([Pkg.PackageSpec(path="."), Pkg.PackageSpec(url="https://github.com/lorenzoh/ModuleInfo.jl"), Pkg.PackageSpec(url="https://github.com/lorenzoh/Pollen.jl", rev="main")]); Pkg.instantiate();'
+          julia --color=yes --project=./${{inputs.docdir}} -e 'using Pkg; Pkg.add([Pkg.PackageSpec(path="."), Pkg.PackageSpec(url="https://github.com/lorenzoh/Pollen.jl", rev="main")]); Pkg.instantiate();'
       # Build the documentation data and annotate it with the package tag
       - name: Build
         run: |
-          julia --color=yes --project=./${{inputs.docdir}} ./${{inputs.docdir}/make.jl ./pollen/ ${{inputs.tag}}
+          julia --color=yes --project=./${{inputs.docdir}} ./${{inputs.docdir}}/make.jl ./pollen/ ${{inputs.tag}}

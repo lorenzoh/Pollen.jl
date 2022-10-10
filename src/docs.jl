@@ -11,6 +11,8 @@ function servedocs(encm::Module,
                    subdir = "docs",
                    lazy = get(ENV, "POLLEN_LAZY", "false") == "true",
                    port = Base.parse(Int, get(ENV, "POLLEN_PORT", "8000")),
+                   tag = "dev",
+                   dir = mktempdir(),
                    kwargs...)
     try
         validatedocs(pkgdir; subdir)
@@ -23,7 +25,7 @@ function servedocs(encm::Module,
         @info "Loading project configuration from $docdir"
         createproject = Base.include(encm, joinpath(pkgdir, subdir, "project.jl"))
         @info "Starting development server..."
-        Pollen.serve(createproject();
+        Pollen.serve(createproject(; tag), dir;
                      lazy,
                      port,
                      kwargs...)

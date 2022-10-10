@@ -13,8 +13,11 @@ function build_corpus(documents; filterfn = Returns(true))
     for (id, doc) in documents
         filterfn(id) || continue
         text = extract_text(doc)
-        isempty(text) && continue
-        corpus[id] = Dict("title" => attributes(doc)[:title], "contents" => text,
+        title = attributes(doc)[:title]
+        if isempty(text)
+            text = title
+        end
+        corpus[id] = Dict("title" => title, "contents" => text,
                           "url" => id)
     end
     return corpus
@@ -74,7 +77,7 @@ end
 
 function extract_text!(s, node::Node, ::Val{:julia})
     # TODO: find :md blocks inside source files and parse them
-    for node in select(node, SelectTag(:Identifier) & SelectTag(:md))
+    for node in select(node, SelectTag(:Identifier) | SelectTag(:md))
         if tag(node) == :md
             extract_text!(s, node, Val(:md))
         else

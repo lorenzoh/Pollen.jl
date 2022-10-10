@@ -1,5 +1,5 @@
 {
-    "README": "README.md",
+    "README": "/doc/README.md",
     "Tutorials": {
         "Documenting a package": "docs/tutorials/setup.md",
         "Working with documents": "docs/tutorials/documents.md"
@@ -9,6 +9,6 @@
         "Set up package documentation": "docs/howto/setup.md"
     },
     "Reference": {
-        "Module reference": "/ref/Pollen"
+        "Module": "/ref/Pollen"
     }
 }

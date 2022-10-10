@@ -52,7 +52,7 @@ function __splitoncomments(node)
     code = Node[]
 
     for ch in children(node)
-        if tag(ch) === :COMMENT
+        if tag(ch) === :Comment
             if !isempty(code)
                 push!(chs, Node(:codeblock, code...; lang = "julia"))
                 code = Node[]
@@ -60,7 +60,7 @@ function __splitoncomments(node)
             in_comment = true
             push!(comment, _strip_comment(Pollen.gettext(ch)))
             push!(comment, " ")
-        elseif in_comment & (tag(ch) == :NEWLINE_WS || tag(ch) == :WHITESPACE)
+        elseif in_comment && (tag(ch) == :NewlineWs || tag(ch) == :Whitespace)
             continue
         else
             if !isempty(comment)

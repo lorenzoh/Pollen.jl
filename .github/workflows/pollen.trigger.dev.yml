@@ -3,14 +3,12 @@ name: Pollen.jl build - dev
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
+      - ${{ github.event.repository.default_branch }}
 
 jobs:
   pollen:
     name: "Pollen - Build documentation on push to main"
-    uses: "lorenzoh/Pollen.jl/.github/workflows/pollen.yml@lo/develop"
+    uses: "./.github/workflows/pollen.build.yml"
     with:
       tag: dev
-    secrets:
-      GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    secrets: inherit
