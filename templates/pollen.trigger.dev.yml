@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - <<BRANCH_PRIMARY>>
+  workflow_dispatch:
 
 jobs:
   pollen:
