@@ -21,7 +21,7 @@ function createproject(; tag = "dev", package = m, modules = ms)
     packages = [
         ModuleInfo.getid(pkgindex.packages[1]),
         [d for d in pkgindex.packages[1].dependencies
-        if d in ModuleInfo.getid.(pkgindex.packages)]...]
+        if d in [ModuleInfo.getid(p) for p in pkgindex.packages]]...]
 
     project = Project([
         # Add written documentation, source files, and symbol docstrings as pages
