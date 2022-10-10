@@ -10,5 +10,3 @@ jobs:
     with:
       tag: dev
     secrets: inherit
-    outputs:
-      preview: 'https://${{github.event.repository.owner.login}}.github.io/${{github.event.repository.name}}/pr-${{github.event.pull_request.number}}'
