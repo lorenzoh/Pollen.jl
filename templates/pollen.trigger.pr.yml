@@ -8,5 +8,5 @@ jobs:
     name: "Pollen - Build documentation on push to main"
     uses: "./.github/workflows/pollen.build.yml"
     with:
-      tag: dev
+      tag: pr-${{ github.event.number }}
     secrets: inherit
