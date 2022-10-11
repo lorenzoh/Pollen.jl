@@ -152,7 +152,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.DocumentationFiles"
     [[input.files]]
     title = "Pollen.jl"
-    contents = "Pollen.jl\nA document generation system based on tree rewriting built for interactive work.\nHi from PR.\nNote: The documentation for this package is still a work in progress and while Pollen.jl already powers the documentation of some packages like FastAI.jl, it is not as stable or mature as other solutions like Documenter.jl.\nGetting started\nFirst, find out how to install Pollen and then how to setup package documentation.\n\n"
+    contents = "Pollen.jl\nA document generation system based on tree rewriting built for interactive work.\nNote: The documentation for this package is still a work in progress and while Pollen.jl already powers the documentation of some packages like FastAI.jl, it is not as stable or mature as other solutions like Documenter.jl.\nGetting started\nFirst, find out how to install Pollen and then how to setup package documentation.\n\n"
     url = "Pollen@dev/doc/README.md"
     [[input.files]]
     title = "FirstChild"
