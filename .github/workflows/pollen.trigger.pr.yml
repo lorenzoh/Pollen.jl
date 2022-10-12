@@ -20,5 +20,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          msg: "A documentation preview has been successfully built, view it here: [Documentation preview PR-${{github.event.number}}](${{https://${{github.event.repository.owner.login}}.github.io/${{github.event.repository.name}}/pr-${{github.event.pull_request.number}})"
+          msg: "A documentation preview has been successfully built, view it here: [Documentation preview PR-${{github.event.number}}](https://${{github.event.repository.owner.login}}.github.io/${{github.event.repository.name}}/pr-${{github.event.pull_request.number}})"
           delete_prev_regex_msg: "ocumentation preview PR"
