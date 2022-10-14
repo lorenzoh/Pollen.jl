@@ -9,12 +9,12 @@ on:
       docdir:
         description: "Path of the subdirectory where Pollen's Project.toml, make.jl, and project.jl are stored."
         required: false
-        default: "docs/"
+        default: "<<DOCS_FOLDER>>"
         type: string
       databranch:
         description: "Branch where the generated documentation is stored"
         required: false
-        default: "pollen"
+        default: "<<BRANCH_DATA>>"
         type: string
       juliaversion:
         description: "Julia version to use when building the documentation"
