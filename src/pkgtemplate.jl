@@ -4,19 +4,53 @@ const POLLEN_TEMPLATE_DIR =
 
 
 """
-    PollenPlugin() <: Plugin
+    PollenPlugin(; kwargs...) <: Plugin
 
-Sets up Pollen.jl documentation for a package.
+Configuration for setting up Pollen.jl documentation for a package.
 
-## Extended
+To add documentation when creating a package with PkgTemplates.jl, use this as one
+of the plugins.
 
-Performs the following steps:
+To add documentation to an existing package, you can configure this and pass it to
+[`setup_docs_files`](#), [`setup_docs_project`](#), [`setup_docs_actions`](#) and
+[`setup_docs_branches`](#). See these functions for more detail on what is set up.
 
-- creates a `docs/` folder with default files `project.jl`, `serve.jl`, `make.jl`
-    and `toc.json`
-- creates the GitHub actions for building the documentation data and the frontend
-- creates an empty (orphan) branch "pollen" where documentation data will be built to
-    by GitHub Actions
+Follow [the tutorial](/doc/docs/tutorials/setup.md) for a step-by-step guide for
+setting up documentation.
+
+## Keyword arguments
+
+- `folder::String = "docs"`: The folder in which the documentation configuration
+    and project will be stored. See [`setup_docs_files`](#) and [`setup_docs_project`](#).
+- `remote = "origin"`: The name of the remote to use. Branches created by
+    [`setup_docs_branches`](#) will be pushed to this remote. Set `remote = nothing` to
+    disable the pushing of branches to a remote.
+
+    !!! warn "Missing remote"
+
+        If the remote does not exist, the setup will error! In that case, disable with
+        `remote = nothing`.
+
+Branch configuration:
+
+- `branch_primary = "main"`: The main branch of the repository. Pushes to this branch
+    will trigger documentation builds on GitHub.
+
+    !!! warn "Old repositories"
+
+        If your repository was created a while ago, chances are its default branch is called
+        `"master"`. In that case, you will have to pass `branch_primary = "master"` or
+        the GitHub Actions will not be set up correctly.
+- `branch_data = "pollen"`: Pollen.jl will create a branch in your repository that stores
+    data generated during documentation build on GitHub Pages. You will usually not need to
+    change this.
+- `branch_page = "gh-pages"`: The branch that the statically rendered HTML is built to for
+    publishing on GitHub Pages.
+
+Dependency configuration:
+
+- `pollen_spec::Pkg.PackageSpec`: If you want to use an in-development version/branch of
+    Pollen.jl, modify this to ensure that GitHub Actions will also that version.
 """
 @plugin struct PollenPlugin <: Plugin
     folder::String = "docs"
@@ -219,6 +253,11 @@ end
 
 
 function PkgTemplates.hook(plugin::PollenPlugin, t::Template, pkg_dir::AbstractString)
+end
+
+function PkgTemplates.posthook(plugin::PollenPlugin, t::Template, pkg_dir::AbstractString)
+    # Setup the environment for building the docs
+    setup_docs_project(pkg_dir, plugin)
     setup_docs_files(pkg_dir, plugin)
     setup_docs_actions(pkg_dir, plugin)
     _withbranch(pkg_dir, plugin.branch_primary) do
@@ -227,26 +266,7 @@ function PkgTemplates.hook(plugin::PollenPlugin, t::Template, pkg_dir::AbstractS
         readchomp |>
         println
     end
-end
-
-function PkgTemplates.posthook(plugin::PollenPlugin, t::Template, pkg_dir::AbstractString)
-    # Setup the environment for building the docs
-    setup_docs_project(pkg_dir, plugin)
-
-    #=
-    _withbranch(pkg_dir, p.branch_data) do
-        rendertemplate("pollenbuild.yml", folder_actions)
-        rendertemplate("pollenstatic.yml", folder_actions)
-        Git.git(["add", "."]) |> readchomp |> println
-        Git.git(["commit", "-m", "Add actions to data branch"]) |> readchomp |> println
-    end
-    _withbranch(pkg_dir, p.branch_page) do
-        touch(".nojekyll")
-        Git.git(["add", "."]) |> readchomp |> println
-        Git.git(["commit", "-m", "Add .nojekyll"]) |> readchomp |> println
-    end
-    sleep(0.1)
-    =#
+    setup_docs_branches(pkg_dir, plugin)
 end
 
 
@@ -254,6 +274,7 @@ function PkgTemplates.view(p::PollenPlugin, ::Template, pkg_dir::AbstractString)
     return Dict{String,Any}(
         "PKG" => split(pkg_dir, "/")[end],
         "DOCS_FOLDER" => p.folder,
+        "BRANCH_PRIMARY" => p.branch_primary,
         "BRANCH_DATA" => p.branch_data,
         "BRANCH_PAGE" => p.branch_page,
     )
@@ -303,13 +324,18 @@ end
 
 function _createorphanbranch(repo::String, branch::String; remote = nothing)
     return _withbranch(repo, branch, options = ["--orphan"]) do
-        readchomp(Git.git(["reset", "--hard"])) |> println
+        @info "Creating orphaned branch `$branch`"
+        readchomp(Git.git(["reset", "--hard"]))
         readchomp(
             Git.git(["commit", "--allow-empty", "-m", "Empty branch for Pollen.jl data"]),
-        ) |> println
+        )
         if !isnothing(remote)
-            readchomp(Git.git(["push", "--set-upstream", remote, branch])) |> println
-
+            try
+                readchomp(Git.git(["push", "--set-upstream", remote, branch]))
+            catch
+                @error """Could not push branch `$branch` to remote. You may have to do
+                        this manually later."""
+            end
         end
     end
 end
@@ -318,12 +344,14 @@ end
 # Tests
 
 @testset "Documentation setup" begin
-    @testset "Package template" begin
-        template = PkgTemplates.Template([
+    @testset "PkgTemplates" begin
+        template = Template(plugins=[
+                Pollen.PollenPlugin(remote=nothing),
+                PkgTemplates.Tests(project=true),
+                PkgTemplates.Git(ssh=true),
+                GitHubActions(),
+            ], user="lorenzoh")
 
-        ])
-        mktempdir() do dir
-            @test_nowarn template(joinpath(dir, "TempPackage"))
-        end
+        template(joinpath(mktempdir(), "TestPackage"))
     end
 end

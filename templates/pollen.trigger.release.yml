@@ -5,9 +5,15 @@ on:
     types: [created]
 
 jobs:
-   pollen:
+  pollen:
     name: "Pollen - Build documentation on push to main"
     uses: "./.github/workflows/pollen.build.yml"
     with:
-      tag: dev
+      tag: ${{github.event.release.name}}
+    secrets: inherit
+  pollenstable:
+    name: "Pollen - Build documentation on push to main"
+    uses: "./.github/workflows/pollen.build.yml"
+    with:
+      tag: stable
     secrets: inherit
