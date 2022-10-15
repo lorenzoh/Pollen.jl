@@ -1,7 +1,6 @@
 
-const POLLEN_TEMPLATE_DIR =
-    Ref{String}(joinpath(dirname(dirname(pathof(Pollen))), "templates"))
-
+const POLLEN_TEMPLATE_DIR = Ref{String}(joinpath(dirname(dirname(pathof(Pollen))),
+                                                 "templates"))
 
 """
     PollenPlugin(; kwargs...) <: Plugin
@@ -58,34 +57,25 @@ Dependency configuration:
     branch_page::String = "gh-pages"
     branch_primary::String = "main"
     remote::Union{String, Nothing} = "origin"
-    pollen_spec::Pkg.PackageSpec =
-        Pkg.PackageSpec(url = "https://github.com/lorenzoh/Pollen.jl", rev = "main")
-    moduleinfo_spec::Pkg.PackageSpec =
-        Pkg.PackageSpec(url = "https://github.com/lorenzoh/ModuleInfo.jl", rev = "main")
+    pollen_spec::Pkg.PackageSpec = Pkg.PackageSpec(url = "https://github.com/lorenzoh/Pollen.jl",
+                                                   rev = "main")
+    moduleinfo_spec::Pkg.PackageSpec = Pkg.PackageSpec(url = "https://github.com/lorenzoh/ModuleInfo.jl",
+                                                       rev = "main")
 end
-
-
 
 # Setup and validation steps
 
-
-function setup_docs(
-    dir::String,
-    plugin = Pollen.PollenPlugin();
-    verbose = true,
-    force = false,
-)
+function setup_docs(dir::String,
+                    plugin = Pollen.PollenPlugin();
+                    verbose = true,
+                    force = false)
     # ## Checks
     # check isdir
     isdir(dir) || throw(SystemError("Directory `$dir` not found!"))
     # check isfile Project.toml
     projfile = joinpath(dir, "Project.toml")
     if !isfile(projfile)
-        throw(
-            SystemError(
-                "Project file `$dir/Project.toml` not found! Please pass a valid Julia package directory.",
-            ),
-        )
+        throw(SystemError("Project file `$dir/Project.toml` not found! Please pass a valid Julia package directory."))
     end
 
     verbose && @info "Rendering templates in docs subfolder `$(plugin.folder)"
@@ -102,7 +92,6 @@ function setup_docs(
     end
 end
 
-
 TEMPLATES_DOCS = ["project.jl", "make.jl", "serve.jl", "toc.json"]
 TEMPLATES_ACTIONS = [
     "pollen.build.yml",
@@ -112,12 +101,10 @@ TEMPLATES_ACTIONS = [
     "pollen.render.yml",
 ]
 
-function setup_docs_files(
-    dir::String,
-    plugin = PollenPlugin();
-    verbose = true,
-    force = false,
-)
+function setup_docs_files(dir::String,
+                          plugin = PollenPlugin();
+                          verbose = true,
+                          force = false)
     # Validation
     isdir(dir) || throw(SystemError("Directory `$dir` not found!"))
     docsdir = joinpath(dir, plugin.folder)
@@ -125,12 +112,8 @@ function setup_docs_files(
     docsfiles = [joinpath(docsdir, f) for f in TEMPLATES_DOCS]
     for file in docsfiles
         if !force && isfile(file)
-            throw(
-                SystemError(
-                    "File `$file` already exists. Pass `force = true` to overwrite any previous configuration.",
-                    2,
-                ),
-            )
+            throw(SystemError("File `$file` already exists. Pass `force = true` to overwrite any previous configuration.",
+                              2))
         end
     end
 
@@ -142,12 +125,10 @@ function setup_docs_files(
     end
 end
 
-function setup_docs_actions(
-    dir::String,
-    plugin = PollenPlugin();
-    verbose = true,
-    force = false,
-)
+function setup_docs_actions(dir::String,
+                            plugin = PollenPlugin();
+                            verbose = true,
+                            force = false)
     # Validation
     isdir(dir) || throw(SystemError("Directory `$dir` not found!"))
     actionsdir = joinpath(dir, ".github/workflows")
@@ -155,12 +136,8 @@ function setup_docs_actions(
     actionfiles = [joinpath(actionsdir, f) for f in TEMPLATES_ACTIONS]
     for file in actionfiles
         if !force && isfile(file)
-            throw(
-                SystemError(
-                    "File `$file` already exists. Pass `force = true` to overwrite any previous configuration.",
-                    2,
-                ),
-            )
+            throw(SystemError("File `$file` already exists. Pass `force = true` to overwrite any previous configuration.",
+                              2))
         end
     end
 
@@ -170,7 +147,6 @@ function setup_docs_actions(
         _rendertemplate(template, actionsdir, config)
     end
 end
-
 
 function setup_docs_branches(dir::String, plugin = PollenPlugin(); force = false)
     if !_iscleanworkingdir(dir)
@@ -197,16 +173,12 @@ function setup_docs_branches(dir::String, plugin = PollenPlugin(); force = false
     end
 end
 
-
 function setup_docs_project(dir, plugin = PollenPlugin(); force = false, verbose = false)
     isdir(dir) || throw(SystemError("Directory `$dir` not found!"))
     docsdir = joinpath(dir, plugin.folder)
     if isdir(docsdir) && isfile(joinpath(docsdir, "Project.toml"))
-        force || throw(
-            SystemError(
-                "There is already a Julia project at `$docsdir`. Pass `force = true` to overwrite.",
-            ),
-        )
+        force ||
+            throw(SystemError("There is already a Julia project at `$docsdir`. Pass `force = true` to overwrite."))
     end
     isdir(docsdir) || mkdir(docsdir)
     # TODO: check if it
@@ -219,27 +191,19 @@ function setup_docs_project(dir, plugin = PollenPlugin(); force = false, verbose
 end
 
 function _rendertemplate(name, dst, config)
-    PkgTemplates.gen_file(
-        joinpath(dst, name),
-        PkgTemplates.render_file(
-            joinpath(POLLEN_TEMPLATE_DIR[], name),
-            config,
-            ("<<", ">>"),
-        ),
-    )
+    PkgTemplates.gen_file(joinpath(dst, name),
+                          PkgTemplates.render_file(joinpath(POLLEN_TEMPLATE_DIR[], name),
+                                                   config,
+                                                   ("<<", ">>")))
 end
 
 function _docs_config(dir::String, plugin::PollenPlugin)
-    return Dict{String,Any}(
-        "PKG" => split(dir, "/")[end],
-        "DOCS_FOLDER" => plugin.folder,
-        "BRANCH_DATA" => plugin.branch_data,
-        "BRANCH_PAGE" => plugin.branch_page,
-        "BRANCH_PRIMARY" => plugin.branch_primary,
-    )
+    return Dict{String, Any}("PKG" => split(dir, "/")[end],
+                             "DOCS_FOLDER" => plugin.folder,
+                             "BRANCH_DATA" => plugin.branch_data,
+                             "BRANCH_PAGE" => plugin.branch_page,
+                             "BRANCH_PRIMARY" => plugin.branch_primary)
 end
-
-
 
 # Hooks for PkgTemplates
 
@@ -250,7 +214,6 @@ function PkgTemplates.validate(::PollenPlugin, t::Template) end
 function PkgTemplates.prehook(p::PollenPlugin, ::Template, pkg_dir::AbstractString)
     setup_docs_branches(pkg_dir, p)
 end
-
 
 function PkgTemplates.hook(plugin::PollenPlugin, t::Template, pkg_dir::AbstractString)
 end
@@ -269,15 +232,12 @@ function PkgTemplates.posthook(plugin::PollenPlugin, t::Template, pkg_dir::Abstr
     setup_docs_branches(pkg_dir, plugin)
 end
 
-
 function PkgTemplates.view(p::PollenPlugin, ::Template, pkg_dir::AbstractString)
-    return Dict{String,Any}(
-        "PKG" => split(pkg_dir, "/")[end],
-        "DOCS_FOLDER" => p.folder,
-        "BRANCH_PRIMARY" => p.branch_primary,
-        "BRANCH_DATA" => p.branch_data,
-        "BRANCH_PAGE" => p.branch_page,
-    )
+    return Dict{String, Any}("PKG" => split(pkg_dir, "/")[end],
+                             "DOCS_FOLDER" => p.folder,
+                             "BRANCH_PRIMARY" => p.branch_primary,
+                             "BRANCH_DATA" => p.branch_data,
+                             "BRANCH_PAGE" => p.branch_page)
 end
 
 # Git utilities
@@ -304,12 +264,9 @@ end
 
 function _hasbranch(dir, branch)
     try
-        cd(
-            () ->
-                pipeline(Git.git(["rev-parse", "--quiet", "--verify", branch])) |>
-                readchomp,
-            dir,
-        )
+        cd(() -> pipeline(Git.git(["rev-parse", "--quiet", "--verify", branch])) |>
+                 readchomp,
+           dir)
         return true
     catch
         return false
@@ -326,9 +283,12 @@ function _createorphanbranch(repo::String, branch::String; remote = nothing)
     return _withbranch(repo, branch, options = ["--orphan"]) do
         @info "Creating orphaned branch `$branch`"
         readchomp(Git.git(["reset", "--hard"]))
-        readchomp(
-            Git.git(["commit", "--allow-empty", "-m", "Empty branch for Pollen.jl data"]),
-        )
+        readchomp(Git.git([
+                              "commit",
+                              "--allow-empty",
+                              "-m",
+                              "Empty branch for Pollen.jl data",
+                          ]))
         if !isnothing(remote)
             try
                 readchomp(Git.git(["push", "--set-upstream", remote, branch]))
@@ -340,18 +300,17 @@ function _createorphanbranch(repo::String, branch::String; remote = nothing)
     end
 end
 
-
 # Tests
 
-@testset "Documentation setup" begin
-    @testset "PkgTemplates" begin
-        template = Template(plugins=[
-                Pollen.PollenPlugin(remote=nothing),
-                PkgTemplates.Tests(project=true),
-                PkgTemplates.Git(ssh=true),
-                GitHubActions(),
-            ], user="lorenzoh")
+@testset "Documentation setup" begin @testset "PkgTemplates" begin
+    template = Template(plugins = [
+                            Pollen.PollenPlugin(remote = nothing),
+                            PkgTemplates.Git(ssh = true),
+                        ], user = "lorenzoh")
 
-        template(joinpath(mktempdir(), "TestPackage"))
+    @test_nowarn redirect_stderr(Base.DevNull()) do
+        redirect_stdout(Base.DevNull()) do
+            template(joinpath(mktempdir(), "TestPackage"))
+        end
     end
-end
+end end

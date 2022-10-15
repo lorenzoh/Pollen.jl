@@ -1,6 +1,4 @@
 [deps]
-FilePathsBase = "48062228-2e41-5def-b9a4-89aafe57970f"
-Pollen = "c88717ad-5130-4874-a664-5a9aba5ec443"
 ReTest = "e0db7c4e-2690-44b9-bad6-7687da720f89"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TestSetExtensions = "98d24dd4-01ad-11ea-1b02-c9a08f80db04"

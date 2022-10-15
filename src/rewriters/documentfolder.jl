@@ -68,12 +68,17 @@ end
 
 function __getpkgids(ms; pkgtags = Dict{String, String}())
     return ["$m@$(get(pkgtags, string(m), ModuleInfo.packageversion(m)))"
-     for m in ms]
+            for m in ms]
 end
 
 hasextension(f, ext) = endswith(f, string(ext))
 hasextension(f, exts::Vector) = any(map(ext -> hasextension(f, ext), exts))
 hasextension(exts) = Base.Fix2(hasextension, exts)
+
+function rglob(filepattern = "*", dir = pwd(), depth = 5)
+    patterns = ["$(repeat("*/", i))$filepattern" for i in 0:depth]
+    return vcat([glob(pattern, dir) for pattern in patterns[1:depth]]...)
+end
 
 @testset "DocumentFolder [rewriter]" begin
     dir = mktempdir()

@@ -135,7 +135,9 @@ Pollen.fold(node, 0) do x, subtree
 end
 ```
 """
-fold(f, tree::XTree, init; iterator = PostOrderDFS) = foldl(f, (l for l in iterator(tree)); init = init)
+function fold(f, tree::XTree, init; iterator = PostOrderDFS)
+    foldl(f, (l for l in iterator(tree)); init = init)
+end
 
 """
     fold(f, tree)

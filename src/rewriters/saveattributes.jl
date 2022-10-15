@@ -10,7 +10,6 @@ function SaveAttributes(keys = nothing;
 end
 
 function postbuild(save::SaveAttributes, project, builder::FileBuilder)
-
     attrss = Dict{String, Dict}()
 
     for (id, doc) in (save.useoutputs ? project.outputs : project.sources)

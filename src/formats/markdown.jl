@@ -104,7 +104,7 @@ function mdchildrenattrs(node::CM.Node)
                 as[:class] = join(as[:class], ';')
             end
             # last child
-            if i == length(allcs) && allcs[end-1].t isa CM.AbstractInline
+            if i == length(allcs) && allcs[end - 1].t isa CM.AbstractInline
                 attrs[end] = merge(attrs[end], as)
                 as = Dict{Symbol, String}()
             end
@@ -215,9 +215,9 @@ function xtree(node::CM.Node, i::CM.Image, attrs)
 end
 
 function xtree(node::CM.Node, c::CM.CodeBlock, attrs)
-    return Node(tag=:codeblock,
-                children=[Leaf(node.literal)];
-                attributes=merge(attrs, Dict(:lang => c.info)))
+    return Node(tag = :codeblock,
+                children = [Leaf(node.literal)];
+                attributes = merge(attrs, Dict(:lang => c.info)))
 end
 
 function xtree(node::CM.Node, c::CM.List, attrs)
@@ -237,11 +237,11 @@ function xtree(node::CM.Node, c::CM.Heading, attrs)
 end
 
 function xtree(node::CM.Node, c::CM.Admonition, attrs)
-    return Node(tag=:admonition,
-                children=[
+    return Node(tag = :admonition,
+                children = [
                     Node(:admonitiontitle, [Leaf(c.title)]),
                     Node(:admonitionbody, childrenxtrees(node)),
-                ], attributes=merge(attrs, Dict(:class => c.category)))
+                ], attributes = merge(attrs, Dict(:class => c.category)))
 end
 
 # tables

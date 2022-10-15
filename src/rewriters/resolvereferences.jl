@@ -394,7 +394,8 @@ end
     @test resolvelink(SymbolLinkRule(PackageIndex([Pollen])),
                       LinkInfo(Node(:a, Node(:code, "serve"), href = "#")),
                       (symbol = "serve", mod = "Pollen")) ==
-          Node(:reference, Node(:code, "serve"), document_id = "Pollen@0.1.0/ref/Pollen.serve",
+          Node(:reference, Node(:code, "serve"),
+               document_id = "Pollen@0.1.0/ref/Pollen.serve",
                href = "#", reftype = "symbol")
 end
 
@@ -415,7 +416,8 @@ struct ResolveReferences <: Rewriter
     selector::Selector
 end
 
-function ResolveReferences(pkgindex = nothing; selector = DEFAULT_LINK_SELECTOR, prefixes = ("@ref", "#"))
+function ResolveReferences(pkgindex = nothing; selector = DEFAULT_LINK_SELECTOR,
+                           prefixes = ("@ref", "#"))
     rules = if isnothing(pkgindex)
         [URLLinkRule(), InternalLinkRule()]
     else

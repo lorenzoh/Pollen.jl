@@ -11,12 +11,13 @@ struct ModuleReference <: Rewriter
     ids::Set{String}
 end
 
-ModuleReference(pkgindex::ModuleInfo.PackageIndex) = ModuleReference(pkgindex, Set{String}())
+function ModuleReference(pkgindex::ModuleInfo.PackageIndex)
+    ModuleReference(pkgindex, Set{String}())
+end
 
 function ModuleReference(ms; kwargs...)
     ModuleReference(PackageIndex(ms; kwargs...))
 end
-
 
 # TODO: make autoreload with Revise.jl
 
@@ -48,8 +49,9 @@ function __make_reference_file(I::PackageIndex, symbol::ModuleInfo.SymbolInfo)
     children = [__parse_docstring(d)
                 for d in ModuleInfo.getdocstrings(I, symbol_id = symbol.id)]
     attributes = Dict{Symbol, Any}(:symbol_id => symbol.id, :title => symbol.name,
-                              :module_id => symbol.module_id, :kind => symbol.kind,
-                              :package_id => ModuleInfo.getid(ModuleInfo.getpackage(I, symbol)))
+                                   :module_id => symbol.module_id, :kind => symbol.kind,
+                                   :package_id => ModuleInfo.getid(ModuleInfo.getpackage(I,
+                                                                                         symbol)))
     if symbol.kind != :module
         # TODO: change
         binding = ModuleInfo.getbinding(I, symbol.id)
@@ -62,7 +64,7 @@ function __make_reference_file(I::PackageIndex, symbol::ModuleInfo.SymbolInfo)
         # TODO: submodules
         # TODO: exported bindings
     end
-    return Node(; tag=:documentation, children, attributes)
+    return Node(; tag = :documentation, children, attributes)
 end
 
 function __parse_docstring(doc::ModuleInfo.DocstringInfo)::Node

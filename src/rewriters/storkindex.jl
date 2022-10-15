@@ -1,12 +1,10 @@
 
-
 Base.@kwdef struct StorkSearchIndex <: Rewriter
     filterfn = Returns(True)
     tag::String = "dev"
     stork_bin::String = get_stork_binary()
     corpus::Dict{String, Any} = Dict{String, Any}()
 end
-
 
 function build_corpus(documents; filterfn = Returns(true))
     corpus = Dict{String, Dict}()
@@ -24,7 +22,7 @@ function build_corpus(documents; filterfn = Returns(true))
 end
 
 function rewriteoutputs!(outputs, stork::StorkSearchIndex)
-    newcorpus = build_corpus(outputs, filterfn =stork.filterfn)
+    newcorpus = build_corpus(outputs, filterfn = stork.filterfn)
     merge!(stork.corpus, newcorpus)
     return outputs
 end
@@ -32,16 +30,13 @@ end
 function postbuild(stork::StorkSearchIndex, project, builder::FileBuilder)
     # create a config.toml and place it in the build directory
 
-    config = Dict(
-        "input" => Dict(
-            "base_directory" => ".",
-            "url_prefix" => "",
-            "files" => collect(values(stork.corpus))
-        )
-    )
+    config = Dict("input" => Dict("base_directory" => ".",
+                                  "url_prefix" => "",
+                                  "files" => collect(values(stork.corpus))))
     mktemp()
     searchdir = mkpath(joinpath(builder.dir, "storksearch", stork.tag))
-    configfile, indexfile = joinpath(searchdir, "config.toml"), joinpath(searchdir, "index.st")
+    configfile, indexfile = joinpath(searchdir, "config.toml"),
+                            joinpath(searchdir, "index.st")
     open(joinpath(searchdir, "config.toml"), "w") do f
         TOML.print(f, config)
     end
@@ -52,10 +47,8 @@ function build_stork_index(stork_bin::String, config_file::String, output_file::
     run(`$stork_bin build -i $config_file -o $output_file`)
 end
 
-
-
 const LINEBREAKTAGS = [:h1, :h2, :h3, :h4, :p, :admonition, :blockquote, :mathblock, :table,
-                 :hr, :li, :ul, :md, :admonitiontitle, :admonitionbody]
+    :hr, :li, :ul, :md, :admonitiontitle, :admonitionbody]
 
 extract_text(node::Node) = extract_text!("", node, Val(Pollen.tag(node)))
 
@@ -91,7 +84,6 @@ function extract_text!(s, node::Node, ::Val{:julia})
     return s
 end
 
-
 function get_stork_binary()
     dir = @get_scratch!("stork")
     file = joinpath(dir, "stork")
@@ -123,5 +115,4 @@ function get_stork_binary()
         After doing so, please pass make sure it is marked executable and pass its path to
         `StorkSearchIndex` using the `stork_bin` keyword argument."""))
     end
-
 end

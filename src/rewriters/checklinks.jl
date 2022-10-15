@@ -5,7 +5,6 @@ end
 
 CheckLinks() = CheckLinks(SelectTag(:reference) & SelectHasAttr(:document_id))
 
-
 function rewriteoutputs!(outputs, check::CheckLinks)
     for (id, doc) in outputs
         for node in select(doc, check.sel)

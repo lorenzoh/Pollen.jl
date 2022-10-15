@@ -40,7 +40,7 @@ function createproject(; tag = "dev", package = m, modules = ms)
         CheckLinks(),
 
         # Provide data for the frontend
-        StorkSearchIndex(; tag, filterfn = id -> startswith(id, string(package))),
+        StorkSearchIndex(; tag, filterfn = startswith(string(package))),
         SaveAttributes((:title, :backlinks => []), useoutputs = true),
         DocVersions(package; tag = tag, dependencies = packages),
     ])

@@ -60,13 +60,15 @@ function loadtoc(pkgdir::String, projectconfig::Dict, pkgid)
         defaulttoc(projectconfig, pkgid)
     end
     __mapdictleaves(tree) do link
-        linkinfo = LinkInfo(string(link), "", "$pkgid/doc/index.md", Node(:no), "", pkgid, projectconfig["name"])
+        linkinfo = LinkInfo(string(link), "", "$pkgid/doc/index.md", Node(:no), "", pkgid,
+                            projectconfig["name"])
         parselink(InternalLinkRule(), linkinfo)
     end
 end
 
-
-__mapdictleaves(f, d::Union{<:Dict, <:JSON3.Object}) = OrderedDict(map((k, v) -> (k => __mapdictleaves(f, v)), keys(d), values(d)))
+function __mapdictleaves(f, d::Union{<:Dict, <:JSON3.Object})
+    OrderedDict(map((k, v) -> (k => __mapdictleaves(f, v)), keys(d), values(d)))
+end
 __mapdictleaves(f, x) = f(x)
 
 function defaulttoc(projectconfig, pkgid)

@@ -43,8 +43,6 @@ function handle(server, ::ServerMode, ::SourceFileUpdated)
     for rewriter in server.project.rewriters
         if rewriter isa ExecuteCode
             reset!(rewriter)
-        elseif rewriter isa Referencer
-            reset!(rewriter)
         end
     end
     for p in keys(server.project.sources)

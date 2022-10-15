@@ -1,10 +1,10 @@
 
-Base.@kwdef struct StaticResources <: Rewriter
+Base.@kwdef struct StaticAssets <: Rewriter
     resources::Dict{String, String} = Dict{String, String}()
     folder::String = "resources"
 end
 
-function rewritedoc(rewriter::StaticResources, _, doc::Node)
+function rewritedoc(rewriter::StaticAssets, _, doc::Node)
     if haskey(attributes(doc), :path)
         doc_folder = parent(absolute(Path(attributes(doc)[:path])))
         return cata(doc, SelectTag(:img) & SelectHasAttr(:src)) do node
@@ -20,7 +20,7 @@ function rewritedoc(rewriter::StaticResources, _, doc::Node)
     end
 end
 
-function postbuild(rewriter::StaticResources, _, builder::FileBuilder)
+function postbuild(rewriter::StaticAssets, _, builder::FileBuilder)
     for (key, srcfile) in rewriter.resources
         dstfile = absolute(joinpath(absolute(builder.dir), key))
         if !isfile(dstfile)
@@ -30,9 +30,9 @@ function postbuild(rewriter::StaticResources, _, builder::FileBuilder)
     end
 end
 
-@testset "StaticResources [rewriter]" begin mktempdir() do dir
+@testset "StaticAssets [rewriter]" begin mktempdir() do dir
     doc = Node(:md, Node(:img, src = "bla.png"), path = "$dir/doc.md")
-    rewriter = StaticResources()
+    rewriter = StaticAssets()
     outdoc = rewritedoc(rewriter, "", doc)
     @test startswith(attributes(selectfirst(outdoc, SelectTag(:img)))[:src], "resources")
 end end
