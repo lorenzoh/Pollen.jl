@@ -132,7 +132,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.DocumentationFiles"
     [[input.files]]
     title = "Pollen.jl"
-    contents = "Pollen.jl\nA document generation system based on tree rewriting, built for interactive work.\nPollen.jl generates documentation for Julia packages that comes with many features:\nsupport for many input and output formats: Markdown, Jupyter notebooks, HTML, JSON, and Julia source code\n\na modern frontend with Sliding Panes\n\nautomatic hyperreferencing of code variables for discoverability\n\ncode execution to ensure your code examples stay up-to-date\n\nautomated builds, deployments and PR previews with GitHub Actions and GitHub Pages\n\nlocal preview with incremental builds for an improved developer experience\n\n\nFirst, find out how to install Pollen and then how to setup package documentation.\n\n"
+    contents = "Pollen.jl\nDocumentation\nA document generation system based on tree rewriting, built for interactive work.\nPollen.jl generates documentation for Julia packages that comes with many features:\nsupport for many input and output formats: Markdown, Jupyter notebooks, HTML, JSON, and Julia source code\n\na modern frontend with Sliding Panes\n\nautomatic hyperreferencing of code variables for discoverability\n\ncode execution to ensure your code examples stay up-to-date\n\nautomated builds, deployments and PR previews with GitHub Actions and GitHub Pages\n\nlocal preview with incremental builds for an improved developer experience\n\nfull support for multiple packages and linking between them\n\n\nFirst, find out how to install Pollen and then how to setup package documentation.\n\n"
     url = "Pollen@dev/doc/README.md"
     [[input.files]]
     title = "FirstChild"
