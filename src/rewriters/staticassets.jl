@@ -34,5 +34,5 @@ end
     doc = Node(:md, Node(:img, src = "bla.png"), path = "$dir/doc.md")
     rewriter = StaticAssets()
     outdoc = rewritedoc(rewriter, "", doc)
-    @test startswith(attributes(selectfirst(outdoc, SelectTag(:img)))[:src], "resources")
+    @test startswith(attributes(selectfirst(outdoc, SelectTag(:img)))[:src], "assets")
 end end
