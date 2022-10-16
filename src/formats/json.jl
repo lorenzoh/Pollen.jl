@@ -21,7 +21,6 @@ Base.@kwdef struct JSONFormat <: Format
     firstmimeonly = true
 end
 
-
 formatextension(::JSONFormat) = "json"
 
 # Outputting JSON
@@ -35,12 +34,12 @@ one that only uses JSON datatypes (`Dict`, `String`, `Number`, `Nothing`).
 function tojson end
 
 tojson(tree::XTree) = tojson(JSONFormat(), tree)
-tojson(format::JSONFormat, node::Node) = Dict(
-    :type => "node",
-    :tag => tag(node),
-    :children => [tojson(format, ch) for ch in  children(node)],
-    :attributes => attributes(node),
-)
+function tojson(format::JSONFormat, node::Node)
+    Dict(:type => "node",
+         :tag => tag(node),
+         :children => [tojson(format, ch) for ch in children(node)],
+         :attributes => attributes(node))
+end
 
 tojson(::JSONFormat, ::Leaf{Nothing}) = nothing
 tojson(::JSONFormat, leaf::Leaf{String}) = leaf[]
@@ -55,7 +54,6 @@ function render!(io::IO, tree::XTree, ::JSONFormat)
     JSON3.write(io, tojson(tree))
 end
 
-
 # Inputting JSON
 
 function parse(io::IO, format::JSONFormat)
@@ -69,17 +67,11 @@ fromjson(data) = fromjson(JSONFormat(), data)
 function fromjson(format::JSONFormat, data::Union{<:Dict, <:JSON3.Object})
     type = data[:type]
     if type == "leaf"
-        return Leaf(PreRendered(
-            Dict(
-                MIME(m) => val for (m, val) in data[:mimes]
-            )
-        ))
+        return Leaf(PreRendered(Dict(MIME(m) => val for (m, val) in data[:mimes])))
     elseif type == "node"
-        return Node(
-            Symbol(data[:tag]),
-            XTree[fromjson(format, ch) for ch in data[:children]],
-            Dict(data[:attributes]),
-        )
+        return Node(Symbol(data[:tag]),
+                    XTree[fromjson(format, ch) for ch in data[:children]],
+                    Dict(data[:attributes]))
     else
         throw(ArgumentError("Could not parse a tree from JSON data $(data)"))
     end
@@ -107,11 +99,10 @@ function asmimestrings(x::PreRendered, mimes = MIMES; firstonly = false)
     return mimestrings
 end
 
-
-
-Base.show(io::IO, pre::PreRendered) = print(io,
-    "Prerendered($(collect(keys(pre.mimestrings))))")
-
+function Base.show(io::IO, pre::PreRendered)
+    print(io,
+          "Prerendered($(collect(keys(pre.mimestrings))))")
+end
 
 @testset "JSONFormat" begin
     format = JSONFormat(firstmimeonly = false)
@@ -132,6 +123,4 @@ Base.show(io::IO, pre::PreRendered) = print(io,
         tree = Node(:doc, Node(:p, "hi", nothing; attr = "val"))
         @test Pollen.parse(Pollen.render(tree, format), format) == tree
     end
-
-
 end

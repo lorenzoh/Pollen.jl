@@ -24,14 +24,12 @@ function rewritedoc(::Rewriter, docid, doc)
     return doc
 end
 
-
 """
     reset!(rewriter)
 
 Clears internal state of `rewriter`. Does nothing if not overwritten.
 """
 function reset!(::Rewriter) end
-
 
 """
     postbuild(rewriter, project, dst, format)
@@ -40,12 +38,10 @@ Post-build callback for [`Rewriter`](#)s.
 """
 function postbuild(::Rewriter, project, builder) end
 
-
 createsources!(::Rewriter) = Dict{String, Node}()
 
-
 struct Replacer <: Rewriter
-    fn
+    fn::Any
     selector::Selector
 end
 

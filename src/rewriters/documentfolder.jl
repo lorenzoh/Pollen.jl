@@ -1,159 +1,100 @@
-struct DocumentFolder <: Rewriter
-    dir::AbstractPath
-    documents::Dict{String, Node}
-    dirty::Dict{String, Bool}
-    prefix::Any
-    extensions
-    includehidden
-    filterfn
+Base.@kwdef struct DocumentFolder <: Rewriter
+    dirs::Vector{Pair{String, String}}
+    filterfn = hasextension(["md", "ipynb"])
+    loadfn = _defaultload
+    files::Dict{String, FileLoader} = Dict{String, FileLoader}()
+end
+_defaultload(file, _) = Pollen.parse(Path(file))
+
+function Base.show(io::IO, df::DocumentFolder)
+    print(io, "DocumentFolder(", length(keys(df.files)), " files, ", length(df.dirs),
+          " folders)")
 end
 
-function Base.show(io::IO, rewriter::DocumentFolder)
-    print(io, "DocumentFolder(\"", rewriter.dir, "\"")
-    if !isnothing(rewriter.prefix)
-        print(", prefix = \"", rewriter.prefix, "\"")
-    end
-    print(")")
+function DocumentFolder(dirs::Vector; kwargs...)
+    DocumentFolder(; dirs = map(d -> d isa Pair ? d : "" => d, dirs), kwargs...)
 end
-
-"""
-    DocumentFolder(dir) <: Rewriter
-
-Rewriter to add source documents from a folder to a project.
-
-For every file `\$dir/\$subpath`, a new source document with id `\$subpath`
-is added to a project.
-
-## Keyword arguments
-
-- `prefix = nothing`: Prefix for document ids. If a string is given document ids
-    will have the form `\$prefix\$subpath`
-- `extensions = ("ipynb", "md")`: List of file extensions that should be loaded.
-- `includehidden = false`: Whether to load documents from hidden files and directories.
-- `filterfn = p -> true`: Filter applied to every path. Return `false` for a path to not
-    load it.
-"""
-DocumentFolder(
-    dir::AbstractPath;
-    prefix = nothing,
-    extensions = ("ipynb", "md"),
-    includehidden = false,
-    filterfn = (p) -> true,
-) = return DocumentFolder(
-        absolute(dir),
-        Dict{String, Node}(),
-        Dict{String, Bool}(),
-        prefix,
-        extensions,
-        includehidden,
-        filterfn)
-
-DocumentFolder(p::String, args...; kwargs...) = DocumentFolder(Path(p), args...; kwargs...)
-
+DocumentFolder(dir::String; kwargs...) = DocumentFolder([dir]; kwargs...)
 
 function createsources!(rewriter::DocumentFolder)
     sources = Dict{String, Node}()
-    for p in _iterpaths(rewriter)
-        docid = _getdocid(rewriter, p)
-        isdirty = get(rewriter.dirty, docid, true)
-        if isdirty
-            # (re)load document
-            p_abs = absolute(joinpath(rewriter.dir, p))
-            document = __loadfile(p_abs)
-            sources[docid] = rewriter.documents[docid] = document
-            rewriter.dirty[docid] = false
+    for (prefix, dir) in rewriter.dirs
+        for file::String in filter(rewriter.filterfn, rglob("*", dir))
+            docid = "$(prefix)$(relpath(file, dir))"
+
+            # Skip if already created
+            docid in keys(rewriter.files) && continue
+            rewriter.files[docid] = FileLoader(file, docid,
+                                               () -> rewriter.loadfn(file, docid))
+            sources[docid] = rewriter.loadfn(file, docid)
         end
     end
-
     return sources
 end
 
-function __loadfile(filepath)
-    doc = Pollen.parse(Path(filepath))
-    xtitle = selectfirst(doc, SelectTag(:h1))
-    title = isnothing(xtitle) ? filename(Path(filepath)) : gettext(xtitle)
-    attrs = Dict(:path => string(filepath), :title => title)
+function reset!(rewriter::DocumentFolder)
+    # Clear the dictionary with collected files, so they can be recreated
+    empty!(rewriter.files)
+end
+
+function geteventhandler(rewriter::DocumentFolder, ch)
+    return makefilewatcher(ch, collect(values(rewriter.files)), last.(rewriter.dirs))
+end
+
+function DocumentationFiles(ms::Vector{Module}; extensions = ["md", "ipynb"],
+                            pkgtags = Dict{String, String}(), kwargs...)
+    filterfn = hasextension(extensions)
+    pkgdirs = pkgdir.(ms)
+    pkgids = __getpkgids(ms; pkgtags)
+    if any(isnothing, pkgdirs)
+        i::Int = findfirst(isnothing, pkgdirs)
+        throw(ArgumentError("Could not find a package directory for module '$(ms[i])'"))
+    end
+    return DocumentFolder(["$pkgid/doc/" => dir for (pkgid, dir) in zip(pkgids, pkgdirs)];
+                          filterfn, loadfn = __load_documentation_file, kwargs...)
+end
+DocumentationFiles(m::Module; kwargs...) = DocumentationFiles([m]; kwargs...)
+
+function __load_documentation_file(file, id)
+    pfile = Path(file)
+    doc = Pollen.parse(pfile)
+    node_title = selectfirst(doc, SelectTag(:h1))
+    title = isnothing(node_title) ? filename(pfile) : gettext(node_title)
+    attrs = Dict(:path => string(file), :title => title)
     return Node(:document, [doc], attrs)
 end
 
-function geteventhandler(folder::DocumentFolder, ch)
-    documents = Dict{String, String}(string(_getpath(folder, docid)) => docid for docid in keys(folder.documents))
-    return createfilewatcher(documents, ch) do file
-        __loadfile(file)
-    end
+# Utilities
+
+function __getpkgids(ms; pkgtags = Dict{String, String}())
+    return ["$m@$(get(pkgtags, string(m), ModuleInfo.packageversion(m)))"
+            for m in ms]
 end
 
-function _getpath(folder::DocumentFolder, docid)
-    if isnothing(folder.prefix)
-            joinpath(folder.dir, docid)
-    else
-        joinpath(folder.dir, docid[length(folder.prefix)+2:end])
-    end
+hasextension(f, ext) = endswith(f, string(ext))
+hasextension(f, exts::Vector) = any(map(ext -> hasextension(f, ext), exts))
+hasextension(exts) = Base.Fix2(hasextension, exts)
+
+function rglob(filepattern = "*", dir = pwd(), depth = 5)
+    patterns = ["$(repeat("*/", i))$filepattern" for i in 0:depth]
+    return vcat([glob(pattern, dir) for pattern in patterns[1:depth]]...)
 end
-
-
-"""
-    createfilewatcher(documents, channel)
-
-Create a file watcher that can be used as an event source when serving.
-`documents` is a `Dict` with entries `filepath => docid`.
-"""
-function createfilewatcher(loadfn, documents::Dict{String, String}, ch::Channel)
-    watcher = LiveServer.SimpleWatcher() do filepath
-        try
-            @info "Source file $filepath was updated"
-            doc = loadfn(filepath)
-            docid = documents[filepath]
-            event = DocUpdated(docid, doc)
-            put!(ch, event)
-        catch e
-            @error "Error while processing file update for \"$filepath\" (document ID \"$(documents[filepath])\"" e=e
-        end
-    end
-    for (filepath, docid) in  documents
-        LiveServer.watch_file!(watcher, filepath)
-    end
-    return watcher
-end
-
-
-function filehandlers(folder::DocumentFolder, ::Project, ::Builder)
-    return Dict(
-        () => Dict(relative(p, folder.dir) => Pollen.parse(p)) for p in folder.paths
-    )
-end
-
-
-
 
 @testset "DocumentFolder [rewriter]" begin
-    mktempdir() do dir
-        open(joinpath(dir, "test.md"), "w") do f
-            write(f, "# Test")
-        end
-        rewriter = DocumentFolder(Path(dir))
-        sources = createsources!(rewriter)
-        @test haskey(sources, "test.md")
-        doc = sources["test.md"]
-        @test tag(doc) == :document
-        @test haskey(attributes(doc), :path)
-        @test children(doc)[1] == Node(:md, Node(:h1, "Test"))
-    end
+    dir = mktempdir()
+    touch(joinpath(dir, "test.md"))
+    r = DocumentFolder(["pre/" => dir])
+    sources = createsources!(r)
+    # Should find the file
+    @test length(sources) == 1
+    # And assign the correct document ID
+    @test first(keys(sources)) == "pre/test.md"
+    # Since `createsources!` is stateful, the file should only be returned once
+    @test isempty(createsources!(r))
+    touch(joinpath(dir, "test2.md"))
+    # But a new file will be found
+    @test "pre/test2.md" in keys(createsources!(r))
+    # After resetting, both files will be found
+    reset!(r)
+    @test length(createsources!(r)) == 2
 end
-
-# ## Helpers
-
-# iterates over paths in the document folder, respectig the filter rules
-_iterpaths(rewriter::DocumentFolder) = (
-    joinpath(relative(absolute(p), rewriter.dir))
-        for p in walkpath(rewriter.dir)
-            if extension(p) in rewriter.extensions &&
-                rewriter.filterfn(p) &&
-                (rewriter.includehidden || !_ishidden(relative(absolute(p), rewriter.dir))))
-
-# form a document ID string for a path
-_getdocid(rewriter::DocumentFolder, p::AbstractPath) =
-    string(isnothing(rewriter.prefix) ? p : joinpath(Path(rewriter.prefix), p))
-
-
-_ishidden(p::AbstractPath) = any(startswith(s, '.') && s != "." for s in p.segments)

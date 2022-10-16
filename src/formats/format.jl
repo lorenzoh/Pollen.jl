@@ -14,7 +14,6 @@ A `Format` `F` can implement the following methods:
 """
 abstract type Format end
 
-
 """
     parse(io, format)
     parse(path, format)
@@ -25,7 +24,6 @@ a string `str`.
 """
 parse(path::AbstractPath, format) = parse(open(path), format)
 parse(s::String, format) = parse(IOBuffer(s), format)
-
 
 """
     parse(path)
@@ -48,6 +46,8 @@ For example `extensionformat(Val(:html)) == HTMLFormat()`, so `parse(p"index.htm
 dispatches to `parse(p"index.html", HTMLFormat())`
 """
 function extensionformat(::Val{:ext}) end
+extensionformat(file::String) = extensionformat(Val(Symbol(extension(Path(file)))))
+
 function formatextension end
 
 # output interface
@@ -58,18 +58,18 @@ function render!(path::AbstractPath, doc::XTree, format)
     end
 end
 
-
 function render(doc, format)
     io = IOBuffer()
     render!(io, doc, format)
     return String(take!(io))
 end
 
-
 @testset "Format [interface]" begin
     struct TestFormat <: Format end
     Pollen.parse(io::IO, ::TestFormat) = Node(:doc, Leaf.(split(read(io, String))))
-    Pollen.render!(io::IO, node::Node, ::TestFormat) = write(io, join(getindex.(children(node)), " "))
+    function Pollen.render!(io::IO, node::Node, ::TestFormat)
+        write(io, join(getindex.(children(node)), " "))
+    end
 
     format = TestFormat()
     @test render(parse("hello world", format), TestFormat()) == "hello world"

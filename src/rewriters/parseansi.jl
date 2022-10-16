@@ -8,7 +8,6 @@ struct ANSI{T}
     value::T
 end
 
-
 function Base.show(io::IO, mime::MIME"text/plain", ansi::ANSI)
     print(io, "ANSI(")
     show(io, mime, ansi.value)
@@ -21,10 +20,9 @@ function Base.show(io::IO, mime::MIME"text/html", ansi::ANSI)
     end
     buf = IOContext(IOBuffer(), :color => true, :compact => false, :short => false)
     print(buf, ansi.value)
-    printer = ANSIColoredPrinters.HTMLPrinter(buf.io, root_class="ansi")
+    printer = ANSIColoredPrinters.HTMLPrinter(buf.io, root_class = "ansi")
     ANSIColoredPrinters.show_body(io, printer)
 end
-
 
 function Base.print(io::IO, ansi::ANSI)
     print(io, ansi.value)

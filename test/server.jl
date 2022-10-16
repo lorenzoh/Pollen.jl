@@ -1,6 +1,5 @@
 include("imports.jl")
 
-
 @testset "Server updates" begin
     server = testserver()
     @test_nowarn addsource!(server, p"hello.md", Node(:body, [Leaf("Hello")]))
@@ -13,14 +12,12 @@ include("imports.jl")
     @test isfile(joinpath(server.builder.dir, p"hello.md.html"))
 end
 
-
 @testset "FileServer" begin
     dir = Path(mktempdir())
     fs = FileServer(dir)
     start(fs)
     stop(fs)
 end
-
 
 @testset "ServeFiles" begin
     server = testserver()
@@ -33,7 +30,6 @@ end
     mode = ServeFilesLazy()
     @test geteventsource(mode, server, Channel()) isa Pollen.FileServer
 end
-
 
 @testset "servereventsources" begin
     server = testserver()

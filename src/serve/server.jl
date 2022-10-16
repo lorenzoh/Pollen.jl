@@ -1,5 +1,4 @@
 
-
 """
     Server(project, builder)
 
@@ -13,8 +12,9 @@ mutable struct Server
     lock::Any
 end
 
-Server(project, builder = FileBuilder(HTMLFormat(), Path(mktempdir()))) =
+function Server(project, builder = FileBuilder(HTMLFormat(), Path(mktempdir())))
     Server(project, builder, Updates(), ReentrantLock())
+end
 
 """
     abstract type ServerMode
@@ -36,7 +36,6 @@ initialize(::ServerMode, server) = return
 """
 function handle end
 
-
 """
     runserver(server, mode)
 
@@ -47,17 +46,15 @@ function runserver(server, mode; dt = 1 / 60)
     eventch = Channel()
     eventhandlers = servereventhandlers(server, mode, eventch)
     initialize(mode, server)
-    @async begin
-        for event in eventch
-            @debug "Received $(typeof(event))" event=event
-            try
-                handle(server, mode, event)
-                foreach(r -> handle(r, event), eventhandlers)
-            catch e
-                @error "Error was thrown during handling of event!" event = event error = e
-            end
+    @async begin for event in eventch
+        @debug "Received $(typeof(event))" event=event
+        try
+            handle(server, mode, event)
+            foreach(r -> handle(r, event), eventhandlers)
+        catch e
+            @error "Error was thrown during handling of event!" event=event error=e
         end
-    end
+    end end
     tasks = nothing
     try
         tasks = map(startasync, eventhandlers)
@@ -86,7 +83,6 @@ function runserver(server, mode; dt = 1 / 60)
     end
 end
 
-
 #=
 [`Updates`](#) is a container that asynchronously collects updates to
 the project state which are then applied synchronously. For example,
@@ -105,8 +101,7 @@ struct Updates
     torebuild::Any
 end
 
-Updates() = Updates(Dict{String,Node}(), Set{String}(), Set{String}())
-
+Updates() = Updates(Dict{String, Node}(), Set{String}(), Set{String}())
 
 """
     applyupdates!(project, builder, updates::Updates)
@@ -115,7 +110,6 @@ Apply `updates` to a project by updating sources, rewriting and building
 documents.
 """
 function applyupdates!(project, builder, updates::Updates)
-
     events = Event[]
 
     for (p, doc) in updates.sources
@@ -139,8 +133,9 @@ function applyupdates!(project, builder, updates::Updates)
     return project, events
 end
 
-applyupdates!(server::Server) =
+function applyupdates!(server::Server)
     applyupdates!(server.project, server.builder, server.updates)
+end
 
 function addsource!(server, docid, doc)
     lock(server.lock) do
@@ -168,7 +163,6 @@ function addbuild!(server, docid)
         end
     end
 end
-
 
 function servereventhandlers(server, mode, ch)
     eventhandlers = []
