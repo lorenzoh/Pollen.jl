@@ -1,6 +1,5 @@
 # Filtered catamorphisms
 
-
 """
     cata(f, tree, selector)
 
@@ -12,7 +11,6 @@ function cata(f, tree, selector::Selector)
     end
 end
 
-
 function catafirst(f, tree, selector::Selector)
     xtree_, _ = catafold(tree, false) do x, done
         (!done && matches(selector, x)) ? (f(x), true) : (x, done)
@@ -20,18 +18,15 @@ function catafirst(f, tree, selector::Selector)
     return xtree_
 end
 
-
 # Replace
 
 function replace(tree, xnode, selector::Selector)
     cata(x -> xnode, tree, selector)
 end
 
-
 function replacefirst(tree, node, selector::Selector)
     return catafirst(x -> node, tree, selector)
 end
-
 
 function replacemany(xtree, xnodes, selector::Selector)
     xtree_, _ = catafold(xtree, 1) do x, i
@@ -39,7 +34,6 @@ function replacemany(xtree, xnodes, selector::Selector)
     end
     return xtree_
 end
-
 
 # Filter
 
@@ -74,7 +68,6 @@ struct Before <: Position
     selector::Selector
 end
 
-
 function insert(xtree, x, pos::Position)
     cata(xtree) do child
         i = insertionindex(child, children(child), pos)
@@ -85,7 +78,6 @@ function insert(xtree, x, pos::Position)
         end
     end
 end
-
 
 function insertfirst(xtree, x, pos::Position)
     xtree_, inserted = catafold(xtree, false) do child, inserted
@@ -100,11 +92,9 @@ function insertfirst(xtree, x, pos::Position)
     return xtree_
 end
 
-
 function insertionindex(parent, children, pos::NthChild)
     matches(pos.selector, parent) ? pos.n : nothing
 end
-
 
 function insertionindex(parent, children, pos::Before)
     for (i, c) in enumerate(children)
@@ -115,7 +105,6 @@ function insertionindex(parent, children, pos::Before)
     return nothing
 end
 
-
 function insertionindex(parent, children, pos::After)
     for (i, c) in enumerate(children)
         if matches(pos.selector, c)
@@ -125,10 +114,8 @@ function insertionindex(parent, children, pos::After)
     return nothing
 end
 
-
-_insert(xs::AbstractVector{T}, i, x::T) where T = insert!(copy(xs), i, x)
-_insert(xs::AbstractVector{<:XTree}, i, x::XTree) = vcat(xs[1:i - 1], [x], xs[i:end])
-
+_insert(xs::AbstractVector{T}, i, x::T) where {T} = insert!(copy(xs), i, x)
+_insert(xs::AbstractVector{<:XTree}, i, x::XTree) = vcat(xs[1:(i - 1)], [x], xs[i:end])
 
 @testset "catafirst" begin
     x = Node(:body, [Leaf(1), Leaf(2)])
@@ -146,7 +133,6 @@ _insert(xs::AbstractVector{<:XTree}, i, x::XTree) = vcat(xs[1:i - 1], [x], xs[i:
     @test children(x__)[2][] == 2
 end
 
-
 @testset "replace" begin
     x = Node(:body, [Leaf(1), Leaf(2)])
     node = Node(:body)
@@ -157,13 +143,13 @@ end
     @test tag(children(x_)[1]) == :body
 end
 
-
 @testset "insert" begin
     x = Node(:body, [Leaf(1), Leaf(2)])
     @testset "NthChild" begin
         x_ = insert(x, Leaf(0), NthChild(1, SelectNode()))
         @test children(x_) == Leaf.(0:2)
-        @test insert(x, Leaf(0), NthChild(1, SelectNode())) == insertfirst(x, Leaf(0), NthChild(1, SelectNode()))
+        @test insert(x, Leaf(0), NthChild(1, SelectNode())) ==
+              insertfirst(x, Leaf(0), NthChild(1, SelectNode()))
     end
 
     @testset "Before" begin
@@ -176,7 +162,6 @@ end
         @test children(x_) == Leaf.([1, 0, 2])
     end
 end
-
 
 @testset "gettext" begin
     x = Node(:body, Leaf.(["Hello", " ", "World"]))

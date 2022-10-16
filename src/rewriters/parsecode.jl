@@ -6,7 +6,6 @@ Base.@kwdef struct ParseCode <: Rewriter
     format::Format = JuliaSyntaxFormat()
 end
 
-
 function rewritedoc(rewriter::ParseCode, _, doc)
     return cata(doc, rewriter.selector) do x
         code = string(strip(Pollen.gettext(x)))
@@ -14,11 +13,11 @@ function rewritedoc(rewriter::ParseCode, _, doc)
     end
 end
 
-
 @testset "ParseCode [rewriter]" begin
     rewriter = ParseCode()
-    @test rewritedoc(
-        rewriter, "",
-        Node(:md, "hi", Node(:codeblock, "x", lang = "julia"))) == Node(:md, "hi", Node(:codeblock,
-            Node(:julia, Node(:IDENTIFIER, "x")), lang = "julia"))
+    @test rewritedoc(rewriter, "",
+                     Node(:md, "hi", Node(:codeblock, "x", lang = "julia"))) ==
+          Node(:md, "hi",
+               Node(:codeblock,
+                    Node(:julia, Node(:Identifier, "x")), lang = "julia"))
 end

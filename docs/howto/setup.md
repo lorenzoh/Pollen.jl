@@ -1,7 +1,7 @@
 # How to set up package documentation
 
 {.subtitle}
-How-to for setting up Pollen.jl documentation for packages. See [the tutorial](docs/tutorials/setup.md) for a more in-depth look.
+How-to for setting up Pollen.jl documentation for packages. See [the tutorial](/docs/tutorials/setup.md) for a more in-depth look.
 
 Pollen.jl comes with a [PkgTemplates.jl](https://github.com/invenia/PkgTemplates.jl) template that performs necessary setup steps to add Pollen documentation to a new package you're creating. To use it, add [`Pollen.PollenPlugin`](#) to the list of plugins when constructing a package template, and call it to create a package:
 

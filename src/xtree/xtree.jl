@@ -1,6 +1,5 @@
 abstract type XTree end
 
-
 """
     Leaf(value) <: XTree
 
@@ -22,9 +21,7 @@ function AbstractTrees.printnode(io::IO, xleaf::Leaf{String})
     else
         print(io, "\"$(xleaf[])\"")
     end
-
 end
-
 
 """
     Node(tag, children...; attributes...)
@@ -35,7 +32,7 @@ children nodes and key-value attributes.
 You can access and modify these using
 
 - [`tag`](#) and [`withtag`](#)
-- [`children`](#) and [`withchildren`](#)
+- [`AbstractTrees.children`](#) and [`withchildren`](#)
 - [`attributes`](#) and [`withattributes`](#)
 
 ## Examples
@@ -51,29 +48,27 @@ Node(:paragraph,
     Dict(:class => "tight"))
 ```
 """
-struct Node{T<:XTree, D<:Dict{Symbol}} <: XTree
+Base.@kwdef struct Node{T <: XTree, D <: Dict{Symbol}} <: XTree
     tag::Symbol
     children::Vector{T}
     attributes::D
 end
 
-Base.show(io::IO, xnode::Node) = print_tree(io, xnode; maxdepth = 10)
+Base.show(io::IO, xnode::Node) = print_tree(io, xnode; maxdepth = 4)
 
 function Node(tag::Symbol, children...; attributes...)
-    return Node(
-        tag,
-        [_xtree(x) for x in children],
-        Dict(pairs(attributes)),
-    )
+    return Node(tag,
+                [_xtree(x) for x in children],
+                Dict(pairs(attributes)))
 end
 
-Node(tag::Symbol, children::AbstractVector{<:XTree}) =
+function Node(tag::Symbol, children::AbstractVector{<:XTree})
     Node(tag, children, Dict{Symbol, Any}())
+end
 
 _xtree(node::Node) = node
 _xtree(leaf::Leaf) = leaf
 _xtree(x) = Leaf(x)
-
 
 AbstractTrees.children(xnode::Node) = xnode.children
 tag(xnode::Node) = xnode.tag
@@ -81,16 +76,20 @@ attributes(xnode::Node) = xnode.attributes
 
 Base.iterate(xnode::Node) = iterate(children(xnode))
 Base.iterate(xnode::Node, state) = iterate(children(xnode), state)
-Base.IteratorSize(::Type{Node{T}}) where T = Base.SizeUnknown()
-Base.eltype(::Type{Node{T}}) where T = T
+Base.IteratorSize(::Type{Node{T}}) where {T} = Base.SizeUnknown()
+Base.eltype(::Type{Node{T}}) where {T} = T
 
-Base.eltype(::Type{<:TreeIterator{<:Node{T}}}) where T = T
-Base.IteratorEltype(::Type{<:TreeIterator{<:Node{T}}}) where T = Base.HasEltype()
+Base.eltype(::Type{<:TreeIterator{<:Node{T}}}) where {T} = T
+Base.IteratorEltype(::Type{<:TreeIterator{<:Node{T}}}) where {T} = Base.HasEltype()
+
+# from AbstractTrees >= v0.4
+if isdefined(AbstractTrees, :ChildIndexing)
+    AbstractTrees.ChildIndexing(::Type{<:XTree}) = AbstractTrees.IndexedChildren()
+end
 
 withchildren(xnode::Node, children) = Node(tag(xnode), children, attributes(xnode))
 withtag(xnode::Node, tag) = Node(tag, children(xnode), attributes(xnode))
 withattributes(xnode::Node, attributes) = Node(tag(xnode), children(xnode), attributes)
-
 
 # Catamorphism
 
@@ -122,7 +121,6 @@ Transform every node in `tree` with function `f`.
 cata(f, xnode::Node) = f(withchildren(xnode, XTree[cata(f, c) for c in children(xnode)]))
 cata(f, xleaf::Leaf) = f(xleaf)
 
-
 """
     fold(f, tree)
 
@@ -137,8 +135,9 @@ Pollen.fold(node, 0) do x, subtree
 end
 ```
 """
-fold(f, tree::XTree, init) = foldl(f, (l for l in PostOrderDFS(tree)); init = init)
-
+function fold(f, tree::XTree, init; iterator = PostOrderDFS)
+    foldl(f, (l for l in iterator(tree)); init = init)
+end
 
 """
     fold(f, tree)
@@ -163,7 +162,6 @@ function Base.:(==)(x1::Node, x2::Node)
             all(c1 == c2 for (c1, c2) in zip(children(x1), children(x2))))
 end
 
-
 Base.:(==)(::Node, _) = false
 Base.:(==)(_, ::Node) = false
 
@@ -171,7 +169,6 @@ Base.:(==)(x1::Leaf, x2::Leaf) = x1[] == x2[]
 Base.:(==)(::Leaf, _) = false
 Base.:(==)(::Node, ::Leaf) = false
 Base.:(==)(::Leaf, ::Node) = false
-
 
 # Printing
 
@@ -196,7 +193,6 @@ function AbstractTrees.printnode(io::IO, x::Node)
     print(io, ")")
 end
 
-
 @testset "XTree" begin
     @testset "Node constructors" begin
         @test_nowarn Node(:tag)
@@ -219,7 +215,6 @@ end
     end
 end
 
-
 @testset "fold" begin
     x = Node(:tag, Leaf.(1:10))
     @test foldleaves(+, x, 0) == sum(1:10)
@@ -227,7 +222,6 @@ end
     x = Node(:tag, "Hello", "World")
     @test foldleaves(*, x, "") == "HelloWorld"
 end
-
 
 @testset "cata" begin
     x = Node(:tag, Leaf.(1:10))

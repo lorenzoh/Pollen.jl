@@ -7,7 +7,6 @@ end
 
 function parse(io::IO, format::HTMLFormat)
     return parse(read(io, String), format)
-
 end
 
 function parse(s::String, format::HTMLFormat)
@@ -20,7 +19,7 @@ end
 
 extensionformat(::Val{:html}) = HTMLFormat()
 
-function xtree(htmlnode::Gumbo.HTMLElement{S}) where S
+function xtree(htmlnode::Gumbo.HTMLElement{S}) where {S}
     attrs = Dict{Symbol, Any}(Symbol(key) => val for (key, val) in htmlnode.attributes)
     return Node(S, XTree[xtree(c) for c in htmlnode.children], attrs)
 end
@@ -46,7 +45,6 @@ function render!(io, x::Node, format::HTMLFormat, ::Val)
     print(io, "</", x.tag, ">")
 end
 
-
 const HTML_MIMES = [
     MIME"image/png"(),
     MIME"image/jpeg"(),
@@ -64,7 +62,6 @@ function render!(io, x::Leaf, ::HTMLFormat)
         show(io, MIME"text/plain"(), x[])
     end
 end
-
 
 #=
 function render!(io, x::Leaf{PreRendered}, ::HTMLFormat)
@@ -84,9 +81,7 @@ function htmlstr(mime::MIME, x)
     return adapthtmlstr(mime, s)
 end
 
-
 adapthtmlstr(::MIME, s) = s
-
 
 function adapthtmlstr(::MIME{Symbol("image/png")}, s)
     return """<img src="data:image/png;base64,$s"/>"""
@@ -96,11 +91,9 @@ function adapthtmlstr(::MIME{Symbol("image/jpeg")}, s)
     return """<img src="data:image/jpeg;base64,$s"/>"""
 end
 
-
 function render!(io, x::Leaf{<:AbstractString}, ::HTMLFormat)
     print(io, x[])
 end
-
 
 const IMAGEMIMES = [
     "image/jpeg",
@@ -109,9 +102,7 @@ const IMAGEMIMES = [
     "image/gif",
 ]
 
-
 formatextension(::HTMLFormat) = "html"
-
 
 # ## Tests
 
@@ -124,7 +115,6 @@ formatextension(::HTMLFormat) = "html"
         @test render(parse(s, format), format) == s
     end
 end
-
 
 # Constants
 
@@ -252,5 +242,5 @@ const HTMLFormatTAGS = [
     :ul,
     :var,
     :video,
-    :wbr
+    :wbr,
 ]

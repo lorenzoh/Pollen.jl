@@ -1,4 +1,6 @@
 {
-    "README": "documents/README.md",
-    "Reference": "references/<<PKG>>"
+    "README": "/doc/README.md",
+    "Reference": {
+        "Module": "/ref/<<PKG>>"
+    }
 }

@@ -7,7 +7,6 @@ using a `Server`. Can be created by a `ServerMode` or a
 """
 abstract type Event end
 
-
 struct DocUpdated <: Event
     name::String
     doc::Node
@@ -21,7 +20,6 @@ struct DocRebuilt <: Event
     name::String
 end
 
-
 """
     geteventhandler
 """
@@ -29,7 +27,6 @@ geteventhandler(rewriter::Rewriter, ch) = return rewriter
 geteventhandler(_, _) = return
 
 handle(_, event::Event) = nothing
-
 
 """
     start(eventhandler)
@@ -41,29 +38,24 @@ function start end
 start(_) = return
 stop(_) = return
 
-
 function startasync(eventhandler)
-    task = @async begin
-        try
-            start(eventhandler)
-        catch e
-            @error "Error while starting event handler!" error=e handler=eventhandler
-        end
-    end
+    task = @async begin try
+        start(eventhandler)
+    catch e
+        @error "Error while starting event handler!" error=e handler=eventhandler
+    end end
     return task
 end
 
 function stopasync(eventhandler, task)
-    @async begin
-        try
-            stop(eventhandler)
-            if !(istaskdone(task) || istaskfailed(task))
-                schedule(task, InterruptException(), error=true)
-            end
-        catch e
-            @error "Error while stopping event handler!" error=e handler=eventhandler
+    @async begin try
+        stop(eventhandler)
+        if !(istaskdone(task) || istaskfailed(task))
+            schedule(task, InterruptException(), error = true)
         end
-    end
+    catch e
+        @error "Error while stopping event handler!" error=e handler=eventhandler
+    end end
 end
 
 stop(watcher::LiveServer.SimpleWatcher) = LiveServer.stop(watcher)
@@ -71,13 +63,13 @@ stop(watcher::LiveServer.SimpleWatcher) = LiveServer.stop(watcher)
 start(watcher::LiveServer.SimpleWatcher) = LiveServer.start(watcher)
 
 mutable struct FileServer
-    dir
-    kwargs
+    dir::Any
+    kwargs::Any
     FileServer(dir; kwargs...) = new(dir, kwargs)
 end
 
 function start(fs::FileServer)
-    LiveServer.serve(;dir=string(fs.dir), fs.kwargs...)
+    LiveServer.serve(; dir = string(fs.dir), fs.kwargs...)
 end
 
 # TODO: maybe `geteventhandler` not needed and `start(rewriter, channel)` suffices?
@@ -85,7 +77,8 @@ end
 """
     serve(project)
 """
-function serve(project::Project, path = mktempdir(); lazy = true, format = JSONFormat(), port = 8000, frontend=true, frontenddir=FRONTENDDIR)
+function serve(project::Project, path = mktempdir(); lazy = true, format = JSONFormat(),
+               port = 8000, frontend = true, frontenddir = FRONTENDDIR)
     builder = FileBuilder(format, Path(path))
     server = Server(project, builder)
     mode = lazy ? ServeFilesLazy(port) : ServeFiles(port)
@@ -96,7 +89,7 @@ function serve(project::Project, path = mktempdir(); lazy = true, format = JSONF
         finally
             # stop frontend server
             if !(istaskdone(task) || istaskfailed(task))
-                schedule(task, InterruptException(), error=true)
+                schedule(task, InterruptException(), error = true)
             end
         end
     else

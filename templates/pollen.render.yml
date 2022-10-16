@@ -1,12 +1,13 @@
-name: pollenstatic
+name: Pollen - Render website
 
 on:
-  push:
-    branches: ['pollen']
   workflow_run:
-    workflows: ["pollenbuild"]
+    workflows: ['Pollen.jl build - dev', 'Pollen.jl build - PR preview', 'Pollen.jl build - Release']
     types:
       - completed
+  workflow_dispatch:
+
+# TODO: add concurrency limit
 jobs:
   pollen:
     name: "Pollen - Prerender static frontend and deploy"
@@ -14,11 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: pollen
+          ref: <<BRANCH_DATA>>
           path: data
       - uses: actions/checkout@v2
         with:
-          ref: "gh-pages"
+          ref: "<<BRANCH_PAGE>>"
           path: pages
       - uses: actions/checkout@v2
         with:
@@ -51,3 +52,4 @@ jobs:
           git add -f .
           git commit -m "Deploy documentation (Pollen.jl)"
           git push
+

@@ -80,7 +80,7 @@ To transform the code `"2 + 2"`, we first need to find it. For this, we'll use a
 node = selectfirst(doc, SelectTag(:code))
 ```
 
-Next, we need to extract the string of code. Using [`children`](#), we can see that the node has 1 child, a [`Leaf`](#) with a string value.
+Next, we need to extract the string of code. Using [`AbstractTrees.children`](#), we can see that the node has 1 child, a [`Leaf`](#) with a string value.
 
 {cell}
 ```julia
