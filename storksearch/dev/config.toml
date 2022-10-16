@@ -20,7 +20,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.Rewriter"
     [[input.files]]
     title = "HTMLFormat"
-    contents = "HTMLFormat"
+    contents = "HTMLFormat() <: Format\nFormat for HTML data. Supports both reading and writing.\nExamples\nReading HTML:\n\nPollen node format \n\n"
     url = "Pollen@dev/ref/Pollen.HTMLFormat"
     [[input.files]]
     title = "rewritesources!"
@@ -28,7 +28,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.rewritesources!"
     [[input.files]]
     title = "How to set up package documentation"
-    contents = "How to set up package documentation\nHow-to for setting up Pollen.jl documentation for packages. See the tutorial for a more in-depth look.\nPollen.jl comes with a PkgTemplates.jl template that performs necessary setup steps to add Pollen documentation to a new package you're creating. To use it, add Pollen.PollenPlugin to the list of plugins when constructing a package template, and call it to create a package:\nPollen PkgTemplates template Template plugins Pollen PkgTemplates Tests project PkgTemplates Git ssh GitHubActions user template \nSetting up Pollen.jl documentation for an existing package\nIf you want to add Pollen documentation to an existing package, make sure to remove any Documenter.jl-specific files, e.g. by renaming the existing \"docs/\" folder.\nYou can then call the plugin manually:\nPollen PkgTemplates setuppollen pkgdir plugin Pollen t Template plugins plugin user PkgTemplates validate plugin t PkgTemplates prehook plugin t pkgdir PkgTemplates hook plugin t pkgdir PkgTemplates posthook plugin t pkgdir \n\n"
+    contents = "How to set up package documentation\nHow-to for setting up Pollen.jl documentation for packages. See the tutorial for a more in-depth look.\nSetting up Pollen.jl documentation consists of the following steps:\nCreate boilerplate files\n\nCreate a Julia project with documentation dependencies\n\n(Optional) Set up GitHub Actions and helper branches on the repository for automatic publishing\n\n\nThe steps apply to both existing and newly created packages.\nThe tl;dr\nTo set up documentation for a package MyPackage, run:\nPollen MyPackage dir pkgdir MyPackage config Pollen Pollen dir config Pollen dir config Pollen dir config \nThen, commit all generated files to make sure you have a clean Git working directory, and run:\nPollen dir config \nYou can then preview the documentation locally.\nLonger version\nStep 1: Configuration\nAll setup steps use a configuration object:\nPollen config Pollen \nNext, we need to set the folder where the package is stored:\ndir MyPackage dir pkgdir MyPackage \nFor older repositories\nWhen adding documentation to an existing package, there is one option you may need to change: the name of the primary branch. If your repository's primary branch is master and not main, pass it in when creating the configuration:\nconfig Pollen branch_primary \n\n\nStep 2: Set up files\nTo handle documentation-specific package dependencies, we set up a Julia project in the \"$dir/docs\" folder:\nPollen dir config \nThen, we set up file that configure how the documentation behaves:\nPollen dir config \nWe also add Github Actions workflows so that the documentation can be built and deployed automatically:\nPollen dir config \nStep 3: Create helper branches for deployment\nSo that the documentation can be built and deployed on GitHub Pages, we need to set up two branches.\nBefore we do this, you must clean your git working directory, for example by committing the files generated above in the terminal:\n$ git add .\n$ git commit -m \"Setup Pollen.jl files\" \nAfter that, run:\nPollen dir config \n\nThat's it! Next, preview the docs locally to make sure everything works.\n\n"
     url = "Pollen@dev/doc/docs/howto/setup.md"
     [[input.files]]
     title = "Pollen/frontend.jl"
@@ -52,7 +52,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.is_frontend_loaded"
     [[input.files]]
     title = "Pollen/rewriters/checklinks.jl"
-    contents = "sel reference document_id outputs check id doc outputs node doc check sel target get node document_id nothing target keys outputs target startswith splitpath target end source_document_id id broken_link_node node outputs \n"
+    contents = "ids Set String sel Set String outputs check foreach keys outputs id push! check ids id id doc outputs node doc check sel target get node document_id nothing target check ids target startswith splitpath target end source_document_id id broken_link_node node outputs \n"
     url = "Pollen@dev/src/rewriters/checklinks.jl"
     [[input.files]]
     title = "Builder"
@@ -112,7 +112,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.ServeFiles"
     [[input.files]]
     title = "JuliaSyntaxFormat"
-    contents = "JuliaSyntaxFormat"
+    contents = "\n"
     url = "Pollen@dev/ref/Pollen.JuliaSyntaxFormat"
     [[input.files]]
     title = "Pollen/formats/markdown.jl"
@@ -128,11 +128,11 @@ url_prefix = ""
     url = "Pollen@dev/src/serve/filewatching.jl"
     [[input.files]]
     title = "DocumentationFiles"
-    contents = "DocumentationFiles"
+    contents = "DocumentationFiles(modules; kwargs) <: Rewriter\nA Rewriter that finds written documentation like .md files in the package directories of modules and adds them to a [Project]'s.\nIt finds all files in the directories dir = pkgdir(m ∈ modules). Then, if the file's extension matches one of extensions, a document with ID \"(pkgname)\"@(pkgversion)/(filepath) is created.\nAlso handles watching and reloading files in development mode.\nKeyword arguments\nextensions = [\"md\", \"ipynb\"]: File extensions to include\n\npkgtags = Dict(): Overwrite package versions\n\n\n\n"
     url = "Pollen@dev/ref/Pollen.DocumentationFiles"
     [[input.files]]
     title = "Pollen.jl"
-    contents = "Pollen.jl\nA document generation system based on tree rewriting built for interactive work.\nNote: The documentation for this package is still a work in progress and while Pollen.jl already powers the documentation of some packages like FastAI.jl, it is not as stable or mature as other solutions like Documenter.jl.\nGetting started\nFirst, find out how to install Pollen and then how to setup package documentation.\n\n"
+    contents = "Pollen.jl\nA document generation system based on tree rewriting, built for interactive work.\nPollen.jl generates documentation for Julia packages that comes with many features:\nsupport for many input and output formats: Markdown, Jupyter notebooks, HTML, JSON, and Julia source code\n\na modern frontend with Sliding Panes\n\nautomatic hyperreferencing of code variables for discoverability\n\ncode execution to ensure your code examples stay up-to-date\n\nautomated builds, deployments and PR previews with GitHub Actions and GitHub Pages\n\nlocal preview with incremental builds for an improved developer experience\n\n\nFirst, find out how to install Pollen and then how to setup package documentation.\n\n"
     url = "Pollen@dev/doc/README.md"
     [[input.files]]
     title = "FirstChild"
@@ -156,7 +156,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.HTML_MIMES"
     [[input.files]]
     title = "tag"
-    contents = "tag"
+    contents = "tag(node)\nGet the symbol tag of a Node.\nExamples\nPollen md \n\n"
     url = "Pollen@dev/ref/Pollen.tag"
     [[input.files]]
     title = "buildtofile"
@@ -272,7 +272,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.addbuild!"
     [[input.files]]
     title = "How to install Pollen.jl"
-    contents = "How to install Pollen.jl\nPollen.jl is a package for the Julia programming language and can be installed like other packages using the built-in package managero\nIn development\nSince Pollen.jl is not yet released and has some unreleased package dependencies, you'll have to install these directly from their repositories for now as shown below.\n\n\nRun the following in a Julia session to install Pollen and its dependencies:\nPkg Pkg add Pkg PackageSpec url Pkg PackageSpec url Pkg PackageSpec url rev \n\n"
+    contents = "How to install Pollen.jl\nPollen.jl is a package for the Julia programming language and can be installed like other packages using the built-in package manager. Run the following in a Julia session to install Pollen and its dependencies:\nPkg Pkg add Pkg PackageSpec url \n\n"
     url = "Pollen@dev/doc/docs/howto/install.md"
     [[input.files]]
     title = "Pollen/formats/jupyter.jl"
@@ -308,7 +308,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.get_stork_binary"
     [[input.files]]
     title = "catafirst"
-    contents = "catafirst"
+    contents = "catafirst(f, tree, selector)\nLike cate, but apply f only to the first node that matches selector.\n\n"
     url = "Pollen@dev/ref/Pollen.catafirst"
     [[input.files]]
     title = "mdchildrenattrs"
@@ -316,7 +316,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.mdchildrenattrs"
     [[input.files]]
     title = "replace"
-    contents = "replace"
+    contents = "replace(tree, xnode, selector)\nReplace every node in tree that matches selector with xnode.\n\n"
     url = "Pollen@dev/ref/Pollen.replace"
     [[input.files]]
     title = "rewriteoutputs!"
@@ -334,6 +334,10 @@ url_prefix = ""
     title = "runblock"
     contents = "runblock"
     url = "Pollen@dev/ref/Pollen.runblock"
+    [[input.files]]
+    title = "How to preview documentation locally"
+    contents = "How to preview documentation locally\nTo preview docs of a package that uses Pollen.jl for documentation, use servedocs:\nPollen MyPackage MyPackage \nOnce the pages are built, navigate to localhost:5173 to preview the documentation.\nLive reload\nYou can make changes to a file that is part of the documentation while the preview is running. For example, modify a Markdown file and Pollen.jl will reload it and rebuild just that page.\nTo update open pages in the preview, press Shift+R.\n\n"
+    url = "Pollen@dev/doc/docs/howto/preview.md"
     [[input.files]]
     title = "ParseCode"
     contents = "ParseCode"
@@ -360,7 +364,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.Event"
     [[input.files]]
     title = "ExecuteCode"
-    contents = "ExecuteCode"
+    contents = "ExecuteCode(; kwargs...) <: Rewriter\nA Rewriter that runs all Julia code blocks annotated with a :cell attribute.\nExamples\nPollen node codeblock cell \nPollen node \n\n"
     url = "Pollen@dev/ref/Pollen.ExecuteCode"
     [[input.files]]
     title = "tojson"
@@ -380,7 +384,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.XTree"
     [[input.files]]
     title = "Working with documents"
-    contents = "Working with documents\nIn this tutorial, you will learn how Pollen represents documents and how to load them from different file formats as wells as transform them.\nAt its core, Pollen is a package for creating and transforming documents. For example, this documentation is comprised of many different documents. This page, for example, is created from a Markdown file which you can find here: Pollen.jl/docs/tutorials/documents.md.\nThis tutorial will give you some insight into how Pollen documents are represented and how this representation makes many forms of common document processing steps possible.\nDocuments as trees\nIf you have worked with HTML before, you'll know that it uses a tree-like data format to represent documents. For example, the following is an HTML snippet of a paragraph with some marked up text:\n<p class=\"subtitle\">\n    Hello world, this is some <strong>marked up</strong> text.\n</p>\nPollen similarly represents documents as a tree. We can represent the above HTML as follows using Pollen:\nPollen p strong class \nFormat-independent documents\nHTML is a natural source for this kind of data, but Pollen can read or write documents from and to different formats, like Markdown files, Julia source files, Jupyter notebooks and JSON.\nFor example, we can parse Markdown text and render it back as HTML:\ndoc Pollen \nPollen doc \nSupporting many different formats allows us to work with different source documents and apply the same set of powerful transformations to documents. So, what can we actually do with our documents?\nTransforming documents\nPollen uses document transformations to implement many different features like executing code cells, syntax highlighting, finding hyperreferences and more.\nTo get a feel for this, let's implement the following transformation: given a document with :code tags, evaluate the code as a Julia expression and replace it with the resulting value. For example, let's say we have this document (parsed from Markdown for convenience):\ndoc Pollen \nThe result that we want is the same document, but the \"2 + 2\" replaced with the result of the calculation: 4.\nmd p \nFinding the code tags\nTo transform the code \"2 + 2\", we first need to find it. For this, we'll use a Selector. Selectors allow us to find specific nodes or leaves in a document tree. Here, we'll use SelectTag to find all nodes with a :code tag.\nnode doc code \nNext, we need to extract the string of code. Using AbstractTrees.children, we can see that the node has 1 child, a Leaf with a string value.\nchildren node \nWe can get the leaf value with empty index notation ([]):\ncodestr only children node \nAnd we can execute the code:\nruncode str Base include_string str runcode codestr \nNow we know how to find nodes with code, how to get the code string, and how to run it. In the next step, we'll create a function that modifies a document, replacing code with its result.\nTransforming the tree\nIf our document was a list of nodes, we could find the relevant elements and map the code-running function over them. We can do something similar to a tree with a so-called catamorphism. At the risk of upsetting category theorists, I'll say that a catamorphism can be seen as a map over trees. Pollen implements it as the function cata which takes a function and a tree as arguments. The function is applied to all nodes and leaves, resulting in a new tree 🌳. For example, we can use it to modify the tags of all nodes:\ndoc subtree subtree subtree newtag subtree \ncata can also take a Selector as a third argument. If specified, only the nodes matchign the selector will be modified. We'll use the above selector to map our code-running function over all nodes with a :code tag.\nwithcodeeval doc doc code node runcode only children node outdoc withcodeeval doc \nWith this, we've implemented a reusable transformation that can be applied to other documents as well. Go ahead and try it with some other examples!\noutdoc2 withcodeeval Pollen \nFinally, we can render the resulting document out to HTML. We wrap the HTML string in Base.HTML so that it's displayed as such here.\nPollen outdoc2 HTML \n\n"
+    contents = "Working with documents\nLearn how Pollen represents documents and how to load them from different file formats as well as transform them.\nAt its core, Pollen is a package for creating and transforming documents. For example, this documentation is comprised of many different documents. This page, for example, is created from a Markdown file which you can find here: Pollen.jl/docs/tutorials/documents.md.\nThis tutorial will give you some insight into how Pollen documents are represented and how this representation makes many forms of common document processing steps possible.\nDocuments as trees\nIf you have worked with HTML before, you'll know that it uses a tree-like data format to represent documents. For example, the following is an HTML snippet of a paragraph with some marked up text:\n<p class=\"subtitle\">\n    Hello world, this is some <strong>marked up</strong> text.\n</p>\nPollen similarly represents documents as a tree. We can represent the above HTML as follows using Pollen:\nPollen p strong class \nFormat-independent documents\nHTML is a natural source for this kind of data, but Pollen can read or write documents from and to different formats, like Markdown files, Julia source files, Jupyter notebooks and JSON.\nFor example, we can parse Markdown text and render it back as HTML:\ndoc Pollen \nPollen doc \nSupporting many different formats allows us to work with different source documents and apply the same set of powerful transformations to documents. So, what can we actually do with our documents?\nTransforming documents\nPollen uses document transformations to implement many different features like executing code cells, syntax highlighting, finding hyperreferences and more.\nTo get a feel for this, let's implement the following transformation: given a document with :code tags, evaluate the code as a Julia expression and replace it with the resulting value. For example, let's say we have this document (parsed from Markdown for convenience):\ndoc Pollen \nThe result that we want is the same document, but the \"2 + 2\" replaced with the result of the calculation: 4.\nmd p \nFinding the code tags\nTo transform the code \"2 + 2\", we first need to find it. For this, we'll use a Selector. Selectors allow us to find specific nodes or leaves in a document tree. Here, we'll use SelectTag to find all nodes with a :code tag.\nnode doc code \nNext, we need to extract the string of code. Using AbstractTrees.children, we can see that the node has 1 child, a Leaf with a string value.\nchildren node \nWe can get the leaf value with empty index notation ([]):\ncodestr only children node \nAnd we can execute the code:\nruncode str Base include_string str runcode codestr \nNow we know how to find nodes with code, how to get the code string, and how to run it. In the next step, we'll create a function that modifies a document, replacing code with its result.\nTransforming the tree\nIf our document was a list of nodes, we could find the relevant elements and map the code-running function over them. We can do something similar to a tree with a so-called catamorphism. At the risk of upsetting category theorists, I'll say that a catamorphism can be seen as a map over trees. Pollen implements it as the function cata which takes a function and a tree as arguments. The function is applied to all nodes and leaves, resulting in a new tree 🌳. For example, we can use it to modify the tags of all nodes:\ndoc subtree subtree subtree newtag subtree \ncata can also take a Selector as a third argument. If specified, only the nodes matchign the selector will be modified. We'll use the above selector to map our code-running function over all nodes with a :code tag.\nwithcodeeval doc doc code node runcode only children node outdoc withcodeeval doc \nWith this, we've implemented a reusable transformation that can be applied to other documents as well. Go ahead and try it with some other examples!\noutdoc2 withcodeeval Pollen \nFinally, we can render the resulting document out to HTML. We wrap the HTML string in Base.HTML so that it's displayed as such here.\nPollen outdoc2 HTML \n\n"
     url = "Pollen@dev/doc/docs/tutorials/documents.md"
     [[input.files]]
     title = "runserver"
@@ -392,7 +396,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.SelectReference"
     [[input.files]]
     title = "withchildren"
-    contents = "withchildren"
+    contents = "withchildren(node, children)\nReplace node's children with children.\n\n"
     url = "Pollen@dev/ref/Pollen.withchildren"
     [[input.files]]
     title = "RunCache"
@@ -408,7 +412,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.withext"
     [[input.files]]
     title = "DocumentFolder"
-    contents = "DocumentFolder"
+    contents = "DocumentFolder(dirs; kwargs...) <: Rewriter\nA Rewriter that creates new documents from files in the directories dirs.\nAlso handles watching and reloading files in development mode.\nSee DocumentFiles and SourceFiles as examples of how it is used.\nKeyword arguments\nfilterfn: Function filepath -> Bool that filters which files are loaded\n\nloadfn: Function filepath -> Node that loads a file into a Node\n\n\n\n"
     url = "Pollen@dev/ref/Pollen.DocumentFolder"
     [[input.files]]
     title = "SourceFileUpdated"
@@ -428,7 +432,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.PackageWatcher"
     [[input.files]]
     title = "Creating, writing and publishing package documentation"
-    contents = "Creating, writing and publishing package documentation\nThis tutorial will teach you how to create a new Julia package with Pollen.jl documentation to get a site just like the one you are probably reading this on. After reading this, you will have learned how to\ncreate a Julia package and set up Pollen as its documentation system,\n\nuse Pollen's development server with live reload to preview changes as you make them; and\n\nhow to publish the package documentation to GitHub Pages\n\n\nYou can see the resulting project and its documentation at lorenzoh/PollenExample.jl.\nInstallation\nBefore starting the tutorial, make sure you've followed the installation instructions for Pollen.jl.\n\n\nCreating a package with Pollen.jl documentation\nDocumentation for an existing package\nThis section describes how to add Pollen documentation when creating a new package. It is also possible to add Pollen.jl documentation to an existing package as described here.\n\n\nThe most commonly used tool for creating new Julia packages is PkgTemplates.jl. Pollen.jl provides a plugin for PkgTemplates.jl to spare you any arduous setup tasks.\nTo create a template, make sure you have PkgTemplates installed and create a template with the Pollen plugin:\nPkgTemplates Pollen template Template plugins Pollen Tests project Git ssh GitHubActions Develop ProjectFile user julia \nFollowing along\nIf you want to follow along and host the tutorial project on GitHub pages, make sure to replace \"lorenzoh\" with your GitHub user name.\n\n\nNext, we'll instantiate the template by calling it with the name of the package we want to create:\ntemplate \nOnce this is done, you'll have a brand new package ready to use Pollen.jl's documentation system.\nWriting documentation interactively\nNow, we'll work on the documentation and preview it locally. If a package has Pollen documentation set up, you can run an preview server with live reload using Pollen.servedocs:\nPollenExample PollenExample \nOnce you see messages that two servers are running on ports 3000 and 8000, you can click the first link (http://localhost:3000/dev/i) to see a preview of the documentation. The first time we run this, Pollen has to install the frontend, but subsequent runs will be much faster. The opened page should look like this:\n\nThe landing page shows our package's README.md which, of course, is almost empty! Let's keep the server running and edit the file, for example by adding some text under the heading. Save the file, return to the documentation web page and press R. The page should update with the text you added to the README. For example:\n\nGreat job! We just updated part of the documentation. While there are a lot more things we could change about the docs at this point, we'll leave them for another tutorial and get to the last part in this tutorial: publishing our package's documentation as a website.\nPublishing the documentation on GitHub Pages\nIf you used the template from the first part of this tutorial, the package directory will already be a git repository. First, we need to make sure to commit the changes we made above:\n> cd ~/.julia/dev/PollenExample\n> git add .\n> git commit -m \"Modified README\"\nNow, you'll need to create a GitHub repository at /$username/PollenExample.jl. If you used your GitHub user in the template above, the local repository's remote should be set up correctly. Now we'll push our changes, and also two helper branches that Pollen uses to host a page:\n> git checkout pollen && git push --set-upstream origin pollen\n> git checkout gh-pages && git push --set-upstream origin gh-pages\n> git checkout main && git push --set-upstream origin main\nThat's it! After about 10 minutes, you'll have a documentation page built at $username.github.io/PollenExample.jl/dev/i.\nNow, every time you push changes to your package's main branch, the documentation page will be updated!\n\nNow that we've built a workflow for publishing documentation, it's time to find out how you to organize your documentation! (follow-up tutorial coming soon 👀)\n\n"
+    contents = "Creating, writing and publishing package documentation\nThis tutorial will teach you how to create a new Julia package with Pollen.jl documentation to get a site just like the one you are probably reading this on. After reading this, you will have learned how to\ncreate a Julia package and set up Pollen as its documentation system,\n\nuse Pollen's development server with live reload to preview changes as you make them; and\n\nhow to publish the package documentation to GitHub Pages\n\n\nYou can see the resulting project and its documentation at lorenzoh/PollenExample.jl.\nInstallation\nBefore starting the tutorial, make sure you've followed the installation instructions for Pollen.jl.\n\n\nCreate a repository on GitHub\nFirst, go to github.com/new and create a repository.\nThen, clone the repository to your local machine. You can do this from a Julia REPL:\nPkg devdir user pkgname run \nSetting up documentation\nDocumentation for an existing package\nThis section describes how to add Pollen documentation when creating a new package. If you want to add Pollen.jl documentation to an existing package, see How to setup package documentation.\n\n\nA handy tool for creating new Julia packages is PkgTemplates.jl. Pollen.jl provides a plugin for PkgTemplates.jl to spare you arduous manual setup.\nInstall PkgTemplates.jl and create a template that includes Pollen.PollenPlugin, substituting the user for your own GitHub user name:\nPkgTemplates Pollen template Template plugins Pollen Tests project Git ssh GitHubActions Develop ProjectFile user julia \nNext, we'll instantiate the template by calling it with the name of the package we want to create:\ntemplate joinpath devdir pkgname \nOnce this is done, you'll have a brand new package ready to use Pollen.jl's documentation system!\nWriting documentation interactively\nNow, we'll work on the documentation and preview it locally.  Run the preview server with live reload using Pollen.servedocs:\nPollenExample PollenExample \nOnce you see messages that two servers are running on ports 5173 and 8000, open localhost:5173 for the preview. The first time we run this, Pollen has to install the frontend, but subsequent runs will be much faster. The opened page should look like this:\n\nThe landing page shows our package's README.md which, of course, is almost empty! Let's keep the server running and edit the file, for example by adding some text under the heading. Save the file, return to the documentation web page and press Shift+R. The page should update with the text you added to the README. For example:\n\nGreat job! We just updated part of the documentation. While there are a lot more things we could change about the docs at this point, we'll leave them for another tutorial and get to the last part in this tutorial: publishing our package's documentation as a website.\nPublishing the documentation on GitHub Pages\nIf you used the template from the first part of this tutorial, the package directory will already be a git repository. First, we need to make sure to commit the changes we made above:\n> cd ~/.julia/dev/PollenExample\n> git add .\n> git commit -m \"Modified README\"\n> git push\nThat's it! After about 10 minutes, you'll have a documentation page built at $user.github.io/PollenExample.jl.\nNow, every time you push changes to your package's main branch, the documentation page will be updated!\n\n"
     url = "Pollen@dev/doc/docs/tutorials/setup.md"
     [[input.files]]
     title = "HTMLFormatTAGS"
@@ -476,7 +480,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.InlineIOContext"
     [[input.files]]
     title = "DocVersions"
-    contents = "DocVersions"
+    contents = "DocVersions(pkgdir; tag, dependencies) <: Rewriter\nA Rewriter that writes version information including Pollen configuration to a versions.json file when a Project is built.\nThe versions.json file is a dictionary of versiontag => config and is updated whenever a new version (specified by tag) is built.\nFor every version, the following configuration is written:\nlinktree: The parsed toc.json with resolved references\n\ntitle: The project title\n\n\nKeyword arguments\ntag = nothing: Version tag to associate with the package that pkgdir defines. If nothing (the default), read the version from the package's Project.toml file.\n\ndependencies = []: A list of (versioned) package IDs.\n\n\n\n"
     url = "Pollen@dev/ref/Pollen.DocVersions"
     [[input.files]]
     title = "build_corpus"
@@ -536,7 +540,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.insertfirst"
     [[input.files]]
     title = "Pollen/pkgtemplate.jl"
-    contents = "Ref String joinpath dirname dirname pathof Pollen Plugin folder String branch_data String branch_page String branch_primary String remote Union String Nothing pollen_spec Pkg PackageSpec Pkg PackageSpec url rev moduleinfo_spec Pkg PackageSpec Pkg PackageSpec url rev dir String plugin Pollen verbose force isdir dir throw SystemError dir projfile joinpath dir isfile projfile throw SystemError dir verbose plugin folder dir plugin verbose force verbose dir plugin verbose force verbose plugin folder dir plugin verbose force verbose TEMPLATES_DOCS TEMPLATES_ACTIONS dir String plugin verbose force isdir dir throw SystemError dir docsdir joinpath dir plugin folder isdir docsdir mkdir docsdir docsfiles joinpath docsdir f f TEMPLATES_DOCS file docsfiles force isfile file throw SystemError file config _docs_config dir plugin template TEMPLATES_DOCS _rendertemplate template docsdir config dir String plugin verbose force isdir dir throw SystemError dir actionsdir joinpath dir isdir actionsdir mkpath docsdir actionfiles joinpath actionsdir f f TEMPLATES_ACTIONS file actionfiles force isfile file throw SystemError file config _docs_config dir plugin template TEMPLATES_ACTIONS _rendertemplate template actionsdir config dir String plugin force _iscleanworkingdir dir throw SystemError dir _hasbranch dir plugin branch_data force _createorphanbranch dir plugin branch_data remote plugin remote _hasbranch dir plugin branch_page force _createorphanbranch dir plugin branch_page remote plugin remote _withbranch dir plugin branch_page touch Git git readchomp println Git git readchomp println dir plugin force verbose isdir dir throw SystemError dir docsdir joinpath dir plugin folder isdir docsdir isfile joinpath docsdir force throw SystemError docsdir isdir docsdir mkdir docsdir cd dir PkgTemplates with_project docsdir Pkg add plugin pollen_spec plugin moduleinfo_spec Pkg develop Pkg PackageSpec path dir _rendertemplate name dst config PkgTemplates gen_file joinpath dst name PkgTemplates render_file joinpath name config _docs_config dir String plugin Dict String Any split dir end plugin folder plugin branch_data plugin branch_page plugin branch_primary PkgTemplates priority PkgTemplates validate t Template PkgTemplates prehook p Template pkg_dir AbstractString pkg_dir p PkgTemplates hook plugin t Template pkg_dir AbstractString PkgTemplates posthook plugin t Template pkg_dir AbstractString pkg_dir plugin pkg_dir plugin pkg_dir plugin _withbranch pkg_dir plugin branch_primary Git git readchomp println Git git readchomp println pkg_dir plugin PkgTemplates view p Template pkg_dir AbstractString Dict String Any split pkg_dir end p folder p branch_primary p branch_data p branch_page _withbranch f dir branch options String verbose _println args verbose println args nothing isdir dir throw ArgumentError dir isdir joinpath dir throw ArgumentError dir cd dir prevbranch readchomp Git git Git git options branch readchomp _println f e rethrow Git git prevbranch readchomp _println _hasbranch dir branch cd pipeline Git git branch readchomp dir _iscleanworkingdir dir cd dir isempty strip readchomp Pollen Git git _createorphanbranch repo String branch String remote nothing _withbranch repo branch options branch readchomp Git git readchomp Git git isnothing remote readchomp Git git remote branch branch template Template plugins Pollen remote nothing PkgTemplates Git ssh user redirect_stderr Base DevNull redirect_stdout Base DevNull template joinpath mktempdir \n"
+    contents = "Ref String joinpath dirname dirname pathof Pollen Plugin folder String branch_data String branch_page String branch_primary String remote Union String Nothing pollen_spec Pkg PackageSpec Pkg PackageSpec url rev moduleinfo_spec Pkg PackageSpec Pkg PackageSpec url rev dir String plugin Pollen verbose force isdir dir throw SystemError dir projfile joinpath dir isfile projfile throw SystemError dir verbose plugin folder dir plugin verbose force verbose dir plugin verbose force verbose plugin folder dir plugin verbose force verbose TEMPLATES_DOCS TEMPLATES_ACTIONS dir String plugin verbose force isdir dir throw SystemError dir docsdir joinpath dir plugin folder isdir docsdir mkdir docsdir docsfiles joinpath docsdir f f TEMPLATES_DOCS file docsfiles force isfile file throw SystemError file config _docs_config dir plugin template TEMPLATES_DOCS _rendertemplate template docsdir config dir String plugin verbose force isdir dir throw SystemError dir actionsdir joinpath dir isdir actionsdir mkpath docsdir actionfiles joinpath actionsdir f f TEMPLATES_ACTIONS file actionfiles force isfile file throw SystemError file config _docs_config dir plugin template TEMPLATES_ACTIONS _rendertemplate template actionsdir config dir String plugin force _iscleanworkingdir dir throw SystemError dir _hasbranch dir plugin branch_data force _createorphanbranch dir plugin branch_data remote plugin remote _hasbranch dir plugin branch_page force _createorphanbranch dir plugin branch_page remote plugin remote _withbranch dir plugin branch_page touch Git git readchomp println Git git readchomp println dir plugin force verbose isdir dir throw SystemError dir docsdir joinpath dir plugin folder isdir docsdir isfile joinpath docsdir force throw SystemError docsdir isdir docsdir mkdir docsdir cd dir PkgTemplates with_project docsdir Pkg add plugin pollen_spec plugin moduleinfo_spec Pkg develop Pkg PackageSpec path dir _rendertemplate name dst config PkgTemplates gen_file joinpath dst name PkgTemplates render_file joinpath name config _docs_config dir String plugin Dict String Any split dir end plugin folder plugin branch_data plugin branch_page plugin branch_primary PkgTemplates priority PkgTemplates validate t Template PkgTemplates prehook p Template pkg_dir AbstractString pkg_dir p PkgTemplates hook plugin t Template pkg_dir AbstractString PkgTemplates posthook plugin t Template pkg_dir AbstractString pkg_dir plugin pkg_dir plugin pkg_dir plugin _withbranch pkg_dir plugin branch_primary Git git readchomp println Git git readchomp println pkg_dir plugin PkgTemplates view p Template pkg_dir AbstractString Dict String Any split pkg_dir end p folder p branch_primary p branch_data p branch_page _withbranch f dir branch options String verbose _println args verbose println args nothing isdir dir throw ArgumentError dir isdir joinpath dir throw ArgumentError dir cd dir prevbranch readchomp Git git Git git options branch readchomp _println f e rethrow Git git prevbranch readchomp _println _hasbranch dir branch cd pipeline Git git branch readchomp dir _iscleanworkingdir dir cd dir isempty strip readchomp Pollen Git git _createorphanbranch repo String branch String remote nothing _withbranch repo branch options branch readchomp Git git readchomp Git git isnothing remote readchomp Git git remote branch branch \n"
     url = "Pollen@dev/src/pkgtemplate.jl"
     [[input.files]]
     title = "geteventhandler"
@@ -544,7 +548,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.geteventhandler"
     [[input.files]]
     title = "Pollen/rewriters/storkindex.jl"
-    contents = "Base filterfn Returns True String stork_bin String corpus Dict String Any Dict String Any documents filterfn Returns corpus Dict String Dict id doc documents filterfn id text doc title doc title isempty text text title corpus id Dict title text id corpus outputs stork newcorpus outputs filterfn stork filterfn merge! stork corpus newcorpus outputs stork project builder config Dict Dict collect values stork corpus mktemp searchdir mkpath joinpath builder dir stork configfile indexfile joinpath searchdir joinpath searchdir open joinpath searchdir f TOML print f config stork stork_bin string configfile string indexfile stork_bin String config_file String output_file String run h1 h2 h3 h4 p admonition blockquote mathblock table hr li ul md admonitiontitle admonitionbody node node Val Pollen node s node Val ch children node ch ch String s ch s s ch Val Pollen ch Pollen node s s s node Val julia node node Identifier md node md s node Val md length children node only children node String s only children node s s s dir file joinpath dir isfile file file url Sys islinux Sys isapple nothing url String download url file chmod Path file file throw SystemError \n"
+    contents = "Base filterfn Returns True String stork_bin String corpus Dict String Any Dict String Any documents filterfn Returns corpus Dict String Dict id doc documents filterfn id text doc title doc title isempty text text title corpus id Dict title text id corpus outputs stork newcorpus outputs filterfn stork filterfn merge! stork corpus newcorpus outputs stork project builder config Dict Dict collect values stork corpus mktemp searchdir mkpath joinpath builder dir stork configfile indexfile joinpath searchdir joinpath searchdir open joinpath searchdir f TOML print f config stork stork_bin string configfile string indexfile stork_bin String config_file String output_file String run pipeline stdout Base DevNull stderr Base DevNull h1 h2 h3 h4 p admonition blockquote mathblock table hr li ul md admonitiontitle admonitionbody node node Val Pollen node s node Val ch children node ch ch String s ch s s ch Val Pollen ch Pollen node s s s node Val julia node node Identifier md node md s node Val md length children node only children node String s only children node s s s dir file joinpath dir isfile file file url Sys islinux Sys isapple nothing url String download url file chmod Path file file throw SystemError \n"
     url = "Pollen@dev/src/rewriters/storkindex.jl"
     [[input.files]]
     title = "stop"
@@ -572,11 +576,11 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.addsource!"
     [[input.files]]
     title = "withattributes"
-    contents = "withattributes"
+    contents = "withattributes(node, attributes)\nReplace node's attributes with attributes.\n\n"
     url = "Pollen@dev/ref/Pollen.withattributes"
     [[input.files]]
     title = "CheckLinks"
-    contents = "CheckLinks"
+    contents = "CheckLinks() <: Rewriter\nA Rewriter that warns when it finds a :reference tag that does not point to a valid document. See ResolveReferences and ResolveSymbols for rewriters that create nodes with :reference tags.\nIt does not make any changes to a project.\nExample\n\n\n"
     url = "Pollen@dev/ref/Pollen.CheckLinks"
     [[input.files]]
     title = "htmlstr"
@@ -584,7 +588,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.htmlstr"
     [[input.files]]
     title = "withtag"
-    contents = "withtag"
+    contents = "withtag(node, tag)\nReplace the tag of node with tag.\n\n"
     url = "Pollen@dev/ref/Pollen.withtag"
     [[input.files]]
     title = "combine"
@@ -640,7 +644,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.Before"
     [[input.files]]
     title = "fold"
-    contents = "fold(f, tree)\nFold over tree in post-order iteration.\nExamples\nnode table row row Pollen node x subtree subtree Int x subtree x \n\n"
+    contents = "fold(f, tree)\nFold over tree in post-order iteration.\nExamples\nPollen node table row row Pollen node x subtree subtree Int x subtree x \n\n"
     url = "Pollen@dev/ref/Pollen.fold"
     [[input.files]]
     title = "PollenPlugin"
@@ -760,7 +764,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.PreRendered"
     [[input.files]]
     title = "Pollen/formats/juliasyntax.jl"
-    contents = "Pollen Pollen io IO s read io String isempty s julia ast JuliaSyntax parseall JuliaSyntax GreenNode s ignore_trivia ast s julia e s error e julia s ast JuliaSyntax GreenNode source String offset _tokenname ast isempty ast args Pollen source offset ast span offset chs ch ast args push! chs ch source offset offset ch span chs _tokenname ast JuliaSyntax GreenNode T Symbol convert String ast head kind format format julia call Identifier + Integer s i1 i2 i2 i1 i1 _closestindex s i1 i2 _closestindex s i2 s i1 i2 _closestindex s i i min max i ncodeunits s prevind s i \n"
+    contents = "Pollen io IO s read io String isempty s julia ast JuliaSyntax parseall JuliaSyntax GreenNode s ignore_trivia ast s julia e s error e julia s ast JuliaSyntax GreenNode source String offset _tokenname ast isempty ast args Pollen source offset ast span offset chs ch ast args push! chs ch source offset offset ch span chs _tokenname ast JuliaSyntax GreenNode T Symbol convert String ast head kind format format julia call Identifier + Integer s i1 i2 i2 i1 i1 _closestindex s i1 i2 _closestindex s i2 s i1 i2 _closestindex s i i min max i ncodeunits s prevind s i \n"
     url = "Pollen@dev/src/formats/juliasyntax.jl"
     [[input.files]]
     title = "setup_docs"
@@ -816,7 +820,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.replacefirst"
     [[input.files]]
     title = "Backlinks"
-    contents = "Backlinks"
+    contents = "Backlinks() <: Rewriter\nRewriter that sets the :backlinks attribute of every page in a project with a list of page IDs that link to it.\nA page links to another page with id id if it has a Node(:reference, ...) with attribute :document_id = id. See ResolveReferences and ResolveSymbols for rewriters that create nodes with :reference tags.\n\n"
     url = "Pollen@dev/ref/Pollen.Backlinks"
     [[input.files]]
     title = "defaulttoc"
@@ -847,6 +851,10 @@ url_prefix = ""
     contents = "nodehref"
     url = "Pollen@dev/ref/Pollen.nodehref"
     [[input.files]]
+    title = "Pollen.jl"
+    contents = "Pollen.jl\nA document generation system based on tree rewriting, built for interactive work.\nPollen.jl generates documentation for Julia packages that comes with many features:\nsupport for many input and output formats: Markdown, Jupyter notebooks, HTML, JSON, and Julia source code\n\na modern frontend with Sliding Panes\n\nautomatic hyperreferencing of code variables for discoverability\n\nsource code browser\n\ncode execution to ensure your code examples stay up-to-date\n\nautomated builds, deployments and PR previews with GitHub Actions and GitHub Pages\n\nlocal preview with incremental builds for an improved developer experience\n\n\nFirst, find out how to install Pollen and then how to setup package documentation.\n\n"
+    url = "Pollen@dev/doc/docs/README.md"
+    [[input.files]]
     title = "Pollen/files.jl"
     contents = "path AbstractPath ext extension path ext path newname filename path e extensions path newname newname e newname newname ext joinpath parent path newname href ext m match href isnothing m href string Path href ext ref id m m ref id ref_ string Path ref ext ref_ id node string relative path node path node node isnothing parent node node parent node \n"
     url = "Pollen@dev/src/files.jl"
@@ -876,7 +884,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.rewritedoc"
     [[input.files]]
     title = "Pollen/xtree/xtree.jl"
-    contents = "T data T Base getindex xleaf xleaf data leaf leaf AbstractTrees children AbstractTrees printnode io IO xleaf print io xleaf AbstractTrees printnode io IO xleaf String get io color get io compact print io xleaf print io xleaf Base T D Dict Symbol Symbol children Vector T D Base show io IO xnode print_tree io xnode maxdepth Symbol children _xtree x x children Dict pairs Symbol children AbstractVector children Dict Symbol Any _xtree node node _xtree leaf leaf _xtree x x AbstractTrees children xnode xnode children xnode xnode xnode xnode Base iterate xnode iterate children xnode Base iterate xnode state iterate children xnode state Base IteratorSize Type T T Base SizeUnknown Base eltype Type T T T Base eltype Type TreeIterator T T T Base IteratorEltype Type TreeIterator T T Base HasEltype isdefined AbstractTrees ChildIndexing AbstractTrees ChildIndexing Type AbstractTrees IndexedChildren xnode children xnode children xnode xnode children xnode xnode xnode xnode children xnode f xnode state T cs T c children xnode c state f c state T T push! cs c f xnode cs state f xleaf state kwargs f xleaf state f xnode f xnode f c c children xnode f xleaf f xleaf f tree init iterator PostOrderDFS foldl f l l iterator tree init init f xnode init foldl f l l Leaves xnode init init Base x1 x2 x1 x2 x1 x2 length children x1 length children x2 all c1 c2 c1 c2 zip children x1 children x2 Base _ Base _ Base x1 x2 x1 x2 Base _ Base Base AbstractTrees printnode io IO x rich get io color get io compact print io rich print io print io x rich print io isempty x print io rich print io i key value enumerate x i print io print io key show io value rich print io print io isempty children isempty Int node node gat gat length children node node Dict x x x x sum x prod x x x x_ x node node node node x_ x x_ n x node state node node state node state x_ n \n"
+    contents = "T data T Base getindex xleaf xleaf data leaf leaf AbstractTrees children AbstractTrees printnode io IO xleaf print io xleaf AbstractTrees printnode io IO xleaf String get io color get io compact print io xleaf print io xleaf Base T D Dict Symbol Symbol children Vector T D Base show io IO xnode print_tree io xnode maxdepth Symbol children _xtree x x children Dict pairs Symbol children AbstractVector children Dict Symbol Any _xtree node node _xtree leaf leaf _xtree x x AbstractTrees children xnode xnode children xnode xnode xnode xnode Base iterate xnode iterate children xnode Base iterate xnode state iterate children xnode state Base IteratorSize Type T T Base SizeUnknown Base eltype Type T T T Base eltype Type TreeIterator T T T Base IteratorEltype Type TreeIterator T T Base HasEltype isdefined AbstractTrees ChildIndexing AbstractTrees ChildIndexing Type AbstractTrees IndexedChildren xnode children xnode children xnode node children node node xnode xnode children xnode f xnode state T cs T c children xnode c state f c state T T push! cs c f xnode cs state f xleaf state kwargs f xleaf state f xnode f xnode f c c children xnode f xleaf f xleaf f tree init iterator PostOrderDFS foldl f l l iterator tree init init f xnode init foldl f l l Leaves xnode init init Base x1 x2 x1 x2 x1 x2 length children x1 length children x2 all c1 c2 c1 c2 zip children x1 children x2 Base _ Base _ Base x1 x2 x1 x2 Base _ Base Base AbstractTrees printnode io IO x rich get io color get io compact print io rich print io print io x rich print io isempty x print io rich print io i key value enumerate x i print io print io key show io value rich print io print io isempty children isempty Int node node gat gat length children node node Dict x x x x sum x prod x x x x_ x node node node node x_ x x_ n x node state node node state node state x_ n \n"
     url = "Pollen@dev/src/xtree/xtree.jl"
     [[input.files]]
     title = "start"
@@ -932,5 +940,5 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.JSONFormat"
     [[input.files]]
     title = "FileBuilder"
-    contents = "struct FileBuilder <: Builder\nBuild every document to a file in dir using output format.\n\n"
+    contents = "FileBuilder(format, dir) <: Builder\nBuild every document to a file in dir using output format.\n\n"
     url = "Pollen@dev/ref/Pollen.FileBuilder"
