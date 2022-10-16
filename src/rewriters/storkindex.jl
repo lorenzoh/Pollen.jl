@@ -44,7 +44,7 @@ function postbuild(stork::StorkSearchIndex, project, builder::FileBuilder)
 end
 
 function build_stork_index(stork_bin::String, config_file::String, output_file::String)
-    run(`$stork_bin build -i $config_file -o $output_file`)
+    run(pipeline(`$stork_bin build -i $config_file -o $output_file`, stdout=Base.DevNull(), stderr=Base.DevNull()))
 end
 
 const LINEBREAKTAGS = [:h1, :h2, :h3, :h4, :p, :admonition, :blockquote, :mathblock, :table,

@@ -12,16 +12,29 @@ You can see the resulting project and its documentation at [lorenzoh/PollenExamp
 
     Before starting the tutorial, make sure you've followed the [installation instructions for Pollen.jl](../howto/install.md).
 
+### Create a repository on GitHub
 
-## Creating a package with Pollen.jl documentation
+First, go to [github.com/new](https://github.com/new) and create a repository.
+
+Then, [clone the repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) to your local machine. You can do this from a Julia REPL:
+
+```julia
+using Pkg: devdir
+user = "GITHUB_USER"
+pkgname = "PollenExample.jl"
+run(`git clone https://github.com/$(user)/$(pkgname) $(devdir())/$(pkgname)`)
+```
+
+## Setting up documentation
 
 !!! note "Documentation for an existing package"
 
-    This section describes how to add Pollen documentation when creating a new package. It is also possible to add Pollen.jl documentation to an existing package [as described here](/docs/howto/setup.md).
+    This section describes how to add Pollen documentation when creating a new package. If you want to add Pollen.jl documentation to an existing package, see [How to setup package documentation](/doc/docs/howto/setup.md).
 
-The most commonly used tool for creating new Julia packages is [PkgTemplates.jl](https://github.com/invenia/PkgTemplates.jl). Pollen.jl provides a plugin for PkgTemplates.jl to spare you any arduous setup tasks.
+A handy tool for creating new Julia packages is [PkgTemplates.jl](https://github.com/invenia/PkgTemplates.jl). Pollen.jl provides a plugin for PkgTemplates.jl to spare you arduous manual setup.
 
-To create a template, make sure you have `PkgTemplates` installed and create a template with the Pollen plugin:
+Install `PkgTemplates.jl` and create a template that includes [`Pollen.PollenPlugin`](#), substituting the `user` for your own GitHub user name:
+
 ```julia
 using PkgTemplates, Pollen
 
@@ -33,35 +46,31 @@ template = Template(plugins=[
         Develop(),
         ProjectFile(),
     ],
-    user="lorenzoh", julia=v"1.6")
+    user="lorenzoh", julia=v"1.8")
 ```
 
-!!! note "Following along"
-    If you want to follow along and host the tutorial project on GitHub pages, make sure to replace `"lorenzoh"` with your GitHub user name. 
-    
 Next, we'll instantiate the template by calling it with the name of the package we want to create:
 
 ```julia
-template("PollenExample")
+template(joinpath(devdir(), pkgname))
 ```
 
-Once this is done, you'll have a brand new package ready to use Pollen.jl's documentation system.
+Once this is done, you'll have a brand new package ready to use Pollen.jl's documentation system!
 
 ## Writing documentation interactively
 
-Now, we'll work on the documentation and preview it locally. If a package has Pollen documentation set up, you can run an preview server with live reload using [`Pollen.servedocs`](#):
+Now, we'll work on the documentation and preview it locally.  Run the preview server with live reload using [`Pollen.servedocs`](#):
 
 ```julia
 using PollenExample
-
-servedocs(@__MODULE__, PollenExample)
+servedocs(PollenExample)
 ```
 
-Once you see messages that two servers are running on ports 3000 and 8000, you can click the first link ([http://localhost:3000/dev/i](http://localhost:3000/dev/i)) to see a preview of the documentation. The first time we run this, Pollen has to install the frontend, but subsequent runs will be much faster. The opened page should look like this:
+Once you see messages that two servers are running on ports 5173 and 8000, open [localhost:5173](http://localhost:5173) for the preview. The first time we run this, Pollen has to install the frontend, but subsequent runs will be much faster. The opened page should look like this:
 
 ![](./setup_screenshot_empty.png)
 
-The landing page shows our package's `README.md` which, of course, is almost empty! Let's keep the server running and edit the file, for example by adding some text under the heading. Save the file, return to the documentation web page and **press `R`**. The 
+The landing page shows our package's `README.md` which, of course, is almost empty! Let's keep the server running and edit the file, for example by adding some text under the heading. Save the file, return to the documentation web page and press **`Shift+R`**. The 
 page should update with the text you added to the README. For example:
 
 ![](./setup_screenshot_text.png)
@@ -76,20 +85,9 @@ If you used the template from the first part of this tutorial, the package direc
 > cd ~/.julia/dev/PollenExample
 > git add .
 > git commit -m "Modified README"
+> git push
 ```
 
-Now, you'll need to create a GitHub repository at `/$username/PollenExample.jl`. If you used your GitHub user in the template above, the local repository's remote should be set up correctly. Now we'll push our changes, and also two helper branches that Pollen uses to host a page:
-
-```sh
-> git checkout pollen && git push --set-upstream origin pollen
-> git checkout gh-pages && git push --set-upstream origin gh-pages
-> git checkout main && git push --set-upstream origin main
-```
-
-That's it! After about 10 minutes, you'll have a documentation page built at `$username.github.io/PollenExample.jl/dev/i`.
+That's it! After about 10 minutes, you'll have a documentation page built at `$user.github.io/PollenExample.jl`.
 
 Now, every time you push changes to your package's `main` branch, the documentation page will be updated!
-
----
-
-Now that we've built a workflow for publishing documentation, it's time to find out how you to organize your documentation! (follow-up tutorial coming soon 👀)

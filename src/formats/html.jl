@@ -1,4 +1,26 @@
 
+"""
+    HTMLFormat() <: Format
+
+Format for HTML data. Supports both reading and writing.
+
+
+## Examples
+
+Reading HTML:
+
+{cell}
+```julia
+using Pollen
+format = HTMLFormat()
+node = Pollen.parse("<div class=\"group\"><span>Hi there!</span></div>", format)
+```
+
+{cell}
+```julia
+Pollen.render(node, format)
+```
+"""
 Base.@kwdef struct HTMLFormat <: Format
     stripbody = true
 end

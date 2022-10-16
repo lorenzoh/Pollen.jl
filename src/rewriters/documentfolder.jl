@@ -1,3 +1,17 @@
+"""
+    DocumentFolder(dirs; kwargs...) <: Rewriter
+
+A [`Rewriter`](#) that creates new documents from files in the directories `dirs`.
+
+Also handles watching and reloading files in development mode.
+
+See [`DocumentFiles`](#) and [`SourceFiles`](#) as examples of how it is used.
+
+## Keyword arguments
+
+- `filterfn`: Function `filepath -> Bool` that filters which files are loaded
+- `loadfn`: Function `filepath -> Node` that loads a file into a [`Node`](#)
+"""
 Base.@kwdef struct DocumentFolder <: Rewriter
     dirs::Vector{Pair{String, String}}
     filterfn = hasextension(["md", "ipynb"])
@@ -41,6 +55,24 @@ function geteventhandler(rewriter::DocumentFolder, ch)
     return makefilewatcher(ch, collect(values(rewriter.files)), last.(rewriter.dirs))
 end
 
+"""
+    DocumentationFiles(modules; kwargs) <: Rewriter
+
+A [`Rewriter`](#) that finds written documentation like `.md` files in the package
+directories of `modules` and adds them to a [`Project`]'s.
+
+It finds all files in the directories `dir = pkgdir(m ∈ modules)`. Then, if the file's
+extension matches one of `extensions`, a document with ID
+`"(pkgname)"@(pkgversion)/(filepath)` is created.
+
+Also handles watching and reloading files in development mode.
+
+## Keyword arguments
+
+- `extensions = ["md", "ipynb"]`: File extensions to include
+- `pkgtags = Dict()`: Overwrite package versions
+
+"""
 function DocumentationFiles(ms::Vector{Module}; extensions = ["md", "ipynb"],
                             pkgtags = Dict{String, String}(), kwargs...)
     filterfn = hasextension(extensions)

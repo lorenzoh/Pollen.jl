@@ -43,6 +43,7 @@ function createproject(; tag = "dev", package = m, modules = ms)
         StorkSearchIndex(; tag, filterfn = startswith(string(package))),
         SaveAttributes((:title, :backlinks => []), useoutputs = true),
         DocVersions(package; tag = tag, dependencies = packages),
+        StaticAssets(),
     ])
 
 

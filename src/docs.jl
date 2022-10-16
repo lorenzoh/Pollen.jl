@@ -80,7 +80,7 @@ function validatedocs(pkgdir::String; subdir = "docs")
     "Pollen" ∈ keys(project_config["deps"]) ||
         throw("Expected `Pollen` to be a dependency in documentation project at \"$docsdir\"")
 
-    for f in ("project.jl", "make.jl", "toc.json", "serve.jl")
+    for f in ("project.jl", "make.jl", "toc.json")
         isfile(joinpath(docsdir, f)) ||
             throw(ArgumentError("Required file \"$f\" does not exist in documentation directory \"$docsdir\""))
     end

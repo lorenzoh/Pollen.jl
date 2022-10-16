@@ -1,11 +1,12 @@
 {
-    "README": "/doc/README.md",
+    "README": "/doc/docs/README.md",
     "Tutorials": {
         "Documenting a package": "docs/tutorials/setup.md",
         "Working with documents": "docs/tutorials/documents.md"
     },
     "How-to": {
-        "Install": "docs/howto/install.md",
+        "Install Pollen.jl": "docs/howto/install.md",
+        "Preview documentation locally": "docs/howto/preview.md",
         "Set up package documentation": "docs/howto/setup.md"
     },
     "Reference": {

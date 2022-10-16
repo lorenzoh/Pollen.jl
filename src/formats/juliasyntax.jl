@@ -1,5 +1,8 @@
 
-struct JuliaSyntaxFormat <: Pollen.Format end
+"""
+
+"""
+struct JuliaSyntaxFormat <: Format end
 
 function Pollen.parse(io::IO, ::JuliaSyntaxFormat)
     s = read(io, String)

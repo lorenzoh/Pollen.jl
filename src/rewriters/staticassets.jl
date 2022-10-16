@@ -1,7 +1,7 @@
 
 Base.@kwdef struct StaticAssets <: Rewriter
     resources::Dict{String, String} = Dict{String, String}()
-    folder::String = "resources"
+    folder::String = "assets"
 end
 
 function rewritedoc(rewriter::StaticAssets, _, doc::Node)
