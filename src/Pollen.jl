@@ -9,7 +9,7 @@ import Base64: Base64EncodePipe
 import JuliaSyntax
 using CSTParser
 using DataFrames
-import FilePathsBase: AbstractPath, Path, @p_str, extension, absolute
+import FilePathsBase: AbstractPath, Path, @p_str, extension, absolute, filename
 using DataStructures: DefaultDict, OrderedDict
 import Gumbo
 import Glob: glob
