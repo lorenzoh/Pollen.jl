@@ -1,0 +1,944 @@
+[input]
+base_directory = "."
+url_prefix = ""
+
+    [[input.files]]
+    title = "mdchildrenattrs"
+    contents = "mdchildrenattrs"
+    url = "Pollen@localdeploy/ref/Pollen.mdchildrenattrs"
+    [[input.files]]
+    title = "FileLoader"
+    contents = "FileLoader"
+    url = "Pollen@localdeploy/ref/Pollen.FileLoader"
+    [[input.files]]
+    title = "buildtofile"
+    contents = "buildtofile"
+    url = "Pollen@localdeploy/ref/Pollen.buildtofile"
+    [[input.files]]
+    title = "render!"
+    contents = "render!"
+    url = "Pollen@localdeploy/ref/Pollen.render!"
+    [[input.files]]
+    title = "SelectHasAttr"
+    contents = "SelectHasAttr(name)\nSelects nodes that have an attribute name.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.SelectHasAttr"
+    [[input.files]]
+    title = "DocRequested"
+    contents = "DocRequested"
+    url = "Pollen@localdeploy/ref/Pollen.DocRequested"
+    [[input.files]]
+    title = "PUBLISH_CODEBLOCK_SELECTOR"
+    contents = "PUBLISH_CODEBLOCK_SELECTOR"
+    url = "Pollen@localdeploy/ref/Pollen.PUBLISH_CODEBLOCK_SELECTOR"
+    [[input.files]]
+    title = "StorkSearchIndex"
+    contents = "StorkSearchIndex"
+    url = "Pollen@localdeploy/ref/Pollen.StorkSearchIndex"
+    [[input.files]]
+    title = "defaulttoc"
+    contents = "defaulttoc"
+    url = "Pollen@localdeploy/ref/Pollen.defaulttoc"
+    [[input.files]]
+    title = "stringrange"
+    contents = "stringrange"
+    url = "Pollen@localdeploy/ref/Pollen.stringrange"
+    [[input.files]]
+    title = "hasrichdisplay"
+    contents = "hasrichdisplay"
+    url = "Pollen@localdeploy/ref/Pollen.hasrichdisplay"
+    [[input.files]]
+    title = "Pollen/serve/servefiles.jl"
+    contents = "Base port Int server event server event name event doc server event name server event name server ch server builder dir port port allow_cors server server project server builder Base port Int server server builder server project server event server event name event doc event name keys server project outputs server event name server event name server event event name keys server project sources event name keys server project outputs event name server event name server event name server ch builddir server builder dir builddir port port allow_cors preprocess_request req _lazyservecallback req ch builddir server project _lazyservecallback req ch builddir project documentid req target end endswith req target endswith req target documentid keys project sources LiveServer HTTP setheader req req buildpath joinpath builddir req target end mkpath parent buildpath touch buildpath sourcepath Path documentid put! ch sourcepath sleep req \n"
+    url = "Pollen@localdeploy/src/serve/servefiles.jl"
+    [[input.files]]
+    title = "tag"
+    contents = "tag(node)\nGet the symbol tag of a Node.\nExamples\nPollen md \n\n"
+    url = "Pollen@localdeploy/ref/Pollen.tag"
+    [[input.files]]
+    title = "Pollen.jl"
+    contents = "Pollen.jl\nA document generation system based on tree rewriting, built for interactive work.\nPollen.jl generates documentation for Julia packages that comes with many features:\nsupport for many input and output formats: Markdown, Jupyter notebooks, HTML, JSON, and Julia source code\n\na modern frontend with Sliding Panes\n\nautomatic hyperreferencing of code variables for discoverability\n\nsource code browser\n\ncode execution to ensure your code examples stay up-to-date\n\nautomated builds, deployments and PR previews with GitHub Actions and GitHub Pages\n\nlocal preview with incremental builds for an improved developer experience\n\n\nFirst, find out how to install Pollen and then how to setup package documentation.\n\n"
+    url = "Pollen@localdeploy/doc/docs/README.md"
+    [[input.files]]
+    title = "How to add pages to documentation"
+    contents = "How to add pages to documentation\nTo add a new page to your documentation, add a file to\n\n"
+    url = "Pollen@localdeploy/doc/docs/howto/add_files.md"
+    [[input.files]]
+    title = "insert"
+    contents = "insert"
+    url = "Pollen@localdeploy/ref/Pollen.insert"
+    [[input.files]]
+    title = "rewritedoc"
+    contents = "rewritedoc(rewriter, docid, document) -> document'\nRewrite document with id docid, returning a rewritten document.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.rewritedoc"
+    [[input.files]]
+    title = "SelectReference"
+    contents = "SelectReference"
+    url = "Pollen@localdeploy/ref/Pollen.SelectReference"
+    [[input.files]]
+    title = "Creating, writing and publishing package documentation"
+    contents = "Creating, writing and publishing package documentation\nThis tutorial will teach you how to create a new Julia package with Pollen.jl documentation to get a site just like the one you are probably reading this on. After reading this, you will have learned how to\ncreate a Julia package and set up Pollen as its documentation system,\n\nuse Pollen's development server with live reload to preview changes as you make them; and\n\nhow to publish the package documentation to GitHub Pages\n\n\nYou can see the resulting project and its documentation at lorenzoh/PollenExample.jl.\nInstallation\nBefore starting the tutorial, make sure you've followed the installation instructions for Pollen.jl.\n\n\nCreate a repository on GitHub\nFirst, go to github.com/new and create a repository.\nThen, clone the repository to your local machine. You can do this from a Julia REPL:\nPkg devdir user pkgname run \nSetting up documentation\nDocumentation for an existing package\nThis section describes how to add Pollen documentation when creating a new package. If you want to add Pollen.jl documentation to an existing package, see How to setup package documentation.\n\n\nA handy tool for creating new Julia packages is PkgTemplates.jl. Pollen.jl provides a plugin for PkgTemplates.jl to spare you arduous manual setup.\nInstall PkgTemplates.jl and create a template that includes Pollen.PollenPlugin, substituting the user for your own GitHub user name:\nPkgTemplates Pollen template Template plugins Pollen Tests project Git ssh GitHubActions Develop ProjectFile user julia \nNext, we'll instantiate the template by calling it with the name of the package we want to create:\ntemplate joinpath devdir pkgname \nOnce this is done, you'll have a brand new package ready to use Pollen.jl's documentation system!\nWriting documentation interactively\nNow, we'll work on the documentation and preview it locally.  Run the preview server with live reload using Pollen.servedocs:\nPollenExample PollenExample \nOnce you see messages that two servers are running on ports 5173 and 8000, open localhost:5173 for the preview. The first time we run this, Pollen has to install the frontend, but subsequent runs will be much faster. The opened page should look like this:\n\nThe landing page shows our package's README.md which, of course, is almost empty! Let's keep the server running and edit the file, for example by adding some text under the heading. Save the file, return to the documentation web page and press Shift+R. The page should update with the text you added to the README. For example:\n\nGreat job! We just updated part of the documentation. While there are a lot more things we could change about the docs at this point, we'll leave them for another tutorial and get to the last part in this tutorial: publishing our package's documentation as a website.\nPublishing the documentation on GitHub Pages\nIf you used the template from the first part of this tutorial, the package directory will already be a git repository. First, we need to make sure to commit the changes we made above:\n> cd ~/.julia/dev/PollenExample\n> git add .\n> git commit -m \"Modified README\"\n> git push\nThat's it! After about 10 minutes, you'll have a documentation page built at $user.github.io/PollenExample.jl.\nNow, every time you push changes to your package's main branch, the documentation page will be updated!\n\n"
+    url = "Pollen@localdeploy/doc/docs/tutorials/setup.md"
+    [[input.files]]
+    title = "RunCache"
+    contents = "RunCache"
+    url = "Pollen@localdeploy/ref/Pollen.RunCache"
+    [[input.files]]
+    title = "insertionindex"
+    contents = "insertionindex"
+    url = "Pollen@localdeploy/ref/Pollen.insertionindex"
+    [[input.files]]
+    title = "After"
+    contents = "After"
+    url = "Pollen@localdeploy/ref/Pollen.After"
+    [[input.files]]
+    title = "DocumentationFiles"
+    contents = "DocumentationFiles(modules; kwargs) <: Rewriter\nA Rewriter that finds written documentation like .md files in the package directories of modules and adds them to a [Project]'s.\nIt finds all files in the directories dir = pkgdir(m ∈ modules). Then, if the file's extension matches one of extensions, a document with ID \"(pkgname)\"@(pkgversion)/(filepath) is created.\nAlso handles watching and reloading files in development mode.\nKeyword arguments\nextensions = [\"md\", \"ipynb\"]: File extensions to include\n\npkgtags = Dict(): Overwrite package versions\n\n\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.DocumentationFiles"
+    [[input.files]]
+    title = "ExecuteCode"
+    contents = "ExecuteCode(; kwargs...) <: Rewriter\nA Rewriter that runs all Julia code blocks annotated with a :cell attribute.\nExamples\nPollen node codeblock cell \nPollen node \n\n"
+    url = "Pollen@localdeploy/ref/Pollen.ExecuteCode"
+    [[input.files]]
+    title = "parselink"
+    contents = "parselink(rule::AbstractLinkRule, link::LinkInfo)\nparselink(rules::AbstractLinkRule, link::LinkInfo)\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.parselink"
+    [[input.files]]
+    title = "SelectCondition"
+    contents = "SelectCondition(f) <: Selector\nSelects all nodes or leaves for which function f returns true.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.SelectCondition"
+    [[input.files]]
+    title = "Pollen/formats/html.jl"
+    contents = "Base stripbody io IO format read io String format s String format doc Gumbo parsehtml s html format stripbody doc doc children html doc Val html htmlnode Gumbo HTMLElement S S attrs Dict Symbol Any Symbol key val key val htmlnode S c c htmlnode children attrs htmltext Gumbo HTMLText htmltext text io doc format io doc format Val doc io x format Val print io x isempty x print io name attr x print io string name attr print io foreach child io child format children x print io x io x showable x show io x show io x mime MIME x s IJulia limitstringmime mime x mime s MIME s s MIME Symbol s s MIME Symbol s s io x AbstractString print io x format format html b format html b x s s format format s DOCTYPE a abbr acronym address applet area article aside audio b base basefont bdi bdo big blockquote body br button canvas caption center cite code col colgroup data datalist dd del details dfn dialog dir div dl dt em embed fieldset figcaption figure font footer form frame frameset h1 h2 h3 h4 h5 h6 head header hr html i iframe img input ins kbd label legend li link main map mark meta meter nav noframes noscript object ol optgroup option output p param picture pre progress q rp rt ruby s samp script section small source span strike strong style sub summary sup svg table tbody td template textarea tfoot th thead time title tr track tt u ul var video wbr \n"
+    url = "Pollen@localdeploy/src/formats/html.jl"
+    [[input.files]]
+    title = "Pollen/xtree/catamorphisms.jl"
+    contents = "f tree selector tree x selector x f x x f tree selector xtree_ _ tree x done done selector x f x x done xtree_ tree xnode selector x xnode tree selector tree node selector x node tree selector xnodes selector xtree_ _ x i selector x xnodes i i x i xtree_ Base filter f x x x x collect filter f children x Base filter sel filter x sel x n Int selector selector selector selector selector x pos child i child children child pos isnothing i child child _insert children child i x x pos xtree_ inserted child inserted inserted child inserted i child children child pos isnothing i child child _insert children child i x xtree_ parent children pos pos selector parent pos n nothing parent children pos i c enumerate children pos selector c i nothing parent children pos i c enumerate children pos selector c i nothing _insert xs AbstractVector T i x T T insert! copy xs i x _insert xs AbstractVector i x vcat xs i x xs i end x body x_ x leaf leaf children x_ children x_ x__ x leaf leaf children x__ children x__ x body node body Pollen x node node x_ Pollen x node x_ body children x_ body x body x_ x children x_ x x x_ x children x_ x_ x children x_ x body Pollen x \n"
+    url = "Pollen@localdeploy/src/xtree/catamorphisms.jl"
+    [[input.files]]
+    title = "insertfirst"
+    contents = "insertfirst"
+    url = "Pollen@localdeploy/ref/Pollen.insertfirst"
+    [[input.files]]
+    title = "JuliaSyntaxFormat"
+    contents = "\n"
+    url = "Pollen@localdeploy/ref/Pollen.JuliaSyntaxFormat"
+    [[input.files]]
+    title = "runtests"
+    contents = "Pollen.runtests(pattern...; kwargs...)\nEquivalent to ReTest.retest(Pollen, pattern...; kwargs...). This function is defined automatically in any module containing a @testset, possibly nested within submodules.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.runtests"
+    [[input.files]]
+    title = "InternalLinkRule"
+    contents = "InternalLinkRule"
+    url = "Pollen@localdeploy/ref/Pollen.InternalLinkRule"
+    [[input.files]]
+    title = "validatedocs"
+    contents = "validatedocs(m::Module)\nvalidatedocs(pkgdir)\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.validatedocs"
+    [[input.files]]
+    title = "geteventhandler"
+    contents = "geteventhandler\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.geteventhandler"
+    [[input.files]]
+    title = "RE_HREF"
+    contents = "RE_HREF"
+    url = "Pollen@localdeploy/ref/Pollen.RE_HREF"
+    [[input.files]]
+    title = "xtree"
+    contents = "xtree"
+    url = "Pollen@localdeploy/ref/Pollen.xtree"
+    [[input.files]]
+    title = "build"
+    contents = "build(project, builder[, docs])\nBuild every document named in docs using builder. docs defaults to keys(project.sources), meaning every document will be built. If you only want to rebuild previously built files, use rebuild.\n\nbuild(project)\nBuild project to a temporary directory with HTMLFormat format.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.build"
+    [[input.files]]
+    title = "get_stork_binary"
+    contents = "get_stork_binary"
+    url = "Pollen@localdeploy/ref/Pollen.get_stork_binary"
+    [[input.files]]
+    title = "SourceFiles"
+    contents = "SourceFiles"
+    url = "Pollen@localdeploy/ref/Pollen.SourceFiles"
+    [[input.files]]
+    title = "DEFAULT_LINK_SELECTOR"
+    contents = "DEFAULT_LINK_SELECTOR"
+    url = "Pollen@localdeploy/ref/Pollen.DEFAULT_LINK_SELECTOR"
+    [[input.files]]
+    title = "stopasync"
+    contents = "stopasync"
+    url = "Pollen@localdeploy/ref/Pollen.stopasync"
+    [[input.files]]
+    title = "Pollen/rewriters/modulereference.jl"
+    contents = "info ModuleInfo PackageIndex ids Set String pkgindex ModuleInfo PackageIndex pkgindex Set String ms kwargs PackageIndex ms kwargs Base show io IO mr print io show io mr info modules id print io show io mr info print io rewriter sources Dict String symbolinfo ModuleInfo getsymbols rewriter info docid __get_ref_docid rewriter info symbolinfo docid rewriter ids sources docid __make_reference_file rewriter info symbolinfo push! rewriter ids docid sources __get_ref_docid I ModuleInfo PackageIndex symbol ModuleInfo SymbolInfo pkgid ModuleInfo getid ModuleInfo getpackage I symbol pkgid symbol id __make_reference_file I PackageIndex symbol ModuleInfo SymbolInfo children __parse_docstring d d ModuleInfo getdocstrings I symbol_id symbol id Dict Symbol Any symbol_id symbol id title symbol name module_id symbol module_id kind symbol kind package_id ModuleInfo getid ModuleInfo getpackage I symbol symbol kind module binding ModuleInfo getbinding I symbol id exported isnothing binding binding exported methods ModuleInfo getmethods I symbol_id symbol id symbol kind module pkgid ModuleInfo getid ModuleInfo getpackage I symbol symbols ModuleInfo getsymbols I module_id symbol id files ModuleInfo getfiles I package_id pkgid documentation children __parse_docstring doc ModuleInfo DocstringInfo node doc docstring docstring children node Dict Symbol Any module doc module_id symbol doc symbol_id file doc file line doc line \n"
+    url = "Pollen@localdeploy/src/rewriters/modulereference.jl"
+    [[input.files]]
+    title = "Pollen/rewriters/documentfolder.jl"
+    contents = "Base dirs Vector Pair String String filterfn loadfn _defaultload files Dict String Dict String _defaultload file _ Pollen Path file Base show io IO df print io length keys df files length df dirs dirs Vector kwargs dirs map d d Pair d d dirs kwargs dir String kwargs dir kwargs rewriter sources Dict String prefix dir rewriter dirs file String filter rewriter filterfn dir docid prefix relpath file dir docid keys rewriter files rewriter files docid file docid rewriter loadfn file docid sources docid rewriter loadfn file docid sources rewriter empty! rewriter files rewriter ch ch collect values rewriter files last rewriter dirs ms Vector Module extensions pkgtags Dict String String kwargs filterfn extensions pkgdirs pkgdir ms pkgids __getpkgids ms pkgtags any isnothing pkgdirs i Int findfirst isnothing pkgdirs throw ArgumentError ms i pkgid dir pkgid dir zip pkgids pkgdirs filterfn loadfn __load_documentation_file kwargs m Module kwargs m kwargs __load_documentation_file file id pfile Path file doc Pollen pfile node_title doc h1 title isnothing node_title filename pfile node_title attrs Dict path string file title title document doc attrs __getpkgids ms pkgtags Dict String String m get pkgtags string m ModuleInfo packageversion m m ms f ext endswith f string ext f exts Vector any map ext f ext exts exts Base Fix2 exts filepattern dir pwd depth patterns repeat i filepattern i depth vcat glob pattern dir pattern patterns depth dir mktempdir touch joinpath dir r dir sources r length sources first keys sources isempty r touch joinpath dir keys r r length r \n"
+    url = "Pollen@localdeploy/src/rewriters/documentfolder.jl"
+    [[input.files]]
+    title = "setup_docs_actions"
+    contents = "setup_docs_actions"
+    url = "Pollen@localdeploy/ref/Pollen.setup_docs_actions"
+    [[input.files]]
+    title = "SelectSymbolReference"
+    contents = "SelectSymbolReference"
+    url = "Pollen@localdeploy/ref/Pollen.SelectSymbolReference"
+    [[input.files]]
+    title = "loaddefaults"
+    contents = "loaddefaults"
+    url = "Pollen@localdeploy/ref/Pollen.loaddefaults"
+    [[input.files]]
+    title = "selectfirst"
+    contents = "selectfirst(tree, selector)\nIterate over nodes in tree that match selector and return the first one. If no matching node can be found, return nothing.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.selectfirst"
+    [[input.files]]
+    title = "SelectDocumentReference"
+    contents = "SelectDocumentReference"
+    url = "Pollen@localdeploy/ref/Pollen.SelectDocumentReference"
+    [[input.files]]
+    title = "fullbuild"
+    contents = "fullbuild"
+    url = "Pollen@localdeploy/ref/Pollen.fullbuild"
+    [[input.files]]
+    title = "serve"
+    contents = "serve(project)\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.serve"
+    [[input.files]]
+    title = "Pollen/rewriters/packagewatcher.jl"
+    contents = "modules Any handler Any modules modules pkgwatcher ch watcher LiveServer SimpleWatcher filename Path filename ch m pkgwatcher modules srcdir joinpath Path pkgdir m p walkpath srcdir LiveServer watch_file! watcher string p watcher p AbstractPath p ch p Revise revise event p put! ch event server rewriter server project rewriters rewriter rewriter p keys server project sources p keys server project outputs server p server p \n"
+    url = "Pollen@localdeploy/src/rewriters/packagewatcher.jl"
+    [[input.files]]
+    title = "DocUpdated"
+    contents = "DocUpdated"
+    url = "Pollen@localdeploy/ref/Pollen.DocUpdated"
+    [[input.files]]
+    title = "DocVersions"
+    contents = "DocVersions(pkgdir; tag, dependencies) <: Rewriter\nA Rewriter that writes version information including Pollen configuration to a versions.json file when a Project is built.\nThe versions.json file is a dictionary of versiontag => config and is updated whenever a new version (specified by tag) is built.\nFor every version, the following configuration is written:\nlinktree: The parsed toc.json with resolved references\n\ntitle: The project title\n\n\nKeyword arguments\ntag = nothing: Version tag to associate with the package that pkgdir defines. If nothing (the default), read the version from the package's Project.toml file.\n\ndependencies = []: A list of (versioned) package IDs.\n\n\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.DocVersions"
+    [[input.files]]
+    title = "extensionformat"
+    contents = "extensionformat(Val(Symbol(ext)))\nDefine a default Format for parsing files with extension ext.\nFor example extensionformat(Val(:html)) == HTMLFormat(), so parse(p\"index.html\") dispatches to parse(p\"index.html\", HTMLFormat())\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.extensionformat"
+    [[input.files]]
+    title = "formatextension"
+    contents = "formatextension"
+    url = "Pollen@localdeploy/ref/Pollen.formatextension"
+    [[input.files]]
+    title = "Pollen/project.jl"
+    contents = "sources ThreadSafeDict String outputs ThreadSafeDict String rewriters Vector rewriters sources ThreadSafeDict String foreach rewriters rewriter merge! sources rewriter outputs ThreadSafeDict String sources outputs rewriters Base show io IO project print io length project sources length project rewriters project docids Set keys project sources project sources project outputs project rewriters docids sourcedocs outputdocs rewriters Vector docids docs filter k v k docids sourcedocs isempty docs merge! outputdocs docs rewriters docs rewriters docids union docids keys docs merge! outputdocs Dict String Any docid outputdocs docid docid docids rewriters docids sources rewriters outputs ThreadSafeDict String docids collect keys sources Threads i eachindex docids docid docids i doc sources docid foreach rewriters rewriter doc rewriter docid doc outputs docid doc outputs outputs rewriters Vector r rewriters outputs outputs r outputs outputs outputs rewriters Vector docs Vector Dict String undef length rewriters Threads i length rewriters docs i rewriters i merge docs project foreach k delete! project sources k keys project sources foreach k delete! project outputs k keys project outputs foreach project rewriters \n"
+    url = "Pollen@localdeploy/src/project.jl"
+    [[input.files]]
+    title = "matches"
+    contents = "matches"
+    url = "Pollen@localdeploy/ref/Pollen.matches"
+    [[input.files]]
+    title = "Pollen/xtree/selectors.jl"
+    contents = "sel x f Any sel x sel f x x _ _ Symbol sel x sel x T Tuple selectors T Base sel1 sel2 sel1 sel2 Base selor sel selor seletors sel sel x any s x s sel selectors T Tuple selectors T Base sel1 sel2 sel1 sel2 Base seland sel seland selectors sel sel x all s x s sel selectors sel sel x sel sel x Base sel sel T attr Symbol val T sel node haskey node sel attr node sel attr sel val attr Symbol sel x haskey x sel attr sel x x PostOrderDFS sel x sel x PostOrderDFS sel x x nothing leaf node body leaf Dict class body node div node div node div body node div body node leaf node class node class node length collect node node leaf \n"
+    url = "Pollen@localdeploy/src/xtree/selectors.jl"
+    [[input.files]]
+    title = "replace"
+    contents = "replace(tree, xnode, selector)\nReplace every node in tree that matches selector with xnode.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.replace"
+    [[input.files]]
+    title = "asmimestring"
+    contents = "asmimestring"
+    url = "Pollen@localdeploy/ref/Pollen.asmimestring"
+    [[input.files]]
+    title = "initialize"
+    contents = "initialize"
+    url = "Pollen@localdeploy/ref/Pollen.initialize"
+    [[input.files]]
+    title = "mdchildren"
+    contents = "mdchildren"
+    url = "Pollen@localdeploy/ref/Pollen.mdchildren"
+    [[input.files]]
+    title = "Pollen/xtree/xtree.jl"
+    contents = "T data T Base getindex xleaf xleaf data leaf leaf AbstractTrees children AbstractTrees printnode io IO xleaf print io xleaf AbstractTrees printnode io IO xleaf String get io color get io compact print io xleaf print io xleaf Base T D Dict Symbol Symbol children Vector T D Base show io IO xnode print_tree io xnode maxdepth Symbol children _xtree x x children Dict pairs Symbol children AbstractVector children Dict Symbol Any _xtree node node _xtree leaf leaf _xtree x x AbstractTrees children xnode xnode children xnode xnode xnode xnode Base iterate xnode iterate children xnode Base iterate xnode state iterate children xnode state Base IteratorSize Type T T Base SizeUnknown Base eltype Type T T T Base eltype Type TreeIterator T T T Base IteratorEltype Type TreeIterator T T Base HasEltype isdefined AbstractTrees ChildIndexing AbstractTrees ChildIndexing Type AbstractTrees IndexedChildren xnode children xnode children xnode node children node node xnode xnode children xnode f xnode state T cs T c children xnode c state f c state T T push! cs c f xnode cs state f xleaf state kwargs f xleaf state f xnode f xnode f c c children xnode f xleaf f xleaf f tree init iterator PostOrderDFS foldl f l l iterator tree init init f xnode init foldl f l l Leaves xnode init init Base x1 x2 x1 x2 x1 x2 length children x1 length children x2 all c1 c2 c1 c2 zip children x1 children x2 Base _ Base _ Base x1 x2 x1 x2 Base _ Base Base AbstractTrees printnode io IO x rich get io color get io compact print io rich print io print io x rich print io isempty x print io rich print io i key value enumerate x i print io print io key show io value rich print io print io isempty children isempty Int node node gat gat length children node node Dict x x x x sum x prod x x x x_ x node node node node x_ x x_ n x node state node node state node state x_ n \n"
+    url = "Pollen@localdeploy/src/xtree/xtree.jl"
+    [[input.files]]
+    title = "ResolveReferences"
+    contents = "ResolveReferences()\nResolveReferences(modules; selector)\nResolveReferences(rules, selector)\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.ResolveReferences"
+    [[input.files]]
+    title = "POLLEN_TEMPLATE_DIR"
+    contents = "POLLEN_TEMPLATE_DIR"
+    url = "Pollen@localdeploy/ref/Pollen.POLLEN_TEMPLATE_DIR"
+    [[input.files]]
+    title = "catafirst"
+    contents = "catafirst(f, tree, selector)\nLike cate, but apply f only to the first node that matches selector.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.catafirst"
+    [[input.files]]
+    title = "setup_docs_project"
+    contents = "setup_docs_project"
+    url = "Pollen@localdeploy/ref/Pollen.setup_docs_project"
+    [[input.files]]
+    title = "ResolveSymbols"
+    contents = "ResolveSymbols"
+    url = "Pollen@localdeploy/ref/Pollen.ResolveSymbols"
+    [[input.files]]
+    title = "ModuleReference"
+    contents = "ModuleReference(modules)\nModuleReference(pkgindex)\nA Rewriter that creates a reference document for every symbol that is defined in the packages that define modules or is indexed in pkgindex.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.ModuleReference"
+    [[input.files]]
+    title = "htmlstr"
+    contents = "htmlstr"
+    url = "Pollen@localdeploy/ref/Pollen.htmlstr"
+    [[input.files]]
+    title = "FileBuilder"
+    contents = "FileBuilder(format, dir) <: Builder\nBuild every document to a file in dir using output format.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.FileBuilder"
+    [[input.files]]
+    title = "Pollen/formats/jupyter.jl"
+    contents = "Val ipynb io IO format JSON3 read io format data JSON3 Object format attrs merge Dict data metadata Dict nbformat data nbformat data nbformat_minor jupyter cell attrs cell data cells attrs cell nbattrs cell nbattrs Val Symbol cell cell_type cell nbattrs Val markdown join cell source merge cell metadata Dict id get cell id nothing cell nbattrs Val code code join cell source codeblock codeinput codeblock code lang nbattrs kernelspec language chs codeblock codecell codeblock _parsecelloutputs cell outputs merge Dict cell metadata Dict id get cell id nothing execution_count cell execution_count _parsecelloutputs outputs cs stream output outputs output output_type stream join output text output output_type isempty stream push! cs codeoutput codeblock stream stream reprs Dict MIME k join v k v output data length reprs first keys reprs MIME push! cs coderesult codeblock first values reprs push! cs coderesult reprs stream push! cs codeoutput codeblock stream cs \n"
+    url = "Pollen@localdeploy/src/formats/jupyter.jl"
+    [[input.files]]
+    title = "ServeFiles"
+    contents = "ServeFiles"
+    url = "Pollen@localdeploy/ref/Pollen.ServeFiles"
+    [[input.files]]
+    title = "JupyterFormat"
+    contents = "JupyterFormat() <: Format\nFormat for reading in Jupyter notebook (.ipynb) files.\nExtended help\nMarkdown cells are parsed as :md Nodes using MarkdownFormat. Parsd code cells have the following structure:\ncodecell codeblock _ codeoutput _ coderesult _ \n\n"
+    url = "Pollen@localdeploy/ref/Pollen.JupyterFormat"
+    [[input.files]]
+    title = "createcodecell"
+    contents = "createcodecell"
+    url = "Pollen@localdeploy/ref/Pollen.createcodecell"
+    [[input.files]]
+    title = "Pollen/formats/_ijulia_display.jl"
+    contents = "x mimes firstonly mimestrings Dict MIME String mime mimes showable mime x mimestrings mime x mime firstonly mimestrings x mimes Vector MIME i findfirst m showable m x mimes isnothing i throw ArgumentError x mimes! mime mimes i mime x mime MIME x AbstractString x AbstractString MIME x io KVs Pair IOContext io limit color jupyter KVs x mime MIME buf IOBuffer istextmime mime mime x String x show buf mime x b64 Base64EncodePipe buf isa x Vector UInt8 write b64 x show b64 mime x close b64 String take! buf \n"
+    url = "Pollen@localdeploy/src/formats/_ijulia_display.jl"
+    [[input.files]]
+    title = "PackageWatcher"
+    contents = "PackageWatcher(modules) <: Rewriter\nRebuild when a source file in one of modules changes.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.PackageWatcher"
+    [[input.files]]
+    title = "runserver"
+    contents = "runserver(server, mode)\nRun a server in mode. Handles start and cleanup of event sources from rewriters and mode. Synchronizes updates to project state.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.runserver"
+    [[input.files]]
+    title = "setup_docs"
+    contents = "setup_docs"
+    url = "Pollen@localdeploy/ref/Pollen.setup_docs"
+    [[input.files]]
+    title = "How to preview documentation locally"
+    contents = "How to preview documentation locally\nTo preview docs of a package that uses Pollen.jl for documentation, use servedocs:\nPollen MyPackage MyPackage \nOnce the pages are built, navigate to localhost:5173 to preview the documentation.\nLive reload\nYou can make changes to a file that is part of the documentation while the preview is running. For example, modify a Markdown file and Pollen.jl will reload it and rebuild just that page.\nTo update open pages in the preview, press Shift+R.\n\n"
+    url = "Pollen@localdeploy/doc/docs/howto/preview.md"
+    [[input.files]]
+    title = "combine"
+    contents = "combine"
+    url = "Pollen@localdeploy/ref/Pollen.combine"
+    [[input.files]]
+    title = "Before"
+    contents = "Before"
+    url = "Pollen@localdeploy/ref/Pollen.Before"
+    [[input.files]]
+    title = "Pollen/formats/json.jl"
+    contents = "Base mimes firstmimeonly tree tree format node Dict type node children format ch ch children node node Nothing nothing leaf String leaf format leaf mimestrings leaf format mimes firstonly format firstmimeonly Dict type mimes mimestrings io IO tree JSON3 write io tree io IO format data JSON3 read io format data data data format data Union Dict JSON3 Object type data type type Dict MIME m val m val data mimes type Symbol data format ch ch data children Dict data throw ArgumentError data Nothing nothing str String str mimestrings Dict MIME String x x firstonly x mimes firstonly mimestrings Dict MIME String mime mimes mime keys x mimestrings mimestrings mime x mimestrings mime firstonly mimestrings Base show io IO pre print io collect keys pre mimestrings format firstmimeonly format nothing format leaf Base HTML leaf_ leaf format format leaf_ leaf_ mimestrings MIME tree doc p nothing attr Pollen Pollen tree format format tree \n"
+    url = "Pollen@localdeploy/src/formats/json.jl"
+    [[input.files]]
+    title = "Event"
+    contents = "abstract type Event\nAn event that can during an interactive serving of a project using a Server. Can be created by a ServerMode or a Rewriter.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.Event"
+    [[input.files]]
+    title = "fromjson"
+    contents = "fromjson"
+    url = "Pollen@localdeploy/ref/Pollen.fromjson"
+    [[input.files]]
+    title = "Server"
+    contents = "Server(project, builder)\nA server manages interactively running a Project, coordinating events to update project state efficiently.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.Server"
+    [[input.files]]
+    title = "rewritedocs"
+    contents = "rewritedocs(sources, rewriters) -> outputs\nApplies rewriters to a collection of sources.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.rewritedocs"
+    [[input.files]]
+    title = "SymbolCodeRule"
+    contents = "SymbolCodeRule"
+    url = "Pollen@localdeploy/ref/Pollen.SymbolCodeRule"
+    [[input.files]]
+    title = "loadtoc"
+    contents = "loadtoc"
+    url = "Pollen@localdeploy/ref/Pollen.loadtoc"
+    [[input.files]]
+    title = "Position"
+    contents = "Position"
+    url = "Pollen@localdeploy/ref/Pollen.Position"
+    [[input.files]]
+    title = "HTMLFormatTAGS"
+    contents = "HTMLFormatTAGS"
+    url = "Pollen@localdeploy/ref/Pollen.HTMLFormatTAGS"
+    [[input.files]]
+    title = "hasextension"
+    contents = "hasextension"
+    url = "Pollen@localdeploy/ref/Pollen.hasextension"
+    [[input.files]]
+    title = "replacefirst"
+    contents = "replacefirst"
+    url = "Pollen@localdeploy/ref/Pollen.replacefirst"
+    [[input.files]]
+    title = "SelectNode"
+    contents = "SelectNode() <: Selector\nSelects every Node.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.SelectNode"
+    [[input.files]]
+    title = "postbuild"
+    contents = "postbuild(rewriter, project, dst, format)\nPost-build callback for Rewriters.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.postbuild"
+    [[input.files]]
+    title = "MarkdownFormat"
+    contents = "MarkdownFormat([parser]) <: Format\nFormat for reading CommonMark-compliant Markdown. See CommonMark.jl for a reference.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.MarkdownFormat"
+    [[input.files]]
+    title = "resolvelink"
+    contents = "resolvelink(rule, link::LinkInfo) -> Node | Nothing\nresolvelink(rules, link::LinkInfo) -> Node | Nothing\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.resolvelink"
+    [[input.files]]
+    title = "PollenPlugin"
+    contents = "PollenPlugin(; kwargs...) <: Plugin\nConfiguration for setting up Pollen.jl documentation for a package.\nTo add documentation when creating a package with PkgTemplates.jl, use this as one of the plugins.\nTo add documentation to an existing package, you can configure this and pass it to setup_docs_files, setup_docs_project, setup_docs_actions and setup_docs_branches. See these functions for more detail on what is set up.\nFollow the tutorial for a step-by-step guide for setting up documentation.\nKeyword arguments\nfolder::String = \"docs\": The folder in which the documentation configuration and project will be stored. See setup_docs_files and setup_docs_project.\n\nremote = \"origin\": The name of the remote to use. Branches created by setup_docs_branches will be pushed to this remote. Set remote = nothing to disable the pushing of branches to a remote.\nMissing remote\nIf the remote does not exist, the setup will error! In that case, disable with remote = nothing.\n\n\n\n\nBranch configuration:\nbranch_primary = \"main\": The main branch of the repository. Pushes to this branch will trigger documentation builds on GitHub.\nOld repositories\nIf your repository was created a while ago, chances are its default branch is called \"master\". In that case, you will have to pass branch_primary = \"master\" or the GitHub Actions will not be set up correctly.\n\n\n\nbranch_data = \"pollen\": Pollen.jl will create a branch in your repository that stores data generated during documentation build on GitHub Pages. You will usually not need to change this.\n\nbranch_page = \"gh-pages\": The branch that the statically rendered HTML is built to for publishing on GitHub Pages.\n\n\nDependency configuration:\npollen_spec::Pkg.PackageSpec: If you want to use an in-development version/branch of Pollen.jl, modify this to ensure that GitHub Actions will also that version.\n\n\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.PollenPlugin"
+    [[input.files]]
+    title = "StaticAssets"
+    contents = "StaticAssets"
+    url = "Pollen@localdeploy/ref/Pollen.StaticAssets"
+    [[input.files]]
+    title = "LinkInfo"
+    contents = "LinkInfo(href, title, id, node, path, package, mod)\nContainer that stores information on a link in a document\nLinkInfo()\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.LinkInfo"
+    [[input.files]]
+    title = "Pollen/rewriters/staticassets.jl"
+    contents = "Base resources Dict String String Dict String String folder String rewriter _ doc haskey doc path doc_folder parent absolute Path doc path doc img src node src node src startswith src node file string absolute joinpath doc_folder Path src key rewriter folder string hash file extension Path file rewriter resources key file node merge node Dict src key doc rewriter _ builder key srcfile rewriter resources dstfile absolute joinpath absolute builder dir key isfile dstfile mkpath parent dstfile cp string srcfile string dstfile force mktempdir dir doc md img src path dir rewriter outdoc rewriter doc startswith outdoc img src \n"
+    url = "Pollen@localdeploy/src/rewriters/staticassets.jl"
+    [[input.files]]
+    title = "start"
+    contents = "start(eventhandler)\nStart an event source. Use startasync to do this asynchronously.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.start"
+    [[input.files]]
+    title = "Pollen/rewriters/executecode.jl"
+    contents = "blocks Vector String outputs Vector Any results Vector Any module_ Module String Module s Symbol String Module s Base show io IO cache print io nameof cache module_ m Module codeblock c IOCapture capture rethrow InterruptException color Base include_string m codeblock c output c value cache blocks outputs results updated i block enumerate blocks oldblock length cache blocks i cache blocks i nothing updated oldblock block output result cache outputs i cache results i output result cache module_ block updated push! outputs output push! results result blocks outputs results cache module_ codeblock lang cell Base caches Dict Symbol Dict Symbol warnonerror Bool codeblocksel groupfn x get x cell lock ReentrantLock ReentrantLock executecode p doc blocks collect doc executecode codeblocksel codes blocks groupids p executecode groupfn block block blocks outputs results lock executecode lock executecode caches codes groupids executecode warnonerror i result enumerate results result LoadError codes i error result error doc p block i line result line newblocks i block enumerate blocks cell block outputs i results i isempty children cell push! newblocks span push! newblocks cell doc newblocks executecode codeblocksel x any showable m x m caches codes groupids is codesgrouped Dict Symbol Vector String gid code zip groupids codes groupcodes get! codesgrouped gid String push! groupcodes code push! is gid length groupcodes gid keys codesgrouped cache get! caches gid gid caches gid cache codes outputs caches gid outputs i gid i is results caches gid results i gid i is outputs results path groupname Symbol CM slugify string path groupname codeblock output result chs codeattrs outputattrs resultattrs __parsecodeattributes codeblock get codeattrs show push! chs codeinput codeblock codeattrs get outputattrs show isempty output push! chs codeoutput codeblock output outputattrs get resultattrs show isnothing result node result coderesult result coderesult codeblock result push! chs node resultattrs codecell chs __parsecodeattributes attrs Dict Symbol codeattrs Dict Symbol Any outputattrs Dict Symbol Any resultattrs Dict Symbol Any parseval x x x x attr val attrs val parseval val sattr string attr attr show codeattrs show val attr output outputattrs show val attr result resultattrs show val startswith string attr outputattrs Symbol sattr end val startswith string attr resultattrs Symbol sattr end val codeattrs attr val codeattrs outputattrs resultattrs executecode foreach k delete! executecode caches k keys executecode caches rewriter codeblocksel codeblock doc md codeblock Pollen rewriter doc md codecell codeinput codeblock coderesult codeblock rewriter codeblocksel codeblock doc md codeblock Pollen rewriter doc md codecell codeinput codeblock codeoutput codeblock rewriter codeblocksel codeblock doc md codeblock outdoc Pollen rewriter doc val only children outdoc coderesult outdoc2 Pollen rewriter doc val2 only children outdoc2 coderesult val val2 rewriter outdoc3 Pollen rewriter doc val3 only children outdoc3 coderesult val val3 __parsecodeattributes Dict style Dict style Dict Dict __parsecodeattributes Dict style output Dict style Dict show Dict __parsecodeattributes Dict style output resultstyle Dict style Dict show Dict style \n"
+    url = "Pollen@localdeploy/src/rewriters/executecode.jl"
+    [[input.files]]
+    title = "executegrouped!"
+    contents = "executegrouped!"
+    url = "Pollen@localdeploy/ref/Pollen.executegrouped!"
+    [[input.files]]
+    title = "createsources!"
+    contents = "createsources!(rewriters) -> sources\nCreates new source documents from rewriters\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.createsources!"
+    [[input.files]]
+    title = "frontend_install"
+    contents = "frontend_install"
+    url = "Pollen@localdeploy/ref/Pollen.frontend_install"
+    [[input.files]]
+    title = "withext"
+    contents = "withext"
+    url = "Pollen@localdeploy/ref/Pollen.withext"
+    [[input.files]]
+    title = "SelectOr"
+    contents = "SelectOr"
+    url = "Pollen@localdeploy/ref/Pollen.SelectOr"
+    [[input.files]]
+    title = "addsource!"
+    contents = "addsource!"
+    url = "Pollen@localdeploy/ref/Pollen.addsource!"
+    [[input.files]]
+    title = "BLOCK_TO_TAG"
+    contents = "BLOCK_TO_TAG"
+    url = "Pollen@localdeploy/ref/Pollen.BLOCK_TO_TAG"
+    [[input.files]]
+    title = "Pollen/rewriters/sourcefiles.jl"
+    contents = "ms Vector Module pkgtags Dict String String pkgdirs pkgdir ms any isnothing pkgdirs i Int findfirst isnothing pkgdirs throw ArgumentError ms i pkgids __getpkgids ms pkgtags pkgid joinpath dir pkgid dir zip pkgids pkgdirs filterfn loadfn __load_source_file __load_source_file file String id parts split file pkgid split id module_id split pkgid title module_id parts end doc Pollen String read file doc doc sourcefile doc Dict Symbol Any path file title title module_id module_id package_id pkgid tree tree __stripdocstrings __splitoncomments __stripdocstrings tree Pollen tree MACROCALL node isempty children node node first children node CORE_DOC_MACRO_NAME children node end node __splitoncomments node chs in_comment comment String code ch children node ch Comment isempty code push! chs codeblock code lang code in_comment push! comment _strip_comment Pollen ch push! comment in_comment ch NewlineWs ch Whitespace isempty comment push! chs Pollen join comment comment String in_comment push! code ch isempty code push! chs codeblock code lang isempty comment push! chs Pollen join comment Pollen node chs _strip_comment str startswith str strip str end strip str end \n"
+    url = "Pollen@localdeploy/src/rewriters/sourcefiles.jl"
+    [[input.files]]
+    title = "select"
+    contents = "select(tree, selector)\nIterate over nodes in tree that match selector. Call collect on the iterator to get a vector of results.\nExamples\nPollen node document p node Pollen collect \n\n"
+    url = "Pollen@localdeploy/ref/Pollen.select"
+    [[input.files]]
+    title = "InlineIOContext"
+    contents = "InlineIOContext"
+    url = "Pollen@localdeploy/ref/Pollen.InlineIOContext"
+    [[input.files]]
+    title = "How to install Pollen.jl"
+    contents = "How to install Pollen.jl\nPollen.jl is a package for the Julia programming language and can be installed like other packages using the built-in package manager. Run the following in a Julia session to install Pollen and its dependencies:\nPkg Pkg add Pkg PackageSpec url \n\n"
+    url = "Pollen@localdeploy/doc/docs/howto/install.md"
+    [[input.files]]
+    title = "backlinkdata"
+    contents = "backlinkdata"
+    url = "Pollen@localdeploy/ref/Pollen.backlinkdata"
+    [[input.files]]
+    title = "fold"
+    contents = "fold(f, tree)\nFold over tree in post-order iteration.\nExamples\nPollen node table row row Pollen node x subtree subtree Int x subtree x \n\n"
+    url = "Pollen@localdeploy/ref/Pollen.fold"
+    [[input.files]]
+    title = "JSONFormat"
+    contents = "JSONFormat() <: Format\nFormat for reading and writing trees from and to JSON.\nTrees nodes are encoded as JSON objects:\njulia> render(Node(:p, \"Hello\", nothing), JSONFormat()) |> println\n\n{\"attributes\":{},\"tag\":\"p\",\"children\":[\"Hello\", null]}\nEncoding to JSON is lossless only when leaf and attribute values are valid JSON types. Richer leaf values will be converted to a dictionary of MIME type representations to allow serialization and rich display upon deserialization.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.JSONFormat"
+    [[input.files]]
+    title = "prerender"
+    contents = "prerender"
+    url = "Pollen@localdeploy/ref/Pollen.prerender"
+    [[input.files]]
+    title = "Pollen/files.jl"
+    contents = "path AbstractPath ext extension path ext path newname filename path e extensions path newname newname e newname newname ext joinpath parent path newname href ext m match href isnothing m href string Path href ext ref id m m ref id ref_ string Path ref ext ref_ id node string relative path node path node node isnothing parent node node parent node \n"
+    url = "Pollen@localdeploy/src/files.jl"
+    [[input.files]]
+    title = "withattributes"
+    contents = "withattributes(node, attributes)\nReplace node's attributes with attributes.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.withattributes"
+    [[input.files]]
+    title = "Pollen/rewriters/storkindex.jl"
+    contents = "Base filterfn Returns True String stork_bin String corpus Dict String Any Dict String Any documents filterfn Returns corpus Dict String Dict id doc documents filterfn id text doc title doc title isempty text text title corpus id Dict title text id corpus outputs stork newcorpus outputs filterfn stork filterfn merge! stork corpus newcorpus outputs stork project builder config Dict Dict collect values stork corpus mktemp searchdir mkpath joinpath builder dir stork configfile indexfile joinpath searchdir joinpath searchdir open joinpath searchdir f TOML print f config stork stork_bin string configfile string indexfile stork_bin String config_file String output_file String run pipeline stdout Base DevNull stderr Base DevNull h1 h2 h3 h4 p admonition blockquote mathblock table hr li ul md admonitiontitle admonitionbody node node Val Pollen node s node Val ch children node ch ch String s ch s s ch Val Pollen ch Pollen node s s s node Val julia node node Identifier md node md s node Val md length children node only children node String s only children node s s s dir file joinpath dir isfile file file url Sys islinux Sys isapple nothing url String download url file chmod Path file file throw SystemError \n"
+    url = "Pollen@localdeploy/src/rewriters/storkindex.jl"
+    [[input.files]]
+    title = "FirstChild"
+    contents = "FirstChild"
+    url = "Pollen@localdeploy/ref/Pollen.FirstChild"
+    [[input.files]]
+    title = "Pollen/rewriters/parsecode.jl"
+    contents = "codeblock lang Base selector format rewriter _ doc doc rewriter selector x code string strip Pollen x x code rewriter format rewriter rewriter md codeblock lang md codeblock julia Identifier lang \n"
+    url = "Pollen@localdeploy/src/rewriters/parsecode.jl"
+    [[input.files]]
+    title = "ParseCode"
+    contents = "ParseCode"
+    url = "Pollen@localdeploy/ref/Pollen.ParseCode"
+    [[input.files]]
+    title = "parse"
+    contents = "parse(io, format)\nparse(path, format)\nparse(str, format)\nParse source in format into a tree. Input can come from an io::IO or a string str.\n\nparse(path)\nParse source in AbstractPath path into a tree. extensionformat is used to find the correct Format to use.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.parse"
+    [[input.files]]
+    title = "SelectAll"
+    contents = "SelectAll() <: Selector\nSelects every node and leaf.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.SelectAll"
+    [[input.files]]
+    title = "Selector"
+    contents = "abstract type Selector\nA Selector matches a node in an XTree. Selectors can be passed to select, selectfirst, cata.\nSee subtypes(Selector) for example selectors.\nExtending\nTo implement a Selector:\nwrite a struct MySelector <: Selector\n\nimplement a method Pollen.matches(::MySelector, ::XTree)::Bool\n\n\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.Selector"
+    [[input.files]]
+    title = "SymbolLinkRule"
+    contents = "SymbolLinkRule"
+    url = "Pollen@localdeploy/ref/Pollen.SymbolLinkRule"
+    [[input.files]]
+    title = "AbstractLinkRule"
+    contents = "abstract type AbstractLinkRule\nExtending\nA rule R must implement the following methods:\nparselink(::R, ::LinkInfo) -> String | Nothing checks whether the rule applies to the link, returning a target if it does, or nothing otherwise\n\nresolvelink(::R, ::LinkInfo, target) takes a parsed target and returns a new Node that replaces the original link node.\n\n\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.AbstractLinkRule"
+    [[input.files]]
+    title = "Backlinks"
+    contents = "Backlinks() <: Rewriter\nRewriter that sets the :backlinks attribute of every page in a project with a list of page IDs that link to it.\nA page links to another page with id id if it has a Node(:reference, ...) with attribute :document_id = id. See ResolveReferences and ResolveSymbols for rewriters that create nodes with :reference tags.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.Backlinks"
+    [[input.files]]
+    title = "URLLinkRule"
+    contents = "URLLinkRule"
+    url = "Pollen@localdeploy/ref/Pollen.URLLinkRule"
+    [[input.files]]
+    title = "Working with documents"
+    contents = "Working with documents\nLearn how Pollen represents documents and how to load them from different file formats as well as transform them.\nAt its core, Pollen is a package for creating and transforming documents. For example, this documentation is comprised of many different documents. This page, for example, is created from a Markdown file which you can find here: Pollen.jl/docs/tutorials/documents.md.\nThis tutorial will give you some insight into how Pollen documents are represented and how this representation makes many forms of common document processing steps possible.\nDocuments as trees\nIf you have worked with HTML before, you'll know that it uses a tree-like data format to represent documents. For example, the following is an HTML snippet of a paragraph with some marked up text:\n<p class=\"subtitle\">\n    Hello world, this is some <strong>marked up</strong> text.\n</p>\nPollen similarly represents documents as a tree. We can represent the above HTML as follows using Pollen:\nPollen p strong class \nFormat-independent documents\nHTML is a natural source for this kind of data, but Pollen can read or write documents from and to different formats, like Markdown files, Julia source files, Jupyter notebooks and JSON.\nFor example, we can parse Markdown text and render it back as HTML:\ndoc Pollen \nPollen doc \nSupporting many different formats allows us to work with different source documents and apply the same set of powerful transformations to documents. So, what can we actually do with our documents?\nTransforming documents\nPollen uses document transformations to implement many different features like executing code cells, syntax highlighting, finding hyperreferences and more.\nTo get a feel for this, let's implement the following transformation: given a document with :code tags, evaluate the code as a Julia expression and replace it with the resulting value. For example, let's say we have this document (parsed from Markdown for convenience):\ndoc Pollen \nThe result that we want is the same document, but the \"2 + 2\" replaced with the result of the calculation: 4.\nmd p \nFinding the code tags\nTo transform the code \"2 + 2\", we first need to find it. For this, we'll use a Selector. Selectors allow us to find specific nodes or leaves in a document tree. Here, we'll use SelectTag to find all nodes with a :code tag.\nnode doc code \nNext, we need to extract the string of code. Using AbstractTrees.children, we can see that the node has 1 child, a Leaf with a string value.\nchildren node \nWe can get the leaf value with empty index notation ([]):\ncodestr only children node \nAnd we can execute the code:\nruncode str Base include_string str runcode codestr \nNow we know how to find nodes with code, how to get the code string, and how to run it. In the next step, we'll create a function that modifies a document, replacing code with its result.\nTransforming the tree\nIf our document was a list of nodes, we could find the relevant elements and map the code-running function over them. We can do something similar to a tree with a so-called catamorphism. At the risk of upsetting category theorists, I'll say that a catamorphism can be seen as a map over trees. Pollen implements it as the function cata which takes a function and a tree as arguments. The function is applied to all nodes and leaves, resulting in a new tree 🌳. For example, we can use it to modify the tags of all nodes:\ndoc subtree subtree subtree newtag subtree \ncata can also take a Selector as a third argument. If specified, only the nodes matchign the selector will be modified. We'll use the above selector to map our code-running function over all nodes with a :code tag.\nwithcodeeval doc doc code node runcode only children node outdoc withcodeeval doc \nWith this, we've implemented a reusable transformation that can be applied to other documents as well. Go ahead and try it with some other examples!\noutdoc2 withcodeeval Pollen \nFinally, we can render the resulting document out to HTML. We wrap the HTML string in Base.HTML so that it's displayed as such here.\nPollen outdoc2 HTML \n\n"
+    url = "Pollen@localdeploy/doc/docs/tutorials/documents.md"
+    [[input.files]]
+    title = "Pollen.jl"
+    contents = "Pollen.jl\nDocumentation\nA document generation system based on tree rewriting, built for interactive work.\nPollen.jl generates documentation for Julia packages that comes with many features:\nsupport for many input and output formats: Markdown, Jupyter notebooks, HTML, JSON, and Julia source code\n\na modern frontend with Sliding Panes\n\nautomatic hyperreferencing of code variables for discoverability\n\ncode execution to ensure your code examples stay up-to-date\n\nautomated builds, deployments and PR previews with GitHub Actions and GitHub Pages\n\nlocal preview with incremental builds for an improved developer experience\n\nfull support for multiple packages and linking between them\n\n\nFirst, find out how to install Pollen and then how to setup package documentation.\n\n"
+    url = "Pollen@localdeploy/doc/README.md"
+    [[input.files]]
+    title = "Pollen/rewriters/docversions.jl"
+    contents = "pkgdir String version String config Dict String Any m Module kwargs pkgdir m kwargs pkgdir String nothing dependencies String projectfile joinpath pkgdir isfile projectfile throw SystemError file projectconfig TOML parsefile projectfile pollenconfig get projectconfig Dict isnothing string projectconfig pkgid projectconfig config merge projectconfig pkgid pollenconfig config dependencies config pkgdir projectconfig pkgid v VersionNumber projectconfig isnothing v VersionNumber v major v minor v patch v pkgdir config rewriter _ builder dst joinpath builder dir versions isfile dst open dst f Dict JSON3 read f Dict Symbol Any versions Symbol rewriter version rewriter config open dst f JSON3 write f versions project Dict pkgid Dict project pkgid pkgdir String projectconfig Dict pkgid tocfile joinpath pkgdir tree isfile tocfile open tocfile f JSON3 read f projectconfig pkgid __mapdictleaves tree link linkinfo string link pkgid no pkgid projectconfig linkinfo __mapdictleaves f d Union Dict JSON3 Object OrderedDict map k v k __mapdictleaves f v keys d values d __mapdictleaves f x f x projectconfig pkgid OrderedDict pkgid Dict pkgid projectconfig \n"
+    url = "Pollen@localdeploy/src/rewriters/docversions.jl"
+    [[input.files]]
+    title = "addbuild!"
+    contents = "addbuild!"
+    url = "Pollen@localdeploy/ref/Pollen.addbuild!"
+    [[input.files]]
+    title = "Leaf"
+    contents = "Leaf(value) <: XTree\nA leaf node in an XTree. It holds a single value.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.Leaf"
+    [[input.files]]
+    title = "runblock"
+    contents = "runblock"
+    url = "Pollen@localdeploy/ref/Pollen.runblock"
+    [[input.files]]
+    title = "ANSI"
+    contents = "ANSI(x)\nWraps a value with rich text display and adds an HTML display that converts the ANSI escape sequences to valid HTML.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.ANSI"
+    [[input.files]]
+    title = "foldleaves"
+    contents = "fold(f, tree)\nFold over all leaves in tree in post-order iteration.\nExamples\nnode table row row Pollen x leaf x leaf node \n\n"
+    url = "Pollen@localdeploy/ref/Pollen.foldleaves"
+    [[input.files]]
+    title = "catafold"
+    contents = "catafold(f, xtree, state)\nFold a function f : (node, state) -> (node', state') post-order over xtree and return a modified tree as well as the resulting state.\nUse cata for a stateless catamorphism and fold if you don't want to transform xtree.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.catafold"
+    [[input.files]]
+    title = "rglob"
+    contents = "rglob"
+    url = "Pollen@localdeploy/ref/Pollen.rglob"
+    [[input.files]]
+    title = "Pollen/rewriters/resolvereferences.jl"
+    contents = "Base href String title String id String node path Union String Nothing nothing package String mod Union Nothing String nothing rule link target rule link isnothing target link node rule link target rules AbstractVector link rule rules target rule link isnothing target rule link target link node node id href get node href title node path nothing mod nothing package first splitpath id attrs package id href title path mod node link startswith link href startswith link href link href link target link node merge link node Dict href target resolve info info makeinfo href href o nothing resolve makeinfo String resolve makeinfo Nothing resolve makeinfo Nothing res a href res a href Base doctypes rule link isempty link href nothing parts splitpath link href parts length parts nothing parts rule doctypes link package link href doctype split link id link package doctype link href contains parts link href srcparts split link id doctype srcparts srcpath joinpath srcparts end path normpath joinpath srcpath link href startswith path nothing link package doctype path link target link node reference merge link node Dict document_id target resolve info info resolve null nothing nothing resolve null nothing nothing resolve null nothing nothing resolve null nothing nothing resolve null nothing nothing resolve null nothing nothing Nothing resolve null nothing nothing Nothing resolve null nothing nothing Nothing a href reference document_id href I ModuleInfo PackageIndex prefixes Any pkgindex pkgindex rule link parts split link href parts rule prefixes length parts symbol parts mod link mod length children link node nothing child only children link node child nothing child code nothing symbol child mod link mod rule link target bindings unique b b symbol_id rule I target symbol isempty bindings target link link node length bindings b id b symbol_id b bindings bindings begin symbol_id target reference children link node merge link node Dict document_id __id_from_binding rule I bindings reftype pkgindex PackageIndex symbol String modules nothing isnothing modules modules pkgindex modules pkgindex modules id pkgindex modules parent id bindings ModuleInfo resolvebinding pkgindex modules symbol filter b haskey pkgindex index symbols b symbol_id bindings __id_from_binding I ModuleInfo PackageIndex binding ModuleInfo BindingInfo symbol ModuleInfo getsymbol I binding package ModuleInfo getpackage I symbol package name package version symbol id resolve info PackageIndex Pollen info resolve a code href symbol resolve a code href symbol resolve a code href Nothing resolve a href symbol resolve a href Nothing resolve a code href Nothing PackageIndex Pollen a code href symbol mod reference code document_id href reftype rules Vector selector pkgindex nothing selector prefixes rules isnothing pkgindex pkgindex prefixes rules selector a href rewriter docid doc doc rewriter selector node link node id docid mod get doc module nothing doc rewriter rules link pkgindex PackageIndex selector Identifier rule pkgindex rule selector I PackageIndex ms Vector Module kwargs PackageIndex ms recurse cache kwargs rule link length children link node only children link node String idparts splitpath link id mod length idparts idparts split idparts begin begin identifier only children link node mod mod rule link target modules isnothing target mod filter m startswith m id target mod rule I modules id nothing bindings rule I target identifier modules isempty bindings link node reference children link node merge link node Dict document_id __id_from_binding rule I bindings reftype \n"
+    url = "Pollen@localdeploy/src/rewriters/resolvereferences.jl"
+    [[input.files]]
+    title = "SelectNot"
+    contents = "SelectNot(selector)\nInverts a selector. Use !selector as a shorthand, e.g. !SelectTag(:div).\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.SelectNot"
+    [[input.files]]
+    title = "handle"
+    contents = "handle(server, mode, event)\nhandle(rewriter, event)\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.handle"
+    [[input.files]]
+    title = "attributes"
+    contents = "attributes"
+    url = "Pollen@localdeploy/ref/Pollen.attributes"
+    [[input.files]]
+    title = "gettext"
+    contents = "gettext"
+    url = "Pollen@localdeploy/ref/Pollen.gettext"
+    [[input.files]]
+    title = "is_frontend_loaded"
+    contents = "is_frontend_loaded"
+    url = "Pollen@localdeploy/ref/Pollen.is_frontend_loaded"
+    [[input.files]]
+    title = "Replacer"
+    contents = "Replacer"
+    url = "Pollen@localdeploy/ref/Pollen.Replacer"
+    [[input.files]]
+    title = "DocumentFolder"
+    contents = "DocumentFolder(dirs; kwargs...) <: Rewriter\nA Rewriter that creates new documents from files in the directories dirs.\nAlso handles watching and reloading files in development mode.\nSee DocumentFiles and SourceFiles as examples of how it is used.\nKeyword arguments\nfilterfn: Function filepath -> Bool that filters which files are loaded\n\nloadfn: Function filepath -> Node that loads a file into a Node\n\n\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.DocumentFolder"
+    [[input.files]]
+    title = "HTML_MIMES"
+    contents = "HTML_MIMES"
+    url = "Pollen@localdeploy/ref/Pollen.HTML_MIMES"
+    [[input.files]]
+    title = "HTMLFormat"
+    contents = "HTMLFormat() <: Format\nFormat for HTML data. Supports both reading and writing.\nExamples\nReading HTML:\n\nPollen node format \n\n"
+    url = "Pollen@localdeploy/ref/Pollen.HTMLFormat"
+    [[input.files]]
+    title = "withtag"
+    contents = "withtag(node, tag)\nReplace the tag of node with tag.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.withtag"
+    [[input.files]]
+    title = "LINEBREAKTAGS"
+    contents = "LINEBREAKTAGS"
+    url = "Pollen@localdeploy/ref/Pollen.LINEBREAKTAGS"
+    [[input.files]]
+    title = "israwtext"
+    contents = "israwtext"
+    url = "Pollen@localdeploy/ref/Pollen.israwtext"
+    [[input.files]]
+    title = "IMAGEMIMES"
+    contents = "IMAGEMIMES"
+    url = "Pollen@localdeploy/ref/Pollen.IMAGEMIMES"
+    [[input.files]]
+    title = "replacemany"
+    contents = "replacemany"
+    url = "Pollen@localdeploy/ref/Pollen.replacemany"
+    [[input.files]]
+    title = "addrewrite!"
+    contents = "addrewrite!"
+    url = "Pollen@localdeploy/ref/Pollen.addrewrite!"
+    [[input.files]]
+    title = "Pollen/rewriters/saveattributes.jl"
+    contents = "path Any keys Any useoutputs Bool keys nothing path useoutputs Path path keys useoutputs save project builder attrss Dict String Dict id doc save useoutputs project outputs project sources pkg first splitpath id attrs get! attrss pkg Dict String Dict ks isnothing save keys keys a save keys a doc d Dict Symbol Any k ks k Pair k default k d k get a k default d k get a k nothing d doc attrs id d pkg attrs attrss dst joinpath builder dir pkg open dst f JSON3 write f attrs \n"
+    url = "Pollen@localdeploy/src/rewriters/saveattributes.jl"
+    [[input.files]]
+    title = "onsourcefilechanged"
+    contents = "onsourcefilechanged"
+    url = "Pollen@localdeploy/ref/Pollen.onsourcefilechanged"
+    [[input.files]]
+    title = "Pollen/frontend.jl"
+    contents = "dir FRONTENDDIR npm nodejs_cmd url branch force force rm dir recursive force isdir joinpath dir url readchomp Git git url branch dir println cd dir Git git branch readchomp println force readdir dir run dir FRONTENDDIR isdir dir readdir dir dir FRONTENDDIR verbose npm nodejs_cmd dir dir cd dir p _runsafe verbose p _runsafe cmd verbose p nothing io IOBuffer io_err IOBuffer p run pipeline ignorestatus cmd stderr io_err stdout IOContext io color wait Base process_exited p sleep verbose print String take! io e e InterruptException isnothing p kill p Base SIGINT verbose println String take! io rethrow p \n"
+    url = "Pollen@localdeploy/src/frontend.jl"
+    [[input.files]]
+    title = "SelectAnd"
+    contents = "SelectAnd"
+    url = "Pollen@localdeploy/ref/Pollen.SelectAnd"
+    [[input.files]]
+    title = "FileServer"
+    contents = "FileServer"
+    url = "Pollen@localdeploy/ref/Pollen.FileServer"
+    [[input.files]]
+    title = "Pollen/builders.jl"
+    contents = "project builder project dirtypaths addfiles! project project sources builder project dirtypaths builder project project Path mktempdir project builder paths project builder project paths project builder project builder keys project outputs format dir AbstractPath format p String format Path p builder project dirtydocids collect keys project outputs foreach dirtydocids docid project outputs docid docid builder dir builder format rewriter project rewriters rewriter project builder docid String dir format fullpath Path joinpath dir docid format mkpath parent fullpath fullpath format \n"
+    url = "Pollen@localdeploy/src/builders.jl"
+    [[input.files]]
+    title = "rewriteoutputs!"
+    contents = "rewriteoutputs!"
+    url = "Pollen@localdeploy/ref/Pollen.rewriteoutputs!"
+    [[input.files]]
+    title = "Pollen/Pollen.jl"
+    contents = "Pollen ANSIColoredPrinters AbstractTrees Base Docs Crayons CommonMark CM Base64 Base64EncodePipe JuliaSyntax CSTParser DataFrames FilePathsBase FilePathsBase AbstractPath Path extension absolute filename walkpath DataStructures DefaultDict OrderedDict Gumbo Glob glob InlineTest JuliaFormatter Graphs MetaGraphs Mustache LiveServer LiveServer TOML IOCapture ModuleInfo InlineTest JSON3 ThreadSafeDicts Random Revise Git PkgTemplates PkgTemplates Template Plugin hook getplugin with_project render_file gen_file Pkg Scratch NodeJS include include include include children include include include include include include include include include include include include include include include include include include include include include include include include include include include include include FRONTENDDIR __init__ FRONTENDDIR include include include \n"
+    url = "Pollen@localdeploy/src/Pollen.jl"
+    [[input.files]]
+    title = "applyupdates!"
+    contents = "applyupdates!(project, builder, updates::Updates)\nApply updates to a project by updating sources, rewriting and building documents.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.applyupdates!"
+    [[input.files]]
+    title = "servedocs"
+    contents = "servedocs(m::Module)\nservedocs(pkgdir)\nServe the documentation for a package, assuming it is set up correctly. Will fail if it is not. See PollenPlugin for more information about setup.\nThis starts two servers:\na static file server that serves all rewritten documents with file extensions format, by default on port 8000\n\na locally running frontend that gives a preview, at port 5173, if frontend = true\n\n\nFrontend installation\nIf frontend=true and frontenddir is not changed, the code for the frontend will be cloned and installed the first time you run servedocs.\n\n\nKeyword arguments\nsubdir = docs: The subdirectory of pkgdir in which Pollen.jl documentation files are stored. Corresponds to PollenPlugin's folder argument.\n\nport = 8000: The port on which the static file server runs. Can also be overwritten with the enviroment variable \"POLLEN_PORT\".\n\nlazy = true: Whether to use lazy mode. In lazy mode, documents will only be rewritten once you open them in the frontend. This is useful when working on large projects, when you only want to see the preview of a few pages, without having to wait for all pages to build.\n\ndir = mktempdir(): The directory to which pages for the static file server are built.\n\ntag = \"dev\": The version tag associated with this build. More relevant for deployment.\n\nfrontend = true: Whether to run the frontend server.\n\nfrontenddir = Pollen.FRONTENDDIR: Folder where frontend repository is looked for. If you want to develop on the frontend, overwrite this with your local version.\n\n\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.servedocs"
+    [[input.files]]
+    title = "ServeFilesLazy"
+    contents = "ServeFilesLazy"
+    url = "Pollen@localdeploy/ref/Pollen.ServeFilesLazy"
+    [[input.files]]
+    title = "nodehref"
+    contents = "nodehref"
+    url = "Pollen@localdeploy/ref/Pollen.nodehref"
+    [[input.files]]
+    title = "Pollen/formats/juliasyntax.jl"
+    contents = "Pollen io IO s read io String isempty s julia ast JuliaSyntax parseall JuliaSyntax GreenNode s ignore_trivia ast s julia e s error e julia s ast JuliaSyntax GreenNode source String offset _tokenname ast isempty ast args Pollen source offset ast span offset chs ch ast args push! chs ch source offset offset ch span chs _tokenname ast JuliaSyntax GreenNode T Symbol convert String ast head kind format format julia call Identifier + Integer s i1 i2 i2 i1 i1 _closestindex s i1 i2 _closestindex s i2 s i1 i2 _closestindex s i i min max i ncodeunits s prevind s i \n"
+    url = "Pollen@localdeploy/src/formats/juliasyntax.jl"
+    [[input.files]]
+    title = "rebuild"
+    contents = "rebuild(project, builder)\nBuild previously built documents in projects using builder. Equivalent to build(project, builder, keys(project.outputs)).\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.rebuild"
+    [[input.files]]
+    title = "SelectAttrEq"
+    contents = "SelectAttrEq(name, value)\nSelects nodes with attributes(node)[name] == val.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.SelectAttrEq"
+    [[input.files]]
+    title = "Pollen/formats/markdown.jl"
+    contents = "parser CM Parser concatstrings Bool parser concatstrings concatstrings io IO format ast format parser io ast cm CM parser cm enable! cm Parser cm AdmonitionRule cm AttributeRule cm AutoIdentifierRule cm CitationRule cm DollarMathRule cm FootnoteRule cm FrontMatterRule toml TOML cm MathRule cm RawContentRule cm TableRule parser Val md node CM isdefined node first_child t CM child node first_child childs child child node last_child child child nxt push! childs child childs c c t CM Text cs string getfield cs literal str node CM CM Text node literal str node f v AbstractVector predicate buf res x v predicate x push! buf x isempty buf push! res f buf buf push! res x isempty buf push! res f buf buf res node CM allcs node cs CM attrs Dict Symbol String as Dict Symbol String i c enumerate allcs c t CM Attributes as Dict Symbol Any Symbol k v k v c t dict haskey as class as class join as class i length allcs allcs end t CM AbstractInline attrs end merge attrs end as as Dict Symbol String c t CM AbstractInline push! cs c isempty as attrs end merge attrs end as push! attrs Dict Symbol String push! cs c push! attrs as as Dict Symbol String cs attrs node CM cs attrs node c as c as zip cs attrs node CM attrs Dict Dict Symbol Any node node t attrs Dict CM Item li CM Paragraph p CM Text span CM Emph em CM LineBreak br CM ThematicBreak hr CM BlockQuote blockquote CM Admonition admonition CM Citation citation CM Strong strong CM Table table CM TableRow tr CM TableCell td CM FrontMatter fm CM HtmlInline span CM FootnoteLink footnotelink CM FootnoteDefinition footnotedef CM Backslash backslash node CM c CM AbstractContainer attrs Dict Symbol String typeof c node attrs _maybespan x attrs isempty attrs x span x attrs node CM CM Text attrs _maybespan node literal attrs CM CM SoftBreak attrs _maybespan attrs node CM CM Code attrs code node literal attrs node CM CM Math attrs math node literal attrs node CM CM DisplayMath attrs mathblock node literal attrs node CM CM HtmlBlock attrs node literal attrs node CM CM Paragraph attrs chs s ch node ch String s ch isempty s push! chs s s push! chs ch isempty s push! chs s p chs attrs node CM CM Document attrs attrs node isempty attrs node first_child node first_child nxt md node attrs cmnode CM Dict Symbol Any Symbol k v k v CM cmnode node CM i CM Image attrs img node merge attrs Dict src i destination alt i title node CM c CM CodeBlock attrs codeblock children node literal merge attrs Dict lang c info node CM c CM List attrs c list_data type ordered ol ul node attrs node CM l CM Link attrs a node merge attrs Dict href l destination title l title node CM c CM Heading attrs Symbol c level node attrs node CM c CM Admonition attrs admonition children admonitiontitle c title admonitionbody node merge attrs Dict class c category cmnode CM CM TableHeader attrs node tr cmnode first_child attrs node node th node td cmnode CM c CM Table attrs nodeheader cmnode first_child nodebody nodeheader nxt table nodeheader nodebody merge attrs Dict align c spec node tr cmnode attrs node node th node td f f md p f md p em f md p strong f md p code f md p math f f f md ul li p f md ol li p Pollen f md p hr cb Pollen f cb md codeblock lang Pollen f md blockquote p Pollen f md p x f md html div s Pollen s f md table tr th th tr td td align left right s Pollen s f md admonition admonitiontitle admonitionbody p class Pollen f md mathblock node Pollen f node md p id class attr node Pollen f node md p code attr \n"
+    url = "Pollen@localdeploy/src/formats/markdown.jl"
+    [[input.files]]
+    title = "SourceFileUpdated"
+    contents = "SourceFileUpdated"
+    url = "Pollen@localdeploy/ref/Pollen.SourceFileUpdated"
+    [[input.files]]
+    title = "PreRendered"
+    contents = "PreRendered"
+    url = "Pollen@localdeploy/ref/Pollen.PreRendered"
+    [[input.files]]
+    title = "Project"
+    contents = "Project(rewriters)\nA project manages the loading, parsing and rewriting of a set of documents.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.Project"
+    [[input.files]]
+    title = "Pollen/rewriters/parseansi.jl"
+    contents = "T value T Base show io IO mime ansi print io show io mime ansi value print io Base show io IO mime ansi showable mime ansi value show io mime ansi value buf IOContext IOBuffer color compact short print buf ansi value printer ANSIColoredPrinters HTMLPrinter buf io root_class ANSIColoredPrinters show_body io printer Base print io IO ansi print io ansi value \n"
+    url = "Pollen@localdeploy/src/rewriters/parseansi.jl"
+    [[input.files]]
+    title = "Pollen/formats/format.jl"
+    contents = "path AbstractPath format open path format s String format IOBuffer s format path AbstractPath format Val Symbol extension path path format Val ext file String Val Symbol extension Path file path AbstractPath doc format open path f f doc format doc format io IOBuffer io doc format String take! io TestFormat Pollen io IO TestFormat doc split read io String Pollen io IO node TestFormat write io join getindex children node format TestFormat format TestFormat \n"
+    url = "Pollen@localdeploy/src/formats/format.jl"
+    [[input.files]]
+    title = "XTree"
+    contents = "XTree"
+    url = "Pollen@localdeploy/ref/Pollen.XTree"
+    [[input.files]]
+    title = "setup_docs_files"
+    contents = "setup_docs_files"
+    url = "Pollen@localdeploy/ref/Pollen.setup_docs_files"
+    [[input.files]]
+    title = "rewritesources!"
+    contents = "rewritesources!(project, docids) -> rewritten_docids\nRewrite source documents named by docids as well as new source documents recursively created by rewriters. Return a list of all rewritten document ids.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.rewritesources!"
+    [[input.files]]
+    title = "Node"
+    contents = "Node(tag, children...; attributes...)\nA non-leaf node in an XTree. It has a tag, can hold a number of children nodes and key-value attributes.\nYou can access and modify these using\ntag and withtag\n\nAbstractTrees.children and withchildren\n\nattributes and withattributes\n\n\nExamples\nparagraph class paragraph Dict class \n\n"
+    url = "Pollen@localdeploy/ref/Pollen.Node"
+    [[input.files]]
+    title = "Pollen/rewriters.jl"
+    contents = "docid doc doc project builder Dict String fn Any selector Base show io IO replacer print io replacer selector docid doc fn doc selector \n"
+    url = "Pollen@localdeploy/src/rewriters.jl"
+    [[input.files]]
+    title = "Pollen/pkgtemplate.jl"
+    contents = "Ref String joinpath dirname dirname pathof Pollen Plugin folder String branch_data String branch_page String branch_primary String remote Union String Nothing pollen_spec Pkg PackageSpec Pkg PackageSpec url rev moduleinfo_spec Pkg PackageSpec Pkg PackageSpec url rev dir String plugin Pollen verbose force isdir dir throw SystemError dir projfile joinpath dir isfile projfile throw SystemError dir verbose plugin folder dir plugin verbose force verbose dir plugin verbose force verbose plugin folder dir plugin verbose force verbose TEMPLATES_DOCS TEMPLATES_ACTIONS dir String plugin verbose force isdir dir throw SystemError dir docsdir joinpath dir plugin folder isdir docsdir mkdir docsdir docsfiles joinpath docsdir f f TEMPLATES_DOCS file docsfiles force isfile file throw SystemError file config _docs_config dir plugin template TEMPLATES_DOCS _rendertemplate template docsdir config dir String plugin verbose force isdir dir throw SystemError dir actionsdir joinpath dir isdir actionsdir mkpath docsdir actionfiles joinpath actionsdir f f TEMPLATES_ACTIONS file actionfiles force isfile file throw SystemError file config _docs_config dir plugin template TEMPLATES_ACTIONS _rendertemplate template actionsdir config dir String plugin force _iscleanworkingdir dir throw SystemError dir _hasbranch dir plugin branch_data force _createorphanbranch dir plugin branch_data remote plugin remote _hasbranch dir plugin branch_page force _createorphanbranch dir plugin branch_page remote plugin remote _withbranch dir plugin branch_page touch Git git readchomp println Git git readchomp println dir plugin force verbose isdir dir throw SystemError dir docsdir joinpath dir plugin folder isdir docsdir isfile joinpath docsdir force throw SystemError docsdir isdir docsdir mkdir docsdir cd dir PkgTemplates with_project docsdir Pkg add plugin pollen_spec plugin moduleinfo_spec Pkg develop Pkg PackageSpec path dir _rendertemplate name dst config PkgTemplates gen_file joinpath dst name PkgTemplates render_file joinpath name config _docs_config dir String plugin Dict String Any split dir end plugin folder plugin branch_data plugin branch_page plugin branch_primary PkgTemplates priority PkgTemplates validate t Template PkgTemplates prehook p Template pkg_dir AbstractString pkg_dir p PkgTemplates hook plugin t Template pkg_dir AbstractString PkgTemplates posthook plugin t Template pkg_dir AbstractString pkg_dir plugin pkg_dir plugin pkg_dir plugin _withbranch pkg_dir plugin branch_primary Git git readchomp println Git git readchomp println pkg_dir plugin PkgTemplates view p Template pkg_dir AbstractString Dict String Any split pkg_dir end p folder p branch_primary p branch_data p branch_page _withbranch f dir branch options String verbose _println args verbose println args nothing isdir dir throw ArgumentError dir isdir joinpath dir throw ArgumentError dir cd dir prevbranch readchomp Git git Git git options branch readchomp _println f e rethrow Git git prevbranch readchomp _println _hasbranch dir branch cd pipeline Git git branch readchomp dir _iscleanworkingdir dir cd dir isempty strip readchomp Pollen Git git _createorphanbranch repo String branch String remote nothing _withbranch repo branch options branch readchomp Git git readchomp Git git isnothing remote readchomp Git git remote branch branch \n"
+    url = "Pollen@localdeploy/src/pkgtemplate.jl"
+    [[input.files]]
+    title = "build_stork_index"
+    contents = "build_stork_index"
+    url = "Pollen@localdeploy/ref/Pollen.build_stork_index"
+    [[input.files]]
+    title = "PARSECODE_SELECTOR"
+    contents = "PARSECODE_SELECTOR"
+    url = "Pollen@localdeploy/ref/Pollen.PARSECODE_SELECTOR"
+    [[input.files]]
+    title = "runblockscached"
+    contents = "runblockscached"
+    url = "Pollen@localdeploy/ref/Pollen.runblockscached"
+    [[input.files]]
+    title = "ServerMode"
+    contents = "abstract type ServerMode\nMode that a Server can run in. Controls how events affect the project state.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.ServerMode"
+    [[input.files]]
+    title = "Pollen/serve/filewatching.jl"
+    contents = "path String id String load Any ch Channel loaders Vector dirs Vector String filterfn Returns pathtoloader Dict String loader path loader loader loaders watcher LiveServer SimpleWatcher path path loader pathtoloader path put! ch loader id loader load e loader pathtoloader path path loader id e e loader loaders LiveServer watch_file! watcher loader path watcher \n"
+    url = "Pollen@localdeploy/src/serve/filewatching.jl"
+    [[input.files]]
+    title = "default_md_parser"
+    contents = "default_md_parser"
+    url = "Pollen@localdeploy/ref/Pollen.default_md_parser"
+    [[input.files]]
+    title = "Pollen/xtree/folds.jl"
+    contents = "x sep x s x x x AbstractString s sep x s \n"
+    url = "Pollen@localdeploy/src/xtree/folds.jl"
+    [[input.files]]
+    title = "stop"
+    contents = "stop"
+    url = "Pollen@localdeploy/ref/Pollen.stop"
+    [[input.files]]
+    title = "resolvesymbol"
+    contents = "resolvesymbol"
+    url = "Pollen@localdeploy/ref/Pollen.resolvesymbol"
+    [[input.files]]
+    title = "Updates"
+    contents = "struct Updates\nTracks updates to project state. Used internally by runserver.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.Updates"
+    [[input.files]]
+    title = "Pollen/serve/server.jl"
+    contents = "project Any builder Any updates Any lock Any project builder Path mktempdir project builder ReentrantLock server ch nothing _ server server mode dt eventch Channel eventhandlers server mode eventch mode server event eventch typeof event event event server mode event foreach r r event eventhandlers e event event error e tasks nothing tasks map eventhandlers updates server updates lock server lock server updates _ events server project server builder updates foreach e put! eventch e events all isempty updates sources updates torewrite updates torebuild sleep dt e e InterruptException rethrow e isnothing tasks foreach eventhandlers tasks close eventch sources Any torewrite Any torebuild Any Dict String Set String Set String project builder updates events p doc updates sources project sources p doc dirtypaths isempty updates torewrite project updates torewrite Set dirtypaths union dirtypaths updates torebuild isempty dirtypaths builder project dirtypaths p dirtypaths push! events p project events server server project server builder server updates server docid doc lock server lock server updates sources docid doc server docid lock server lock haskey server project sources docid haskey server updates sources path push! server updates torewrite docid docid error docid server docid lock server lock haskey server project outputs docid docid server updates torewrite push! server updates torebuild docid error docid server mode ch eventhandlers rewriter server project rewriters eventhandler rewriter ch isnothing eventhandler push! eventhandlers eventhandler eventhandler mode server ch isnothing eventhandler push! eventhandlers eventhandler eventhandlers \n"
+    url = "Pollen@localdeploy/src/serve/server.jl"
+    [[input.files]]
+    title = "withchildren"
+    contents = "withchildren(node, children)\nReplace node's children with children.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.withchildren"
+    [[input.files]]
+    title = "render"
+    contents = "render"
+    url = "Pollen@localdeploy/ref/Pollen.render"
+    [[input.files]]
+    title = "SelectTag"
+    contents = "SelectTag"
+    url = "Pollen@localdeploy/ref/Pollen.SelectTag"
+    [[input.files]]
+    title = "makefilewatcher"
+    contents = "makefilewatcher"
+    url = "Pollen@localdeploy/ref/Pollen.makefilewatcher"
+    [[input.files]]
+    title = "Pollen/rewriters/documenttree.jl"
+    contents = "makedoctree d Dict doctree ul makedoctree name val name val d makedoctree name String path link a Dict href path name li link makedoctree name String d Dict li name ul makedoctree n val n val d loaddoctree p AbstractPath xdoctree Pollen p xdoctree xdoctree a href x href x href startswith href href href x href href x doctree xdoctree \n"
+    url = "Pollen@localdeploy/src/rewriters/documenttree.jl"
+    [[input.files]]
+    title = "Pollen/docs.jl"
+    contents = "pkgdir String subdir lazy get ENV port Base Int get ENV dir mktempdir kwargs pkgdir subdir e pkgdir rethrow docdir joinpath pkgdir subdir docdir PkgTemplates with_project docdir m Module Symbol splitpath pkgdir end Base include m joinpath pkgdir subdir project Base invokelatest m createproject Pollen project dir lazy port kwargs pkg Module args kwargs Pkg pkgdir pkg args kwargs pkgdir String subdir isdir pkgdir throw ArgumentError pkgdir docsdir joinpath pkgdir subdir isdir docsdir throw ArgumentError docs_project joinpath docsdir isfile docs_project throw ArgumentError docs_project project_config TOML read docs_project String keys project_config throw docsdir f isfile joinpath docsdir f throw ArgumentError f docsdir m Module kwargs Pkg pkgdir m kwargs mktempdir dir ArgumentError dir \n"
+    url = "Pollen@localdeploy/src/docs.jl"
+    [[input.files]]
+    title = "Pollen"
+    contents = "Pollen"
+    url = "Pollen@localdeploy/ref/Pollen"
+    [[input.files]]
+    title = "Pollen/serve/events.jl"
+    contents = "name String doc name String name String rewriter ch rewriter _ _ _ event nothing _ _ eventhandler task eventhandler e error e handler eventhandler task eventhandler task eventhandler istaskdone task istaskfailed task schedule task InterruptException error e error e handler eventhandler watcher LiveServer SimpleWatcher LiveServer watcher watcher LiveServer SimpleWatcher LiveServer watcher dir Any kwargs Any dir kwargs new dir kwargs fs LiveServer dir string fs dir fs kwargs project path mktempdir lazy format port frontend frontenddir FRONTENDDIR builder format Path path server project builder mode lazy port port frontend task frontenddir server mode istaskdone task istaskfailed task schedule task InterruptException error server mode \n"
+    url = "Pollen@localdeploy/src/serve/events.jl"
+    [[input.files]]
+    title = "root"
+    contents = "root"
+    url = "Pollen@localdeploy/ref/Pollen.root"
+    [[input.files]]
+    title = "NthChild"
+    contents = "NthChild"
+    url = "Pollen@localdeploy/ref/Pollen.NthChild"
+    [[input.files]]
+    title = "frontend_serve"
+    contents = "frontend_serve"
+    url = "Pollen@localdeploy/ref/Pollen.frontend_serve"
+    [[input.files]]
+    title = "startasync"
+    contents = "startasync"
+    url = "Pollen@localdeploy/ref/Pollen.startasync"
+    [[input.files]]
+    title = "reset!"
+    contents = "reset!(rewriter)\nClears internal state of rewriter. Does nothing if not overwritten.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.reset!"
+    [[input.files]]
+    title = "CheckLinks"
+    contents = "CheckLinks() <: Rewriter\nA Rewriter that warns when it finds a :reference tag that does not point to a valid document. See ResolveReferences and ResolveSymbols for rewriters that create nodes with :reference tags.\nIt does not make any changes to a project.\nExample\n\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.CheckLinks"
+    [[input.files]]
+    title = "asmimestrings"
+    contents = "asmimestrings"
+    url = "Pollen@localdeploy/ref/Pollen.asmimestrings"
+    [[input.files]]
+    title = "cata"
+    contents = "cata(f, tree)\nTransform every node in tree with function f.\n\ncata(f, tree, selector)\nTransform nodes matching selector with function f.\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.cata"
+    [[input.files]]
+    title = "Pollen/rewriters/backlinks.jl"
+    contents = "graph Any g MetaDiGraph SimpleDiGraph set_prop! g idxs Dict String Int g docdict docgraph g docgraph graph idxs get_prop g idxs p doc docdict name string p haskey idxs name add_vertex! g v nv g idxs name v set_prop! g v docid string p set_prop! g v title get doc title string v set_prop! g v doc p doc docdict _addrefedges! g doc p docid doc docdict v get_prop g idxs docid docdict docid doc merge doc Dict backlinks g v_ v_ inneighbors g v v_ v docdict g v_ d props g v_ d _addrefedges! g doc path idxs get_prop g idxs v idxs string path ref doc target ref document_id v_ get idxs string target nothing isnothing v_ add_edge! g v v_ reference document_id reftype reftype \n"
+    url = "Pollen@localdeploy/src/rewriters/backlinks.jl"
+    [[input.files]]
+    title = "DocRebuilt"
+    contents = "DocRebuilt"
+    url = "Pollen@localdeploy/ref/Pollen.DocRebuilt"
+    [[input.files]]
+    title = "How to set up package documentation"
+    contents = "How to set up package documentation\nHow-to for setting up Pollen.jl documentation for packages. See the tutorial for a more in-depth look.\nSetting up Pollen.jl documentation consists of the following steps:\nCreate boilerplate files\n\nCreate a Julia project with documentation dependencies\n\n(Optional) Set up GitHub Actions and helper branches on the repository for automatic publishing\n\n\nThe steps apply to both existing and newly created packages.\nThe tl;dr\nTo set up documentation for a package MyPackage, run:\nPollen MyPackage dir pkgdir MyPackage config Pollen Pollen dir config Pollen dir config Pollen dir config \nThen, commit all generated files to make sure you have a clean Git working directory, and run:\nPollen dir config \nYou can then preview the documentation locally.\nLonger version\nStep 1: Configuration\nAll setup steps use a configuration object:\nPollen config Pollen \nNext, we need to set the folder where the package is stored:\ndir MyPackage dir pkgdir MyPackage \nFor older repositories\nWhen adding documentation to an existing package, there is one option you may need to change: the name of the primary branch. If your repository's primary branch is master and not main, pass it in when creating the configuration:\nconfig Pollen branch_primary \n\n\nStep 2: Set up files\nTo handle documentation-specific package dependencies, we set up a Julia project in the \"$dir/docs\" folder:\nPollen dir config \nThen, we set up file that configure how the documentation behaves:\nPollen dir config \nWe also add Github Actions workflows so that the documentation can be built and deployed automatically:\nPollen dir config \nStep 3: Create helper branches for deployment\nSo that the documentation can be built and deployed on GitHub Pages, we need to set up two branches.\nBefore we do this, you must clean your git working directory, for example by committing the files generated above in the terminal:\n$ git add .\n$ git commit -m \"Setup Pollen.jl files\" \nAfter that, run:\nPollen dir config \n\nThat's it! Next, preview the docs locally to make sure everything works.\n\n"
+    url = "Pollen@localdeploy/doc/docs/howto/setup.md"
+    [[input.files]]
+    title = "extract_text!"
+    contents = "extract_text!"
+    url = "Pollen@localdeploy/ref/Pollen.extract_text!"
+    [[input.files]]
+    title = "frontmatter"
+    contents = "frontmatter"
+    url = "Pollen@localdeploy/ref/Pollen.frontmatter"
+    [[input.files]]
+    title = "Rewriter"
+    contents = "abstract type Rewriter\nPluggable extension to a [Project] with hooks to transform individual documents, create new documents, register file update handlers and perform additional build steps.\nSee the following methods:\nrewritedoc is applied to every source document and returns a modified document that is passed to the next rewriter.\n\ncreatesources! allow rewriters to create new source documents\n\nreset!\n\npostbuild\n\n\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.Rewriter"
+    [[input.files]]
+    title = "extract_text"
+    contents = "extract_text"
+    url = "Pollen@localdeploy/ref/Pollen.extract_text"
+    [[input.files]]
+    title = "parsejupytercell"
+    contents = "parsejupytercell"
+    url = "Pollen@localdeploy/ref/Pollen.parsejupytercell"
+    [[input.files]]
+    title = "servereventhandlers"
+    contents = "servereventhandlers"
+    url = "Pollen@localdeploy/ref/Pollen.servereventhandlers"
+    [[input.files]]
+    title = "Pollen/rewriters/checklinks.jl"
+    contents = "ids Set String sel Set String outputs check foreach keys outputs id push! check ids id id doc outputs node doc check sel target get node document_id nothing target check ids target startswith splitpath target end source_document_id id broken_link_node node outputs \n"
+    url = "Pollen@localdeploy/src/rewriters/checklinks.jl"
+    [[input.files]]
+    title = "preparesourcefile"
+    contents = "preparesourcefile"
+    url = "Pollen@localdeploy/ref/Pollen.preparesourcefile"
+    [[input.files]]
+    title = "textnode"
+    contents = "textnode"
+    url = "Pollen@localdeploy/ref/Pollen.textnode"
+    [[input.files]]
+    title = "changehrefextension"
+    contents = "changehrefextension"
+    url = "Pollen@localdeploy/ref/Pollen.changehrefextension"
+    [[input.files]]
+    title = "Builder"
+    contents = "Builder"
+    url = "Pollen@localdeploy/ref/Pollen.Builder"
+    [[input.files]]
+    title = "creategroupid"
+    contents = "creategroupid"
+    url = "Pollen@localdeploy/ref/Pollen.creategroupid"
+    [[input.files]]
+    title = "adapthtmlstr"
+    contents = "adapthtmlstr"
+    url = "Pollen@localdeploy/ref/Pollen.adapthtmlstr"
+    [[input.files]]
+    title = "Format"
+    contents = "abstract type Format\nA Format describes a content format that trees can be read from and/or trees can be converted to.\nExtending\nA Format F can implement the following methods:\nparse(::IO, ::F)::XTree` reads a tree\n\nrender!(::IO, ::XTree, ::F writes a tree\n\n\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.Format"
+    [[input.files]]
+    title = "MIMES"
+    contents = "MIMES"
+    url = "Pollen@localdeploy/ref/Pollen.MIMES"
+    [[input.files]]
+    title = "childrenxtrees"
+    contents = "childrenxtrees"
+    url = "Pollen@localdeploy/ref/Pollen.childrenxtrees"
+    [[input.files]]
+    title = "tojson"
+    contents = "tojson(::JSONFormat, tree)\nConvert a tree into a JSON-compatible representation, i.e. one that only uses JSON datatypes (Dict, String, Number, Nothing).\n\n"
+    url = "Pollen@localdeploy/ref/Pollen.tojson"
+    [[input.files]]
+    title = "SelectLeaf"
+    contents = "SelectLeaf"
+    url = "Pollen@localdeploy/ref/Pollen.SelectLeaf"
+    [[input.files]]
+    title = "build_corpus"
+    contents = "build_corpus"
+    url = "Pollen@localdeploy/ref/Pollen.build_corpus"
+    [[input.files]]
+    title = "setup_docs_branches"
+    contents = "setup_docs_branches"
+    url = "Pollen@localdeploy/ref/Pollen.setup_docs_branches"
+    [[input.files]]
+    title = "SaveAttributes"
+    contents = "SaveAttributes"
+    url = "Pollen@localdeploy/ref/Pollen.SaveAttributes"
