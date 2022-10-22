@@ -32,7 +32,7 @@ url_prefix = ""
     url = "Pollen@dev/doc/docs/howto/setup.md"
     [[input.files]]
     title = "Pollen/frontend.jl"
-    contents = "dir FRONTENDDIR url branch force force rm dir recursive force isdir joinpath dir url readchomp Git git url branch dir println cd dir Git git branch readchomp println force readdir dir run dir FRONTENDDIR isdir dir readdir dir dir FRONTENDDIR verbose dir dir cd dir p _runsafe verbose p _runsafe cmd verbose p nothing io IOBuffer io_err IOBuffer p run pipeline ignorestatus cmd stderr io_err stdout IOContext io color wait Base process_exited p sleep verbose print String take! io e e InterruptException isnothing p kill p Base SIGINT verbose println String take! io rethrow p \n"
+    contents = "dir FRONTENDDIR npm nodejs_cmd url branch force force rm dir recursive force isdir joinpath dir url readchomp Git git url branch dir println cd dir Git git branch readchomp println force readdir dir run dir FRONTENDDIR isdir dir readdir dir dir FRONTENDDIR verbose npm nodejs_cmd dir dir cd dir p _runsafe verbose p _runsafe cmd verbose p nothing io IOBuffer io_err IOBuffer p run pipeline ignorestatus cmd stderr io_err stdout IOContext io color wait Base process_exited p sleep verbose print String take! io e e InterruptException isnothing p kill p Base SIGINT verbose println String take! io rethrow p \n"
     url = "Pollen@dev/src/frontend.jl"
     [[input.files]]
     title = "setup_docs_files"
@@ -104,7 +104,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.attributes"
     [[input.files]]
     title = "Pollen/Pollen.jl"
-    contents = "Pollen ANSIColoredPrinters AbstractTrees Base Docs Crayons CommonMark CM Base64 Base64EncodePipe JuliaSyntax CSTParser DataFrames FilePathsBase AbstractPath Path extension absolute filename DataStructures DefaultDict OrderedDict Gumbo Glob glob InlineTest JuliaFormatter Graphs MetaGraphs Mustache LiveServer LiveServer TOML IOCapture ModuleInfo InlineTest JSON3 ThreadSafeDicts Random Revise Git PkgTemplates PkgTemplates Template Plugin hook getplugin with_project render_file gen_file Pkg Scratch NodeJS include include include include children include include include include include include include include include include include include include include include include include include include include include include include include include include include include include FRONTENDDIR __init__ FRONTENDDIR include include include \n"
+    contents = "Pollen ANSIColoredPrinters AbstractTrees Base Docs Crayons CommonMark CM Base64 Base64EncodePipe JuliaSyntax CSTParser DataFrames FilePathsBase FilePathsBase AbstractPath Path extension absolute filename walkpath DataStructures DefaultDict OrderedDict Gumbo Glob glob InlineTest JuliaFormatter Graphs MetaGraphs Mustache LiveServer LiveServer TOML IOCapture ModuleInfo InlineTest JSON3 ThreadSafeDicts Random Revise Git PkgTemplates PkgTemplates Template Plugin hook getplugin with_project render_file gen_file Pkg Scratch NodeJS include include include include children include include include include include include include include include include include include include include include include include include include include include include include include include include include include include FRONTENDDIR __init__ FRONTENDDIR include include include \n"
     url = "Pollen@dev/src/Pollen.jl"
     [[input.files]]
     title = "ServeFiles"
