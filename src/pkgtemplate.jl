@@ -92,7 +92,7 @@ function setup_docs(dir::String,
     end
 end
 
-TEMPLATES_DOCS = ["project.jl", "make.jl", "serve.jl", "toc.json"]
+TEMPLATES_DOCS = ["project.jl", "make.jl", "toc.json"]
 TEMPLATES_ACTIONS = [
     "pollen.build.yml",
     "pollen.trigger.dev.yml",
