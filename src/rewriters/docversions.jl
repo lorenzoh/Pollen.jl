@@ -1,4 +1,27 @@
 
+"""
+    DocVersions(pkgdir; tag, dependencies) <: Rewriter
+
+A [`Rewriter`](#) that writes version information including Pollen configuration
+to a `versions.json` file when a [`Project`](#) is built.
+
+The `versions.json` file is a dictionary of `versiontag => config` and is updated
+whenever a new version (specified by `tag`) is built.
+
+For every version, the following configuration is written:
+
+- `linktree`: The parsed `toc.json` with resolved references
+- `title`: The project title
+
+## Keyword arguments
+
+- `tag = nothing`: Version tag to associate with the package that `pkgdir` defines. If
+    `nothing` (the default), read the version from the package's `Project.toml` file.
+- `dependencies = []`: A list of (versioned) package IDs.
+
+
+
+"""
 struct DocVersions <: Rewriter
     pkgdir::String
     version::String

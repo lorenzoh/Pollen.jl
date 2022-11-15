@@ -85,6 +85,28 @@ end
 const PUBLISH_CODEBLOCK_SELECTOR = SelectTag(:codeblock) & SelectAttrEq(:lang, "julia") &
                                    SelectHasAttr(:cell)
 
+"""
+    ExecuteCode(; kwargs...) <: Rewriter
+
+A [`Rewriter`](#) that runs all Julia code blocks annotated with a `:cell` attribute.
+
+## Examples
+
+{cell}
+```julia
+using Pollen
+node = Node(:codeblock, \"\"\"
+print("Hi")
+1 + 1
+\"\"\", cell = "main")
+```
+
+{cell}
+```julia
+Pollen.rewritedoc(ExecuteCode(), "", node)
+```
+
+"""
 Base.@kwdef struct ExecuteCode <: Rewriter
     # Execution caches for each group of code blocks
     caches::Dict{Symbol, RunCache} = Dict{Symbol, RunCache}()

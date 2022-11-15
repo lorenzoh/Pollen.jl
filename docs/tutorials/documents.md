@@ -1,7 +1,7 @@
 # Working with documents
 
 {.subtitle}
-In this tutorial, you will learn how Pollen represents documents and how to load them from different file formats as wells as transform them. 
+Learn how Pollen represents documents and how to load them from different file formats as well as transform them. 
 
 At its core, Pollen is a package for creating and transforming documents. For example, this documentation is comprised of many different documents. This page, for example, is created from a Markdown file which you can find here: [`Pollen.jl/docs/tutorials/documents.md`](https://github.com/lorenzoh/Pollen.jl/blob/main/docs/tutorials/documents.md).
 

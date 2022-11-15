@@ -40,7 +40,7 @@ Build previously built documents in projects using `builder`. Equivalent to
 rebuild(project, builder) = build(project, builder, keys(project.outputs))
 
 """
-    struct FileBuilder <: Builder
+    FileBuilder(format, dir) <: Builder
 
 Build every document to a file in `dir` using output `format`.
 """

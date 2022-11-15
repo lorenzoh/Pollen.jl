@@ -11,6 +11,12 @@ function cata(f, tree, selector::Selector)
     end
 end
 
+"""
+    catafirst(f, tree, selector)
+
+Like [`cate`](#), but apply `f` only to the first node that matches
+`selector`.
+"""
 function catafirst(f, tree, selector::Selector)
     xtree_, _ = catafold(tree, false) do x, done
         (!done && matches(selector, x)) ? (f(x), true) : (x, done)
@@ -20,6 +26,11 @@ end
 
 # Replace
 
+"""
+    replace(tree, xnode, selector)
+
+Replace every node in `tree` that matches `selector` with `xnode`.
+"""
 function replace(tree, xnode, selector::Selector)
     cata(x -> xnode, tree, selector)
 end

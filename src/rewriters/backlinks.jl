@@ -2,6 +2,16 @@ struct Backlinks <: Rewriter
     graph::Any
 end
 
+"""
+    Backlinks() <: Rewriter
+
+[`Rewriter`](#) that sets the `:backlinks` attribute of every page in a project
+with a list of page IDs that link to it.
+
+A page links to another page with id `id` if it has a `Node(:reference, ...)`
+with attribute `:document_id = id`. See [`ResolveReferences`](#) and [`ResolveSymbols`](#)
+for rewriters that create nodes with `:reference` tags.
+"""
 function Backlinks()
     g = MetaDiGraph(SimpleDiGraph(0))
     set_prop!(g, :idxs, Dict{String, Int}())

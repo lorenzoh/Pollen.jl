@@ -6,6 +6,8 @@ Pluggable extension to a [`Project`] with hooks to transform
 individual documents, create new documents, register file update
 handlers and perform additional build steps.
 
+
+
 See the following methods:
 - [`rewritedoc`](#) is applied to every source document and returns a
     modified document that is passed to the next rewriter.

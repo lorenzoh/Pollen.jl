@@ -71,6 +71,19 @@ _xtree(leaf::Leaf) = leaf
 _xtree(x) = Leaf(x)
 
 AbstractTrees.children(xnode::Node) = xnode.children
+"""
+    tag(node)
+
+Get the symbol tag of a [`Node`](#).
+
+## Examples
+
+{cell}
+```julia
+using Pollen
+tag(Node(:md, "hi"))
+```
+"""
 tag(xnode::Node) = xnode.tag
 attributes(xnode::Node) = xnode.attributes
 
@@ -87,8 +100,23 @@ if isdefined(AbstractTrees, :ChildIndexing)
     AbstractTrees.ChildIndexing(::Type{<:XTree}) = AbstractTrees.IndexedChildren()
 end
 
+"""
+    withchildren(node, children)
+
+Replace `node`'s children with `children`.
+"""
 withchildren(xnode::Node, children) = Node(tag(xnode), children, attributes(xnode))
-withtag(xnode::Node, tag) = Node(tag, children(xnode), attributes(xnode))
+"""
+    withtag(node, tag)
+
+Replace the tag of `node` with `tag`.
+"""
+withtag(node::Node, tag) = Node(tag, children(node), attributes(node))
+"""
+    withattributes(node, attributes)
+
+Replace `node`'s attributes with `attributes`.
+"""
 withattributes(xnode::Node, attributes) = Node(tag(xnode), children(xnode), attributes)
 
 # Catamorphism
@@ -128,7 +156,9 @@ Fold over tree in post-order iteration.
 
 ## Examples
 
+{cell}
 ```julia
+using Pollen
 node = Node(:table, Node(:row, 10, 10), Node(:row, 10, 10))
 Pollen.fold(node, 0) do x, subtree
     subtree isa Leaf{Int} ? x + subtree[] : x

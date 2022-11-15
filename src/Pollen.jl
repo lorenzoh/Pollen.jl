@@ -9,7 +9,7 @@ import Base64: Base64EncodePipe
 import JuliaSyntax
 using CSTParser
 using DataFrames
-import FilePathsBase: AbstractPath, Path, @p_str, extension, absolute
+import FilePathsBase: AbstractPath, Path, @p_str, extension, absolute, filename
 using DataStructures: DefaultDict, OrderedDict
 import Gumbo
 import Glob: glob
@@ -44,7 +44,7 @@ include("xtree/selectors.jl")
 include("xtree/catamorphisms.jl")
 include("xtree/folds.jl")
 
-export Node, Leaf, children, tag, withtag, cata, catafirst, replace, replacefirst, fold, catafold,
+export Node, Leaf, children, tag, withtag, cata, catafirst, catafold,
        select, selectfirst, SelectTag, SelectOr, SelectNode, SelectLeaf, SelectAttrEq,
        SelectHasAttr
 
@@ -112,5 +112,7 @@ end
 include("frontend.jl")
 include("docs.jl")
 include("pkgtemplate.jl")
+
+export servedocs
 
 end
