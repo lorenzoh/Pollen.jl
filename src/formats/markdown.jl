@@ -33,7 +33,7 @@ function default_md_parser()
                             cm.CitationRule(),
                             cm.DollarMathRule(),
                             cm.FootnoteRule(),
-                            cm.FrontMatterRule(toml = TOML.parse),
+                            cm.FrontMatterRule(toml = TOML.parse, json = Dict ∘ JSON3.read, yaml=YAML.load),
                             cm.MathRule(),
                             cm.RawContentRule(),
                             cm.TableRule(),
@@ -363,20 +363,24 @@ end
                                  " world"))
         end
     end
+
+    @testset "FrontMatter" begin
+        s = """---\nx: y\n---\nhi\n"""
+        @test attributes(parse(s, f)) == Dict(:x => "y")
+        s = """+++\nx = "y"\n+++\nhi\n"""
+        @test attributes(parse(s, f)) == Dict(:x => "y")
+        s = """;;;\n{"x":"y"}\n;;;\nhi\n"""
+        @test_broken attributes(parse(s, f)) == Dict(:x => "y")
+    end
 end
 
 
-function render!(io::IO, doc::Node, format::MarkdownFormat)
-    ast = to_commonmark_ast(doc, Val(doc.tag))
-    # CM.ast_dump(ast)
+function render!(io::IO, doc::Node, ::MarkdownFormat)
+    ast = to_commonmark_ast(doc)
     CM.markdown(io, ast)
-    # render!(io, doc, format, Val(doc.tag))
 end
 
 function to_commonmark_ast(node::Node)
-    # if !isempty(node.attributes)
-    #     @show node.attributes
-    # end
     to_commonmark_ast(node, Val(node.tag))
 end
 
@@ -393,11 +397,19 @@ function to_commonmark_ast(str::Leaf{<:AbstractString})
     return n
 end
 
-function to_commonmark_ast(node, ::Val{:document})
-    n = CM.Node(CM.Document())
-    md = only(children(node))
-    append_ast_children!(n, md)
-    n
+function to_commonmark_ast(node, ::Union{Val{:document}, Val{:md}})
+    ast = CM.Node(CM.Document())
+    if !isempty(attributes(node))
+        fm = CM.FrontMatter("---")
+        for k in keys(attributes(node))
+            fm.data[string(k)] = attributes(node)[k]
+        end
+        fmnode = CM.Node(fm)
+        fmnode.literal = YAML.write(attributes(node))
+        CM.append_child(ast, fmnode)
+    end
+    append_ast_children!(ast, only(children(node)))
+    ast
 end
 
 function to_commonmark_ast(node, ::Val{:p})

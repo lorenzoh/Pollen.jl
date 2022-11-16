@@ -36,6 +36,7 @@ Scratch = "6c6a2e73-6563-6170-7368-637461726353"
 TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
 ThreadSafeDicts = "4239201d-c60e-5e0a-9702-85d713665ba7"
 Tokenize = "0796e94c-ce3b-5d07-9a54-7f471281c624"
+YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [compat]
 ANSIColoredPrinters = "0.0"
