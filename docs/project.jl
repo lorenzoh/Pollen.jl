@@ -11,7 +11,7 @@ ms = [m]
 
 function createpackageindex(; package = m, modules = ms, tag = "dev")
     pkgtags = Dict(string(package) => tag)
-    return PackageIndex(ms; recurse = 0, pkgtags, cache = true, verbose = true)
+    return PackageIndex(modules; recurse = 0, pkgtags, cache = true, verbose = true)
 end
 
 
