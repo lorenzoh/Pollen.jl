@@ -336,7 +336,7 @@ url_prefix = ""
     url = "Pollen@dev/ref/Pollen.runblock"
     [[input.files]]
     title = "How to preview documentation locally"
-    contents = "How to preview documentation locally\nTo preview docs of a package that uses Pollen.jl for documentation, use servedocs:\nPollen MyPackage MyPackage \nOnce the pages are built, navigate to localhost:5173 to preview the documentation.\nLive reload\nYou can make changes to a file that is part of the documentation while the preview is running. For example, modify a Markdown file and Pollen.jl will reload it and rebuild just that page.\nTo update open pages in the preview, press Shift+R.\n\n"
+    contents = "How to preview documentation locally\nTo preview docs of a package that uses Pollen.jl for documentation, use servedocs:\nPollen MyPackage MyPackage \nOnce the pages are built, navigate to localhost:5173 to preview the documentation.\nLive reload\nYou can make changes to a file that is part of the documentation while the preview is running. For example, modify a Markdown file and Pollen.jl will reload it and rebuild just that page.\nTo update open pages in the preview, press Shift+R.\nSolving frontend issues\nWhen running [servedocs], you might face the following issue:\n\nThis is likely due to some issues on the frontend side, especially of the installation.\nTo verify do the following:\ndir Pollen FRONTENDDIR cd dir run \nLook if any error appears. If so, you probably need to upgrade your npm and node version. Once the installation does not throw errors, try running\nrun MyPackage frontend \nand eventually report any errors appearing.\n\n"
     url = "Pollen@dev/doc/docs/howto/preview.md"
     [[input.files]]
     title = "ParseCode"
