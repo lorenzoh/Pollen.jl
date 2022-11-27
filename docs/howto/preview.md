@@ -15,3 +15,32 @@ You can make changes to a file that is part of the documentation while the previ
 
 To update open pages in the preview, press **`Shift+R`**.
 
+## Solving frontend issues
+
+When running [`servedocs`], you might face the following issue:
+
+```julia
+[ Info: Starting server...
+[ Info: Stopped frontend dev server
+```
+
+This is likely due to some issues on the frontend side, especially of the installation.
+
+To verify do the following:
+
+```julia
+dir = Pollen.FRONTENDDIR
+cd(dir)
+run(`npm run install`)
+```
+
+Look if any error appears. If so, you probably need
+[to upgrade your `npm` and `node` version](https://nodejs.org/en/).
+Once the installation does not throw errors, try running
+
+```julia
+run(`npm run dev`)
+servedocs(MyPackage; frontend=false)
+```
+
+and eventually report any errors appearing.
