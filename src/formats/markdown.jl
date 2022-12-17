@@ -242,6 +242,7 @@ function xtree(node::CM.Node, c::CM.Admonition, attrs)
                     Node(:admonitiontitle, [Leaf(c.title)]),
                     Node(:admonitionbody, childrenxtrees(node)),
                 ], attributes = merge(attrs, Dict(:class => c.category)))
+
 end
 
 # tables
