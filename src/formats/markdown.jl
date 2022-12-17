@@ -173,7 +173,7 @@ xtree(::CM.Node, ::CM.SoftBreak, attrs) = _maybespan(Leaf(" "), attrs)
 xtree(node::CM.Node, ::CM.Code, attrs) = Node(:code, [Leaf(node.literal)], attrs)
 xtree(node::CM.Node, ::CM.Math, attrs) = Node(:math, [Leaf(node.literal)], attrs)
 function xtree(node::CM.Node, t::CM.Citation, attrs)
-    Node(:citation, Leaf[], merge(attrs, Dict(:id => t.id))
+    Node(:citation, Leaf[], merge(attrs, Dict(:id => t.id)))
 end
 function xtree(node::CM.Node, ::CM.DisplayMath, attrs)
     Node(:mathblock, [Leaf(node.literal)], attrs)
