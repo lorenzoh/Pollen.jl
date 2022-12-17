@@ -149,7 +149,6 @@ const BLOCK_TO_TAG = Dict(
     CM.ThematicBreak => :hr,
     CM.BlockQuote => :blockquote,
     CM.Admonition => :admonition,
-    CM.Citation => :citation,
     CM.Strong => :strong,
     CM.Table => :table,
     CM.TableRow => :tr,
@@ -173,6 +172,9 @@ xtree(node::CM.Node, ::CM.Text, attrs) = _maybespan(Leaf(node.literal), attrs)
 xtree(::CM.Node, ::CM.SoftBreak, attrs) = _maybespan(Leaf(" "), attrs)
 xtree(node::CM.Node, ::CM.Code, attrs) = Node(:code, [Leaf(node.literal)], attrs)
 xtree(node::CM.Node, ::CM.Math, attrs) = Node(:math, [Leaf(node.literal)], attrs)
+function xtree(node::CM.Node, t::CM.Citation, attrs)
+    Node(:citation, Leaf[], merge(attrs, Dict(:id => t.id))
+end
 function xtree(node::CM.Node, ::CM.DisplayMath, attrs)
     Node(:mathblock, [Leaf(node.literal)], attrs)
 end
@@ -363,6 +365,10 @@ f(x) = 1
             )
         end
 
+        @testset "Citation" begin
+            @test Pollen.parse("@cit", f) == Node(:md, Node(:p, Node(:citation, id = "cit")))
+        end
+
         @testset "Math (block)" begin
             @test Pollen.parse(
                 """
@@ -480,6 +486,10 @@ function to_commonmark_ast(node, ::Val{:html})
 end
 
 
+function to_commonmark_ast(node, ::Val{:citation})
+    return CM.Node(CM.Citation(attributes(node)[:id], false))
+end
+
 function to_commonmark_ast(
     node,
     V::Union{
@@ -520,9 +530,9 @@ function to_commonmark_ast(node, ::Val{:codeinput})
     cb.is_fenced = true
     cb.fence_char = '`'
     cb.fence_length = 3
+    cb.info = attributes(node)[:lang]
     n = CM.Node(cb)
-    n.literal = gettext(node) * '\n'
-    # display(node)
+    n.literal = gettext(node)
     append_ast_children!(n, node)
 end
 
@@ -531,8 +541,9 @@ function to_commonmark_ast(node, ::Val{:codeblock})
     cb.is_fenced = true
     cb.fence_char = '`'
     cb.fence_length = 3
+    cb.info = attributes(node)[:lang]
     n = CM.Node(cb)
-    n.literal = gettext(node) * '\n'
+    n.literal = gettext(node)
     append_ast_children!(n, node)
 end
 
