@@ -6,6 +6,8 @@ Base.@kwdef struct ParseCode <: Rewriter
     format::Format = JuliaSyntaxFormat()
 end
 
+Base.show(io::IO, ::ParseCode) = print(io, "ParseCode()")
+
 function rewritedoc(rewriter::ParseCode, _, doc)
     return cata(doc, rewriter.selector) do x
         code = string(strip(Pollen.gettext(x)))

@@ -87,13 +87,27 @@ function DocumentationFiles(ms::Vector{Module}; extensions = ["md", "ipynb"],
 end
 DocumentationFiles(m::Module; kwargs...) = DocumentationFiles([m]; kwargs...)
 
+
+default_config(::typeof(DocumentationFiles)) = Dict(
+    "packages" => String[],
+    "extensions" => String["md", "ipynb"],
+    "tags" => Dict(),
+)
+
+function from_config(::typeof(DocumentationFiles), config)
+    merge_configs(default_config(DocumentationFiles), config)
+    modules = map(load_package, config["packages"])
+    DocumentationFiles(modules, extensions=config["extensions"], pkgtags=tags)
+end
+
+
 function __load_documentation_file(file, id)
     pfile = Path(file)
     doc = Pollen.parse(pfile)
     node_title = selectfirst(doc, SelectTag(:h1))
     title = isnothing(node_title) ? filename(pfile) : gettext(node_title)
     attrs = Dict(:path => string(file), :title => title)
-    return Node(:document, [doc], attrs)
+    return Node(:document, children(doc), merge(attrs, attributes(doc)))
 end
 
 # Utilities

@@ -17,7 +17,7 @@ To update open pages in the preview, press **`Shift+R`**.
 
 ## Solving frontend issues
 
-When running [`servedocs`], you might face the following issue:
+When running [`servedocs`](#), you might face the following issue:
 
 ```julia
 [ Info: Starting server...

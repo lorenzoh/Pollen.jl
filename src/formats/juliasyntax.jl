@@ -31,7 +31,7 @@ function xtree(ast::JuliaSyntax.GreenNode, source::String, offset = 1)
     end
 end
 
-function _tokenname(ast::JuliaSyntax.GreenNode) where {T}
+function _tokenname(ast::JuliaSyntax.GreenNode)
     Symbol(convert(String, ast.head.kind))
 end
 

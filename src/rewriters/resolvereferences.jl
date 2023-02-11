@@ -416,6 +416,8 @@ struct ResolveReferences <: Rewriter
     selector::Selector
 end
 
+Base.show(io::IO, ::ResolveReferences) = print(io, "ResolveReferences()")
+
 function ResolveReferences(pkgindex = nothing; selector = DEFAULT_LINK_SELECTOR,
                            prefixes = ("@ref", "#"))
     rules = if isnothing(pkgindex)

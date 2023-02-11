@@ -36,12 +36,18 @@ function rewritesources!(project::Project, docids = Set(keys(project.sources)))
     rewritesources!(project.sources, project.outputs, project.rewriters, docids)
 end
 
-function rewritesources!(sourcedocs, outputdocs, rewriters::Vector{<:Rewriter}, docids)
+function rewritesources!(sourcedocs, outputdocs, rewriters::Vector{<:Rewriter}, docids; progress = nothing)
+    # Only rewrite documents given in `docids`
     docs = filter(((k, v),) -> k in docids, sourcedocs)
 
+    if isnothing(progress)
+        progress = _default_progress(length(docs), desc = "Rewriting...")
+    end
+
     while !isempty(docs)
-        merge!(outputdocs, rewritedocs(docs, rewriters))
+        merge!(outputdocs, rewritedocs(docs, rewriters; progress))
         docs = createsources!(rewriters)
+        progress.n += length(docs)
         docids = union(docids, keys(docs))
     end
 
@@ -52,19 +58,33 @@ function rewritesources!(sourcedocs, outputdocs, rewriters::Vector{<:Rewriter}, 
     return docids
 end
 
+_default_progress(n; kwargs...) = Progress(
+    n; dt = 0.1,
+    barglyphs=BarGlyphs('|','█', ['▁' ,'▂' ,'▃' ,'▄' ,'▅' ,'▆', '▇'],' ','|',),
+    enabled=get(ENV, "CI", nothing) != "true",
+    color=:blue,
+    showspeed=true,
+    kwargs...)
+
+
 """
     rewritedocs(sources, rewriters) -> outputs
 
 Applies `rewriters` to a collection of `sources`.
 """
-function rewritedocs(sources, rewriters)
+function rewritedocs(sources, rewriters; progress = nothing)
     outputs = ThreadSafeDict{String, XTree}()
     docids = collect(keys(sources))
-    Threads.@threads for i in eachindex(docids)
+   #FIXME TODO Threads.@threads hangs
+    for i in eachindex(docids)
         docid = docids[i]
         doc = sources[docid]
         foreach(rewriters) do rewriter
             doc = rewritedoc(rewriter, docid, doc)
+        end
+        if progress !== nothing
+            showvalues = i == length(docids) ? [] : [(Symbol("Document"), docids[i+1])]
+            ProgressMeter.next!(progress; showvalues)
         end
         outputs[docid] = doc
     end

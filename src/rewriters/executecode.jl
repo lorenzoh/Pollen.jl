@@ -194,6 +194,7 @@ creategroupid(path, groupname) = Symbol("$(CM.slugify(string(path)))_$groupname"
 # printed output, and the result.
 
 function createcodecell(codeblock::Node, output, result)
+    return Node(:codecell, children(codeblock), merge(attributes(codeblock), Dict(:outputvalue => output, :resultvalue => result)))
     chs = Node[]
     codeattrs, outputattrs, resultattrs = __parsecodeattributes(attributes(codeblock))
     if get(codeattrs, :show, true)

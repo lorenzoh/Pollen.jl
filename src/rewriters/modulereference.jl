@@ -11,6 +11,7 @@ struct ModuleReference <: Rewriter
     ids::Set{String}
 end
 
+
 function ModuleReference(pkgindex::ModuleInfo.PackageIndex)
     ModuleReference(pkgindex, Set{String}())
 end
@@ -24,8 +25,6 @@ end
 function Base.show(io::IO, mr::ModuleReference)
     print(io, "ModuleReference(")
     show(io, mr.info.modules.id)
-    print(io, ", ")
-    show(io, mr.info)
     print(io, ")")
 end
 

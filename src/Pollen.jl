@@ -31,7 +31,8 @@ using Revise
 using YAML: YAML
 import Git
 using PkgTemplates: PkgTemplates, @plugin, @with_kw_noshow, Template, Plugin,
-                     hook, getplugin, with_project, render_file, gen_file
+                     hook, getplugin, render_file, gen_file
+using ProgressMeter
 using Pkg
 using Scratch
 using NodeJS
@@ -86,6 +87,7 @@ include("rewriters/documentfolder.jl")
 include("rewriters/checklinks.jl")
 include("rewriters/sourcefiles.jl")
 include("rewriters/modulereference.jl")
+include("rewriters/documentercompat.jl")
 include("rewriters/executecode.jl")
 include("rewriters/packagewatcher.jl")
 include("rewriters/parsecode.jl")
@@ -93,6 +95,7 @@ include("rewriters/parseansi.jl")
 include("rewriters/resolvereferences.jl")
 include("rewriters/backlinks.jl")
 include("rewriters/storkindex.jl")
+include("rewriters/copyassets.jl")
 include("rewriters/saveattributes.jl")
 include("rewriters/docversions.jl")
 include("rewriters/staticassets.jl")
@@ -110,8 +113,13 @@ end
 # Lastly, we have functionality to help with setting up and running complete documentation
 # projects.
 
-include("frontend.jl")
-include("docs.jl")
+include("documentation/project.jl")
+include("documentation/frontend.jl")
+include("documentation/documenter.jl")
+include("documentation/config.jl")
+
+#include("frontend.jl")
+#include("docs.jl")
 include("pkgtemplate.jl")
 
 export servedocs

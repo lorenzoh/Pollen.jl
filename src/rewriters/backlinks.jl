@@ -2,6 +2,8 @@ struct Backlinks <: Rewriter
     graph::Any
 end
 
+Base.show(io::IO, ::Backlinks) = print(io, "Backlinks()")
+
 """
     Backlinks() <: Rewriter
 

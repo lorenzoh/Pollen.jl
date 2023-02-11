@@ -140,6 +140,11 @@ function catafold(f, xnode::Node, state; T = XTree)
 end
 
 catafold(f, xleaf::Leaf, state; kwargs...) = f(xleaf, state)
+#=
+catafold(f, tree, sel::Selector, state) = catafold(tree, state) do ch
+    matches(sel, ch) ? f(ch, state) : (ch, state)
+end
+=#
 
 """
     cata(f, tree)
