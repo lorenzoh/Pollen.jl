@@ -1,0 +1,11 @@
+name = "PollenQuarto"
+uuid = "c6b8f2f7-e72b-4fff-bfb8-cd4779831a64"
+authors = ["lorenzoh <lorenz.ohly@gmail.com> and contributors"]
+version = "0.1.0"
+
+[deps]
+Pollen = "c88717ad-5130-4874-a664-5a9aba5ec443"
+YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
+
+[compat]
+julia = "1.8"

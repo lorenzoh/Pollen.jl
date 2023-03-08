@@ -1,0 +1,7 @@
+name = "PollenSvelte"
+uuid = "22d46258-2969-4b3d-a258-0e425791c3f6"
+authors = ["lorenzoh <lorenz.ohly@gmail.com> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1.8"
