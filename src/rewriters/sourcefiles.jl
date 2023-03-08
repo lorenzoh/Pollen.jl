@@ -1,27 +1,50 @@
 
-function SourceFiles(ms::Vector{Module}; pkgtags = Dict{String, String}())
-    pkgdirs = pkgdir.(ms)
-    if any(isnothing, pkgdirs)
-        i::Int = findfirst(isnothing, pkgdirs)
-        throw(ArgumentError("Could not find a package directory for module '$(ms[i])'"))
-    end
-    pkgids = __getpkgids(ms; pkgtags)
-    return DocumentFolder(["$pkgid/src/" => joinpath(dir, "src")
-                           for (pkgid, dir) in zip(pkgids, pkgdirs)];
-                          filterfn = hasextension("jl"), loadfn = __load_source_file)
+function SourceFiles(pkgdirs::Vector{String}, names::Vector{String})
+    # TODO: check for non-existent src dirs
+    return DocumentFolder(
+        ["src/$name/" => joinpath(pkgdir, "src") for (pkgdir, name) in zip(pkgdirs, names)];
+        extensions = ["jl"],
+        loadfn = __load_source_file)
 end
 
+# TODO: check for non-existent pkgdirs
+SourceFiles(ms::Vector{Module}) = SourceFiles(pkgdir.(ms), string.(ms))
+
+# Loading from configuration
+
+default_config(::typeof(SourceFiles)) = Dict(
+    "index" => default_config(PackageIndex)
+)
+
+canonicalize_config(::typeof(SourceFiles), config::Dict) = Dict(
+    "index" => canonicalize_config(PackageIndex, get(config, "index", []))
+)
+
+function default_config_project(::typeof(SourceFiles), project_config)
+    config = default_config(SourceFiles)
+    config["index"] = default_config_project(PackageIndex, project_config)
+    config
+end
+
+function from_config(::typeof(SourceFiles), config)
+    config = with_default_config(SourceFiles, config)
+    index = from_config(PackageIndex, config["index"])
+    SourceFiles(index.packages.basedir, index.packages.name)
+end
+
+# Load function for the source files
+
 function __load_source_file(file::String, id)
-    parts = split(file, "src")
-    pkgid = split(id, "/")[1]
-    module_id = split(pkgid, "@")[1]
-    title = "$(module_id)$(parts[end])"
-    doc = Pollen.parse(String(read(file)), JuliaSyntaxFormat())
+    doc = Pollen.parse(Path(file), JuliaSyntaxFormat())
     doc = preparesourcefile(doc)
+
+    parts = split(id, "/")
+    module_id = parts[begin+1]
+    title = "$module_id/$(join(parts[begin+2:end], "/"))"
+
     return Node(:sourcefile,
                 [doc],
-                Dict{Symbol, Any}(:path => file, :title => title,
-                                  :module_id => module_id, :package_id => pkgid))
+                Dict{Symbol, Any}(:path => file, :title => title, :module_id => module_id))
 end
 
 # Some helpers for loading source files, ensuring

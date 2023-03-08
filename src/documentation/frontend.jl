@@ -6,8 +6,14 @@ abstract type Frontend end
 
 List of rewriters for `frontend`.
 """
-function frontend_rewriters end
+function frontend_rewriters(::Frontend)
+    RewriterConfig[]
+end
 
+
+function with_frontend_rewriters(frontend::Frontend, rewriter_configs)
+    vcat(rewriter_configs, frontend_rewriters(frontend))
+end
 """
     frontend_serve(frontend, builddir)
 """
@@ -45,13 +51,15 @@ function frontend_build end
 # TODO: Abstraction for deploying to GitHub Pages
 
 
+# So that other packages can register new `Frontend`s under a configuration key, we define
+# a global constant where they can add an entry. See below for how this is done.
 
 const FRONTENDS = Dict{String, Type{<:Frontend}}()
 
 #=
 ## Sample frontend implementation
 
-The simplest `Frontend` is `FileFrontend` which simply renders every file out
+The simplest `Frontend` is `FileFrontend`, which simply renders every file out
 using a `Format`, without applying any other transformations.
 =#
 
@@ -67,13 +75,15 @@ FRONTENDS["files"] = FileFrontend
 # The configuration for `FileFrontend` has just one key that determines the output format
 # by specifying the file extension. [`extensionformat`](#) is then used to detect the format.
 
-default_frontend_config(::Type{FileFrontend}) = Dict(
+default_config(::Type{FileFrontend}) = Dict(
     "filetype" => "md"
 )
 
 
-FileFrontend(config::Dict) = FileFrontend(
-    extensionformat(Val(Symbol(config["files"]["filetype"]))))
+function from_config(::Type{FileFrontend}, config)
+    format = extensionformat(Val(Symbol(get(config, "filetype", "md"))))
+    FileFrontend(format)
+end
 
 # Extension points are basic. `frontend_serve` starts a file server using
 # [LiveServer.jl](https://github.com/tlienart/LiveServer.jl).

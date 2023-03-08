@@ -20,6 +20,9 @@ function Backlinks()
     return Backlinks(g)
 end
 
+from_config(::Type{Backlinks}, _) = Backlinks()
+
+
 function rewriteoutputs!(docdict, docgraph::Backlinks)
     g = docgraph.graph
     idxs = get_prop(g, :idxs)

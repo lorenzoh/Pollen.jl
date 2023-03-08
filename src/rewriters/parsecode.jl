@@ -15,6 +15,12 @@ function rewritedoc(rewriter::ParseCode, _, doc)
     end
 end
 
+
+# TODO: parse selector from config
+# TODO: parse format from config
+default_config(::Type{ParseCode}) = Dict{String, String}()
+from_config(::Type{ParseCode}, _) = ParseCode()
+
 @testset "ParseCode [rewriter]" begin
     rewriter = ParseCode()
     @test rewritedoc(rewriter, "",

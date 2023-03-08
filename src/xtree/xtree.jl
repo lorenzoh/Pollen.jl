@@ -213,10 +213,10 @@ function AbstractTrees.printnode(io::IO, x::Node)
     rich && print(io, crayon"bold")
     print(io, tag(x))
     rich && print(io, crayon"reset")
-    if !isempty(x.attributes)
+    if !isempty(attributes(x))
         print(io, "; ")
         rich && print(io, crayon"dark_gray")
-        for (i, (key, value)) in enumerate(x.attributes)
+        for (i, (key, value)) in enumerate(attributes(x))
             if i != 1
                 print(io, ", ")
             end

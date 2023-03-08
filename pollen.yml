@@ -1,10 +1,8 @@
 title: "Pollen.jl"
 project: "./docs"
 rewriters: 
-  documentation:
-    package: hi
   sourcefiles:
-    packages:
-    - "Pollen"
-    - "ModuleInfo"
-  runcode: true
+    index:
+      - "Pollen"
+
+  

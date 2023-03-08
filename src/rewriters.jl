@@ -6,7 +6,7 @@ interface.
 """
     abstract type Rewriter
 
-Pluggable extension to a [`Project`] with hooks to transform
+Pluggable extension to a [`Project`](#) with hooks to transform
 individual documents, create new documents, register file update
 handlers and perform additional build steps.
 
@@ -74,8 +74,11 @@ files, we define two functions:
     to `from_config`.
 =#
 
+"""
+    from_config(Rewriter, rewriter_config, project_config, state)
+"""
 function from_config end
-default_config(::Type{Rewriter}) = Dict()
+default_config(::Type{<:Rewriter}) = Dict()
 
 #=
 ## Example `Rewriter`

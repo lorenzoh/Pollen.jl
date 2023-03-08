@@ -343,8 +343,8 @@ f(x) = 1
                 :md,
                 Node(
                     :table,
-                    Node(:tr, Node(:th, "x"), Node(:th, "y")),
-                    Node(:tr, Node(:td, "hello"), Node(:td, "world"));
+                    Node(:tableheader, Node(:tr, Node(:th, "x"), Node(:th, "y"))),
+                    Node(:tablebody, Node(:tr, Node(:td, "hello"), Node(:td, "world")));
                     align = [:left, :right],
                 ),
             )
@@ -527,7 +527,7 @@ end
 
 function to_commonmark_ast(node, ::Val{:a})
     l = CM.Link()
-    l.destination = node.attributes[:href]
+    l.destination = attributes(node)[:href]
     n = CM.Node(l)
 
     append_ast_children!(n, node)

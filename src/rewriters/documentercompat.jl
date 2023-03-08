@@ -14,6 +14,26 @@ function Pollen.rewritedoc(rewriter::DocumenterCompat, id, doc)
     return doc
 end
 
+# Load from config
+
+
+default_config(::Type{DocumenterCompat}) = Dict(
+    "index" => default_config(PackageIndex)
+)
+
+function default_config_project(::Type{DocumenterCompat}, project_config)
+    config = default_config(DocumenterCompat)
+    config["index"] = default_config_project(PackageIndex, project_config)
+    config
+end
+
+function from_config(::Type{DocumenterCompat}, config)
+    config = with_default_config(DocumenterCompat, config)
+    pkgindex = from_config(PackageIndex, config["index"])
+    DocumenterCompat(pkgindex)
+end
+
+
 
 function SelectDocTest()
     (SelectTag(:codeblock) &
@@ -51,10 +71,8 @@ function parse_docs_blocks(doc::Node, pkgindex::PackageIndex)
             end
         end
 
-        @show docids
         refs = [Node(:reference, entry, document_id=docid, reftype=:symbol)
                     for (entry, docid) in zip(entries, docids) if !isnothing(docid)]
-        @show refs
         Node(:docsblock, refs)
     end
 end

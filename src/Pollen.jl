@@ -21,7 +21,7 @@ using Mustache
 using LiveServer
 import LiveServer
 using TOML
-using IOCapture
+using IOCapture: IOCapture
 using ModuleInfo
 using InlineTest
 using JSON3
@@ -36,6 +36,7 @@ using ProgressMeter
 using Pkg
 using Scratch
 using NodeJS
+
 
 # We first define [`Node`](#)s and [`Leaf`](#)s, the data structure that underpins
 # the rest of the library. We also define selectors to find parts of a tree.
@@ -83,6 +84,7 @@ include("serve/servefiles.jl")
 
 # Rewriters transform individual documents and can also modify project-level information.
 
+include("utils/pkgindex.jl")
 include("rewriters/documentfolder.jl")
 include("rewriters/checklinks.jl")
 include("rewriters/sourcefiles.jl")
@@ -113,8 +115,8 @@ end
 # Lastly, we have functionality to help with setting up and running complete documentation
 # projects.
 
-include("documentation/project.jl")
 include("documentation/frontend.jl")
+include("documentation/project.jl")
 include("documentation/documenter.jl")
 include("documentation/config.jl")
 

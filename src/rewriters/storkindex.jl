@@ -50,7 +50,7 @@ end
 const LINEBREAKTAGS = [:h1, :h2, :h3, :h4, :p, :admonition, :blockquote, :mathblock, :table,
     :hr, :li, :ul, :md, :admonitiontitle, :admonitionbody]
 
-extract_text(node::Node) = extract_text!("", node, Val(Pollen.tag(node)))
+extract_text(node::Node) = extract_text!("", node, Val(tag(node)))
 
 function extract_text!(s, node::Node, ::Val)
     for ch in children(node)
@@ -58,11 +58,11 @@ function extract_text!(s, node::Node, ::Val)
             ch isa Leaf{String} || continue
             s *= ch[]
         else
-            s = extract_text!(s, ch, Val(Pollen.tag(ch)))
+            s = extract_text!(s, ch, Val(tag(ch)))
         end
     end
 
-    if Pollen.tag(node) in LINEBREAKTAGS
+    if tag(node) in LINEBREAKTAGS
         s *= "\n"
     end
     return s

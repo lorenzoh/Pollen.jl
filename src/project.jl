@@ -10,15 +10,17 @@ struct Project
     sources::ThreadSafeDict{String, Node}
     outputs::ThreadSafeDict{String, Node}
     rewriters::Vector{<:Rewriter}
+    frontend::Any
+    config::Dict
 end
 
-function Project(rewriters)
+function Project(rewriters, frontend = nothing, config = Dict())
     sources = ThreadSafeDict{String, Node}()
     foreach(rewriters) do rewriter
         merge!(sources, createsources!(rewriter))
     end
     outputs = ThreadSafeDict{String, Node}()
-    return Project(sources, outputs, rewriters)
+    return Project(sources, outputs, rewriters, frontend, config)
 end
 
 function Base.show(io::IO, project::Project)

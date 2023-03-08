@@ -57,17 +57,17 @@ render!(io, doc::Node, format::HTMLFormat) = render!(io, doc, format, Val(doc.ta
 
 function render!(io, x::Node, format::HTMLFormat, ::Val)
     if tag(x) in HTMLFormatTAGS || isnothing(format.defaulttag)
-        print(io, "<", x.tag)
-        if !isempty(x.attributes)
+        print(io, "<", tag(x))
+        if !isempty(attributes(x))
             print(io, " ")
-            for (i, (name, attr)) in enumerate(x.attributes)
+            for (i, (name, attr)) in enumerate(attributes(x))
                 print(io, string(name), "=\"", attr, "\"")
-                i != length(x.attributes) && print(io, " ")
+                i != length(attributes(x)) && print(io, " ")
             end
         end
         print(io, ">")
         foreach(child -> render!(io, child, format), children(x))
-        print(io, "</", x.tag, ">")
+        print(io, "</", tag(x), ">")
     else
         node = Node(
             tag=format.defaulttag,
@@ -168,7 +168,7 @@ formatextension(::HTMLFormat) = "html"
     @test parse("<b>hi</b>", format) == Node(:html, Node(:b, "hi"))
     @test parse("<b x=\"yo\">hi</b>", format) == Node(:html, Node(:b, "hi"; x = "yo"))
     @testset "Round-trip" begin
-        s = "<html><b x=yo >hi</b></html>"
+        s = "<html><b x=\"yo\">hi</b></html>"
         @test render(parse(s, format), format) == s
     end
 end

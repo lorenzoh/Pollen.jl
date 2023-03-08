@@ -29,6 +29,10 @@ function load_documenter_config(pkgdir, packageconfig)
     return conf
 end
 
+
+# Everything below is a hack to extract Documenter.jl-specific information like the
+# Table of Contents and Project title from Documenter's `docs/make.jl` file.
+
 function _load_documenter_toc(doc::Node, projectconfig)
     # Load the vector of (name => path) pairs from Documenter.jl's `make.jl` file
     documenter_links = _parse_documenter_toc(doc, projectconfig)
@@ -38,6 +42,7 @@ function _load_documenter_toc(doc::Node, projectconfig)
 
     # Then, resolve all links in the ToC, turning them into absolute links.
     pkgid = projectconfig["name"] * "@" * projectconfig["version"]
+    # FIXME: link resolution
     toc = resolve_toc(documenter_toc, pkgid, "docs/src/")
     return toc
 end
@@ -71,18 +76,13 @@ function _parse_documenter_sitename(doc::Node)
     return gettext(kw.children[end].children[2])
 end
 
-function SelectFunctionCall(name::String)
-    return SelectTag(:call) & Pollen.SelectCondition() do node
-        length(children(node)) >= 1 || return false
-        id = children(node)[1]
-        tag(id) == :Identifier || return false
-        idname = gettext(id)
-        endswith(idname, name)
-    end
-end
-
 function SelectKwarg(name::String)
     return SelectTag(:kw) & Pollen.SelectCondition() do node
         return node.children[1].children[1][] == name
     end
+end
+
+@testset "Project Documenter.jl compat" begin
+    @test isdocumenterproject(pkgdir(AbstractTrees))
+    @test !isdocumenterproject(pkgdir(Pollen))
 end

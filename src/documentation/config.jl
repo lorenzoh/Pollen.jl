@@ -6,7 +6,7 @@ This file defines the configuration for documentation projects.
 - [`default_config`](#) defines a default configuration
 
 
-- [`load_docs_config`](#) loads all applicable configurations and merges them
+- [`load_project_config`](#) loads all applicable configurations and merges them
 =#
 
 #= ## Default config
@@ -19,19 +19,10 @@ rewriters' default values can be loaded as well.
 =#
 
 function default_config()
-    return Dict(
+    return Dict{String, Any}(
         "title" => "TITLE",
         "tag" => "dev",
-        "package" => nothing,
-        "rewriters" => Dict(
-            "backlinks" => true,
-            "sourcefiles" => true,
-            "reference" => true,
-            "parsecode" => true,
-            "runcode" => false,
-            "assets" => true,
-        "documenter" => false,
-        ),
+        "rewriters" => Dict{String, Any}(),
         "frontend" => "files",
         "project" => ".",
         "contents" => Dict(),
@@ -41,79 +32,32 @@ end
 # To provide some better defaults for configuration like the project title, we can
 # load a package's `Project.toml` file to extract some additional information.
 
-function load_package_config(pkgdir::String; tag = nothing)
-    projectconfig = TOML.parsefile(joinpath(pkgdir, "Project.toml"))
-    tag = isnothing(tag) ? projectconfig["version"] : tag
-    pkgid = "$(projectconfig["name"])@$tag"
-    # TODO: if docs/Project.toml exists, set "project" => "./docs"
-    return Dict(
+"""
+    load_package_config(dir)
+
+Load package-specific configuration defaults from a Pollen project directory `dir`.
+This is only called if `dir` is a Julia package, i.e. contains a `Project.toml` file.
+"""
+function load_package_config(dir::String)
+    projectconfig = TOML.parsefile(joinpath(dir, "Project.toml"))
+    pkg_config = Dict{String, Any}(
         "title" => projectconfig["name"] * ".jl",
-        "tag" => tag,
         "package" => Dict(
             "name" => projectconfig["name"],
-            "version" => tag,
-            "id" => pkgid,
-            "dir" => pkgdir,
+            "version" => projectconfig["version"],
+            "uuid" => projectconfig["uuid"],
+            "authors" => get(projectconfig, "authors", String[]),
+            "dir" => dir,
         ),
         "contents" => Dict(
-            "README" => "$pkgid/doc/README.md",
+            "README" => "doc/$(projectconfig["name"])/README.md",
+            "Reference" => "ref/$(projectconfig["name"])",
         ),
     )
-end
-
-#=
-## Rewriter configuration
-
-The configuration also lets us configure which `Rewriter`s are used. The `Rewriter`
-interface has a function that creates an instance from a configuration dict:
-[`from_config`](#). We'll use this to instantiate the rewriters later.
-
-The rewriter-specific configuration is under the `"rewriters"` key of the top-level project
-configuration. To be able to use it to create our project's rewriters, we need to define a
-list of rewriter configurations with
-
-- (1) A mapping from configuration keys to `Rewriter` type (e.g. `("parsecode", ParseCode)`);
-- (2) An ordering of rewriters: since some rewriters depend on each other either by the way
-    they transform individual documents or the state they create, we need to make sure they
-    have an ordering.
-- (3) A default configuration value: this can be a simple `true/false` for enabled/disabled,
-    or concrete configuration options that are passed to [`from_config`](#).
-- (4) Dependencies on other rewriters.
-
-This list of rewriter configurations has a default, but can be overwritten in code, if you
-want to enable additional rewriters or replace existing ones. Additionally, frontends can
-modify this list (in most cases to add additional, frontend-specific rewriters).
-=#
-
-Base.@kwdef struct RewriterConfig
-    # Name of the configuration key
-    key::String
-    # Type of the Rewriter (not an instance)
-    rewriter::Any
-    # Default value with higher precendence than `default_config(Rewriter)`
-    default::Any
-    # Keys of previous rewriters that this depends on
-    dependencies::Vector{String}
-end
-
-const DEFAULT_REWRITER_CONFIGS = RewriterConfig[
-    # FIXME: create IndexPackages rewriter and use it here
-    RewriterConfig("index", DocumentationFiles, true, []),
-    RewriterConfig("documents", DocumentationFiles, true, []),
-    RewriterConfig("sourcefiles", SourceFiles, true, ["index"]),
-    RewriterConfig("references", ModuleReference, true, ["index"]),
-    RewriterConfig("documenter", DocumenterCompat, false, ),
-    RewriterConfig("parsecode", ParseCode, true),
-    RewriterConfig("resolvesymbols", ResolveSymbols, true, ["parsecode"]),
-    RewriterConfig("resolverefs", ResolveReferences, true),
-    RewriterConfig("runcode", ExecuteCode, false, ["parsecode"]),
-    RewriterConfig("backlinks", Backlinks, false, ["resolvesymbols"]),
-    RewriterConfig("assets", Backlinks, false, ["resolvesymbols"]),
-
-]
-
-function load_rewriter_config()
-
+    if isfile(joinpath(dir, "docs", "Project.toml"))
+        pkg_config["dir"] = "./docs"
+    end
+    return pkg_config
 end
 
 
@@ -129,8 +73,8 @@ A Boolean value of `false` means a configuration value should be set to `nothing
 `true` means the default configuration should be used. See the code for the exact semantics.
 =#
 
-function merge_configs(dst::Dict, src::Dict)
-    out = Dict{Any, Any}(dst)
+function merge_configs(dst::Dict{T}, src::Dict{T2}) where {T, T2}
+    out = Dict{T === T2 ? T : Any, Any}(dst)
     for k in keys(src)
         if src[k] isa Dict
             if get(dst, k, nothing) isa Dict
@@ -145,22 +89,15 @@ function merge_configs(dst::Dict, src::Dict)
     return out
 end
 
-function merge_configs(dst::Dict, src::Dict, args...)
-    cfg = merge_configs(dst, src)
-    merge_configs(cfg, args...)
-end
-
 merge_configs(dst::Bool, src::Dict) = src
 merge_configs(dst::Bool, src::Bool) = src
-merge_configs(dst::Dict, src::Bool) = src ? dst : nothing
+merge_configs(dst::Dict, src::Bool) = src ? dst : false
 
-
-# TODO: handle merging `Bool`s
 
 #= ## Loading configuration
 
-To load a complete project configuration for a docs project in `dir`, we combine the
-following configs in [`load_docs_config`](#):
+To load a complete project configuration for a Pollen project in `dir`, we combine the
+following configs in [`load_project_config`](#):
 
 - the default config ([`default_config`](#))
 - IF `dir` contains a `Project.toml`, the package config (with [`load_package_config`](#))
@@ -175,13 +112,11 @@ should be used. The default configuration for the frontend is then merged with
 existing frontend entries in the config.
 =#
 
-# TODO: add `rewriters = DEFAULT_REWRITERS` and pass it to `default_config`
-# TODO: populate rewriters with default config?
-function load_docs_config(dir::String; tag = nothing)
+function load_project_config(dir::Union{String, Nothing})
     config = default_config()
 
     # Load package config
-    if isfile(joinpath(dir, "Project.toml"))
+    if !isnothing(dir) && isfile(joinpath(dir, "Project.toml"))
         config = merge_configs(config, load_package_config(dir))
         # Load Documenter.jl config
         if isdocumenterproject(dir)
@@ -190,29 +125,61 @@ function load_docs_config(dir::String; tag = nothing)
     end
 
     # Load pollen.yml config
-    if isfile(joinpath(dir, "pollen.yml"))
-        config = merge_configs(config, YAML.load_file(joinpath(dir, "pollen.yml")))
+    if !isnothing(dir) && isfile(joinpath(dir, "pollen.yml"))
+        config = merge_configs(config, YAML.load_file(joinpath(dir, "pollen.yml"); dicttype=Dict{String, Any}))
     end
 
     # Load frontend config
     if get(config, "frontend", nothing) !== nothing
         frontend = config["frontend"]
         config[frontend] = merge_configs(
-            default_frontend_config(FRONTENDS[frontend]),
+            default_config(FRONTENDS[frontend]),
             get(config, frontend, Dict()))
     end
 
+    # Maybe do this in load_rewriters??
     # Load rewriter config
-    rewriters = with_frontend_rewriters(FRONTENDS[frontend], rewriters)
+    #=
+    rewriter_configs = with_frontend_rewriters(FRONTENDS[frontend], rewriter_configs)
     config["rewriters"] = merge_configs(
-        get(config, "rewriters", Dict()),
-        load_rewriter_config(rewriters))
+        get(config, "rewriters", true),
+        load_rewriter_config(rewriter_configs))
+    =#
 
     return config
 end
 
+load_project_config(mod::Module) = load_project_config(pkgdir(mod))
+
 # ## Utilities
 
-@testset "load_docs_config" begin
-    @test_nowarn load_docs_config(pkgdir(Pollen))
+@testset "Project configuration" begin
+    @testset "default_config" begin
+        config = default_config()
+        @show keys(config)
+        @test all(in(keys(config)).(["title", "project", "contents", "frontend"]))
+    end
+    @testset "load_package_config" begin
+        pkg_config = load_package_config(pkgdir(@__MODULE__))
+        @test all(in(keys(pkg_config)).(["title", "package", "contents"]))
+        @test all(in(keys(pkg_config["package"])).(["dir", "version", "name"]))
+        @test all(in(keys(pkg_config["contents"])).(["README", "Reference"]))
+    end
+    @testset "load_project_config" begin
+        @testset "Pollen (package with pollen.yml)" begin
+            config = load_project_config(pkgdir(Pollen))
+            @test config["project"] == "./docs"
+            @test config["title"] == "Pollen.jl"
+            @test haskey(config, "package")
+        end
+        @testset "Pollen (package with Documenter.jl setup)" begin
+            config = load_project_config(pkgdir(AbstractTrees))
+            YAML.write(config) |> println
+            @test config["title"] == "AbstractTrees.jl"
+            @test config["project"] == "./docs"
+            @test length(keys(config["contents"])) >= 2
+            @test config["package"]["name"] == "AbstractTrees"
+            @test config["rewriters"]["documenter"] === true
+        end
+    end
 end

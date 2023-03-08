@@ -28,6 +28,26 @@ function Base.show(io::IO, mr::ModuleReference)
     print(io, ")")
 end
 
+# Loading from config
+
+default_config(::Type{ModuleReference}) = Dict(
+    "index" => default_config(PackageIndex)
+)
+
+function default_config_project(::Type{ModuleReference}, project_config)
+    config = default_config(ModuleReference)
+    config["index"] = default_config_project(PackageIndex, project_config)
+    config
+end
+
+function from_config(::Type{ModuleReference}, config)
+    config = with_default_config(ModuleReference, config)
+    pkgindex = from_config(PackageIndex, config["index"])
+    ModuleReference(pkgindex)
+end
+
+
+
 function createsources!(rewriter::ModuleReference)
     sources = Dict{String, Node}()
     for symbolinfo in ModuleInfo.getsymbols(rewriter.info)

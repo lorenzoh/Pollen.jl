@@ -455,6 +455,7 @@ end
 function parselink(rule::SymbolCodeRule, link::LinkInfo)
     @assert length(children(link.node)) == 1 && only(children(link.node)) isa Leaf{String}
     idparts = splitpath(link.id)
+    # FIXME link resolution
     mod = if length(idparts) >= 2 && idparts[2] == "src"
         split(idparts[begin], '@')[begin]
     else
@@ -477,4 +478,51 @@ function resolvelink(rule::SymbolCodeRule, link::LinkInfo, target)
                           Dict(:document_id => __id_from_binding(rule.I, bindings[1]),
                                :reftype => "symbol")))
     end
+end
+
+
+# ## Loading the rewriters from configuration:
+
+# ### `ResolveReferences`
+
+default_config(::Type{ResolveReferences}) = Dict(
+    "index" => default_config(PackageIndex)
+)
+
+canonicalize_config(::Type{ResolveReferences}, config::Dict) = Dict(
+    "index" => canonicalize_config(PackageIndex, get(config, "index", []))
+)
+
+function default_config_project(::Type{ResolveReferences}, project_config)
+    config = default_config(ModuleReference)
+    config["index"] = default_config_project(PackageIndex, project_config)
+    config
+end
+
+function from_config(::Type{ResolveReferences}, config)
+    config = with_default_config(ResolveReferences, config)
+    pkgindex = from_config(PackageIndex, config["index"])
+    ResolveReferences(pkgindex)
+end
+
+# ### `ResolveSymbols`
+
+default_config(::typeof(ResolveSymbols)) = Dict(
+    "index" => default_config(PackageIndex)
+)
+
+canonicalize_config(::typeof(ResolveSymbols), config::Dict) = Dict(
+    "index" => canonicalize_config(PackageIndex, get(config, "index", []))
+)
+
+function default_config_project(::typeof(ResolveSymbols), project_config)
+    config = default_config(ModuleReference)
+    config["index"] = default_config_project(PackageIndex, project_config)
+    config
+end
+
+function from_config(::typeof(ResolveSymbols), config)
+    config = with_default_config(ResolveSymbols, config)
+    pkgindex = from_config(PackageIndex, config["index"])
+    ResolveSymbols(pkgindex)
 end
