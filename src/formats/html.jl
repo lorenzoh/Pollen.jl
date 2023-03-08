@@ -13,7 +13,7 @@ Reading HTML:
 ```julia
 using Pollen
 format = HTMLFormat()
-node = Pollen.parse("<div class=\"group\"><span>Hi there!</span></div>", format)
+node = Pollen.parse(\"\"\"<div class=\"group\"><span>Hi there!</span></div>\"\"\", format)
 ```
 
 {cell}
