@@ -89,10 +89,6 @@ function loadtoc(pkgdir::String, projectconfig::Dict, pkgid)
     end
 end
 
-function __mapdictleaves(f, d::Union{<:Dict, <:JSON3.Object, <:OrderedDict})
-    OrderedDict(map((k, v) -> (k => __mapdictleaves(f, v)), keys(d), values(d)))
-end
-__mapdictleaves(f, x) = f(x)
 
 function defaulttoc(projectconfig, pkgid)
     return OrderedDict("Overview" => "$pkgid/doc/README.md",

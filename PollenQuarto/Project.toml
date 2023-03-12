@@ -4,6 +4,7 @@ authors = ["lorenzoh <lorenz.ohly@gmail.com> and contributors"]
 version = "0.1.0"
 
 [deps]
+Configurations = "5218b696-f38b-4ac9-8b61-a12ec717816d"
 Pollen = "c88717ad-5130-4874-a664-5a9aba5ec443"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 

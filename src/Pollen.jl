@@ -36,6 +36,8 @@ using ProgressMeter
 using Pkg
 using Scratch
 using NodeJS
+using Configurations: Configurations, @option, from_dict, to_dict
+using PrettyPrint: PrettyPrint
 
 
 # We first define [`Node`](#)s and [`Leaf`](#)s, the data structure that underpins
@@ -115,10 +117,12 @@ end
 # Lastly, we have functionality to help with setting up and running complete documentation
 # projects.
 
+include("documentation/config.jl")
 include("documentation/frontend.jl")
 include("documentation/project.jl")
 include("documentation/documenter.jl")
-include("documentation/config.jl")
+
+export load_project, build_project, serve_project
 
 #include("frontend.jl")
 #include("docs.jl")

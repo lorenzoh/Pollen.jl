@@ -75,10 +75,47 @@ files, we define two functions:
 =#
 
 """
+    configtype(T)
+
+Return the `Configurations` option type for type `T`.
+"""
+function configtype end
+
+abstract type AbstractConfig end
+
+Base.show(io::IO, c::AbstractConfig) = PrettyPrint.pprint(io, c)
+
+"""
     from_config(Rewriter, rewriter_config, project_config, state)
 """
-function from_config end
-default_config(::Type{<:Rewriter}) = Dict()
+from_config(T::Type, config::Dict{String}) = from_config(T, from_dict(configtype(T), config))
+
+function merge_configs(config::C, d::Dict) where C
+    from_dict(C, merge_config_dicts(C, shallow_dict(config), d))
+end
+
+shallow_dict(cfg::C) where C = Dict(zip(map(string, fieldnames(C)), map(Base.Fix1(getfield, cfg), fieldnames(C))))
+
+function merge_config_dicts(C::Type{<:AbstractConfig}, d1, d2)
+    dst = Dict{String, Any}()
+    for (name, T) in zip(map(string, fieldnames(C)), fieldtypes(C))
+        if haskey(d1, name) && haskey(d2, name)
+            dst[name] = if d1[name] isa AbstractConfig
+                merge_configs(d1[name], shallow_dict(d2[name]))
+            else
+                mergerec(d1[name], d2[name])
+            end
+        elseif haskey(d2, name)
+            dst[name] = d2[name]
+        elseif haskey(d1, name)
+            dst[name] = d1[name]
+        end
+    end
+    return from_dict(C, dst)
+end
+
+mergerec(d1::AbstractDict, d2::AbstractDict) = mergewith(mergerec, d1, d2)
+mergerec(x1, x2) = x2
 
 #=
 ## Example `Rewriter`

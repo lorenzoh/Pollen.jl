@@ -21,6 +21,8 @@ function parse(io::IO, format::MarkdownFormat)
     return xtree(ast)
 end
 
+as_md(node::Node) = default_md_parser()(render(node, MarkdownFormat()))
+
 function default_md_parser()
     # adapted from https://github.com/MichaelHatherly/Publish.jl/blob/master/src/utilities.jl
     cm = CM
@@ -574,7 +576,7 @@ function to_commonmark_ast(node, ::Val{:julia})
     to_commonmark_ast(Node(:html, node))
 end
 
-function htmlify(node::Node, )
+function htmlify(node::Node)
     cata(node, SelectNode()) do ch
         attrs = attributes(ch)
         if tag(ch) == :julia
@@ -743,7 +745,7 @@ function to_commonmark_ast(node, ::Val{:table})
     alignment = if haskey(attributes(node), :align)
         attributes(node)[:align]
     else
-        :left
+        [:left]
     end
     n = CM.Node(CM.Table(alignment))
     append_ast_children!(n, node)

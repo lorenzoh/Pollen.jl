@@ -106,32 +106,22 @@ end
 DocumentationFiles(m::Module; kwargs...) = DocumentationFiles([m]; kwargs...)
 
 
-default_config(::typeof(DocumentationFiles)) = Dict(
-    "extensions" => String["md", "ipynb"],
-    "index" => default_config(PackageIndex)
-)
-canonicalize_config(::typeof(DocumentationFiles), config::Dict) = merge(config, Dict(
-    "index" => canonicalize_config(PackageIndex, get(config, "index", [])),
-))
+# ## Configuration parsing
 
-function default_config_project(::typeof(DocumentationFiles), project_config)
-    config = default_config(DocumentationFiles)
-    config["index"] = default_config_project(PackageIndex, project_config)
-    @show config
-    config
+@option struct ConfigDocumentationFiles <: AbstractConfig
+    extensions::Vector{String} = ["md", "ipynb"]
+    # TODO: only index packages, not other info
+    index::ConfigPackageIndex = ConfigPackageIndex()
+end
+configtype(::typeof(DocumentationFiles)) = ConfigDocumentationFiles
+
+function from_config(config::ConfigDocumentationFiles)
+    index = from_config(config.index)
+    return DocumentationFiles(
+        index.packages.basedir, index.packages.name; extensions=config.extensions)
 end
 
-function from_config(::typeof(DocumentationFiles), config)
-    @show config
-    config = with_default_config(DocumentationFiles, config)
-    index = from_config(PackageIndex, config["index"])
-    @show config
-    @show index.packages
-    DocumentationFiles(
-        index.packages.basedir, index.packages.name;
-        extensions=config["extensions"])
-end
-
+# ## Helpers
 
 function __load_documentation_file(file, id)
     pfile = Path(file)
@@ -142,7 +132,6 @@ function __load_documentation_file(file, id)
     return Node(:document, children(doc), merge(attrs, attributes(doc)))
 end
 
-# Utilities
 
 hasextension(file, ext) = endswith(file, string(ext))
 hasextension(file, exts::Vector) = any(map(ext -> hasextension(file, ext), exts))
@@ -189,5 +178,9 @@ end
         docs = createsources!(rewriter)
         @test "doc/Pollen/README.md" in keys(docs)
     end
-    # TODO: test file watcher for individual files as well as directories
+
+    @testset "Configuration" begin
+        @test_nowarn configtype(DocumentationFiles)
+        @test_nowarn from_config(ConfigDocumentationFiles()) isa DocumentFolder
+    end
 end

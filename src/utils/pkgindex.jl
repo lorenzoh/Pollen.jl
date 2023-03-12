@@ -3,50 +3,32 @@ So that we can load `Rewriter`s from configuration with `from_config`, this file
 some helpers for instantiating `PackageIndex`es from configuration. This will be used by
 many rewriters that need access to a configurable package index.
 =#
+@option struct ConfigPackageIndex <: AbstractConfig
+    packages::Vector{String} = String[]
+    projects::Vector{String} = String[]
+    recurse::Int = 0
+    verbose::Bool = true
+    cache::Bool = true
+end
+configtype(::Type{PackageIndex}) = ConfigPackageIndex
 
-default_config(::typeof(PackageIndex)) = Dict(
-    "packages" => String[],
-    "projects" => [Base.active_project()],
-    "recurse" => 0,
-    "verbose" => true,
-    "cache" => true,
-)
 
-default_config_project(T, project_config) = default_config(T)
-function default_config_project(::typeof(PackageIndex), project_config)
-    config = default_config(PackageIndex)
-
-    # If the project is a package directory, add that package to the package list
-    # and add the package directory as an environment to check for packages.
-    pkg_config = get(project_config, "package", nothing)
-    if pkg_config !== nothing
-        push!(config["projects"], pkg_config["dir"])
-        push!(config["packages"], pkg_config["name"])
+function from_project_config(::Type{ConfigPackageIndex}, project_config::ConfigProject, values::Dict)
+    if !isnothing(project_config.package)
+        # Append package name and project/environment to index from
+        unique!(push!(get!(values, "projects", String[]), project_config.package.dir))
+        unique!(push!(get!(values, "packages", String[]), project_config.package.name))
     end
-
-    return config
+    return from_dict(ConfigPackageIndex, values)
 end
 
-canonicalize_config(T, config::Dict) = config
-canonicalize_config(T, config::Bool) = config ? default_config(T) : config
-canonicalize_config(::typeof(PackageIndex), config::Vector) = Dict("packages" => config)
 
-with_default_config(T, config) =
-    merge_configs(default_config(T), canonicalize_config(T, config))
-
-from_project_config(T, config, project_config) =
-    from_config(
-        T,
-        merge_configs(
-            default_config_project(T, project_config),
-            canonicalize_config(T, config)))
-
-function from_config(::typeof(PackageIndex), config)
+function from_config(config::ConfigPackageIndex)
     # TODO: validate that "projects" are valid Julia projects
-    config = with_default_config(PackageIndex, config)
-
-    packages = unique(config["packages"])
-    available_packages = reduce(vcat, map(ModuleInfo.get_project_packages, config["projects"]))
+    # TODO: make recurse work as expected
+    packages = unique(config.packages)
+    available_packages = reduce(
+        vcat, map(ModuleInfo.get_project_packages, config.projects), init=String[])
     unavailable_packages = filter(!in(available_packages), packages)
     if !isempty(unavailable_packages)
         throw(ArgumentError("""When creating a package index from a configuration, \
@@ -54,15 +36,27 @@ function from_config(::typeof(PackageIndex), config)
                 Make sure that the packages are either a direct dependency of or defined \
                 by any of the Julia projects:
                 - Missing packages: $unavailable_packages
-                - Julia projects: $(config["projects"]) """))
+                - Julia projects: $(config.projects) """))
     end
 
-    modules::Vector{Module} = unique(reduce(vcat, map(config["projects"]) do proj
+    modules::Vector{Module} = unique(reduce(vcat, map(config.projects) do proj
         proj_module = ModuleInfo.load_project_module(proj)
         # For packages, return the package module
         Symbol(proj_module) !== :Main && return [proj_module]
         # For environments, load all modules that are in packages:
         return ModuleInfo.load_project_dependencies(ModuleInfo.projectfile(proj_module); packages)
-    end))
-    return PackageIndex(modules; recurse=1, packages=packages)
+    end; init=Module[]))
+    return PackageIndex(modules; recurse=max(1, config.recurse), packages=packages)
+end
+
+
+@testset "PackageIndex" begin
+    @test from_project_config(ConfigPackageIndex, ConfigProject()).recurse == 0
+
+    @testset "Include package configuration" begin
+        project_config = load_project_config(pkgdir(@__MODULE__))
+        pkgindex_config = from_project_config(ConfigPackageIndex, project_config)
+        @test !isempty(pkgindex_config.projects)
+        @test !isempty(pkgindex_config.packages)
+    end
 end

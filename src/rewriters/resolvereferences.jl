@@ -52,18 +52,16 @@ kind, but we want to do more:
 To make all of these possible, let's define a verbose, but explicit and unambiguous
 link syntax that defines each of these parameters and then see how some parts can
 be omitted based on context. Let's consider the example above and say that it is a file
-in Pollen.jl and from the package version 0.2.0. We can uniquely link to it with:
+in Pollen.jl. We can uniquely link to it with:
 
-> `Pollen@0.2.0/doc/docs/tutorial1.md`
+> `/doc/Pollen/docs/tutorial1.md`
 
 In the abstract, the format is
 
-> `${Package}@${Version}/${Document type}/${documentId...}`
+> `/${Document type}/${Package}/${documentId...}`
 
 Now, based on context of the source and target document, we can omit parameters:
 
-- If we want to the latest version of a target document, we can omit the version:
-    `"Pollen/doc/docs/tutorial1.md"`
 - If the target document is contained in the same package, we can omit the package:
     `"/doc/docs/tutorial1.md"`
 - If the target document has the same document type, we can omit that as well:
@@ -119,6 +117,7 @@ Base.@kwdef struct LinkInfo
     # the module that a reference is part of
     mod::Union{Nothing, String} = nothing
 end
+Base.show(io::IO, linkinfo::LinkInfo) = PrettyPrint.pprint(io, linkinfo)
 
 """
     abstract type AbstractLinkRule
@@ -180,9 +179,12 @@ end
 # Before we start defining the rules, let's implement a helper that lets us easily construct
 # [`LinkInfo`](#)s from a link in a document.
 
-function LinkInfo(node::Node; id = "NULL/", href = get(attributes(node), :href, ""),
+function LinkInfo(node::Node; id = "type/id", href = get(attributes(node), :href, ""),
                   title = gettext(node),
-                  path = nothing, mod = nothing, package = first(splitpath(id)), attrs...)
+                  path = nothing, mod = nothing, package = nothing, attrs...)
+    if isnothing(package)
+        package = string(split(splitpath(id)[2], ".")[begin])
+    end
     return LinkInfo(; package, id, href, title, path, mod, node)
 end
 
@@ -232,32 +234,33 @@ Base.@kwdef struct InternalLinkRule <: AbstractLinkRule
 end
 
 function parselink(rule::InternalLinkRule, link::LinkInfo)
-    # TODO: add support for href syntax with (trailing) id, e.g."README.md/#Setup"
+    # TODO: add support for href syntax with anchors, e.g."README.md#Setup"
     # that link to headings. Similarly support automatic header syntax using "@ref"
     isempty(link.href) && return nothing
     parts = splitpath(link.href)
+
     if parts[1] == "/"
+        # Is an absolute link
         length(parts) == 1 && return nothing
         if parts[2] in rule.doctypes
-            # doc type is specified
-            return "$(link.package)$(link.href)"
+            # Type is specified, so we have an absolute link of the form
+            # `$type/$package/path...`
+            return link.href
         else
-            # doc type not specified -> same as source document
-            doctype = split(link.id, '/')[2]
-            return "$(link.package)/$(doctype)$(link.href)"
+            # Otherwise we have an absolute link without type and package information;
+            # here we assume we link to a document of the same package and type
+            source_doctype = splitpath(link.id)[begin]
+            return "$source_doctype/$(link.package)$(link.href)"
         end
-    elseif contains(parts[1], '@')
-        # package with version -> complete document ID
-        return link.href
     else
         # relative link (doesn't start with '/')
-        srcparts = split(link.id, '/')
-        doctype = srcparts[2]
-        srcpath = joinpath([".", srcparts[3:(end - 1)]...])
-        path = normpath(joinpath(srcpath, link.href))
+        source_parts = splitpath(link.id)
+        source_doctype = source_parts[begin]
+        source_folder = joinpath([".", source_parts[3:(end - 1)]...])
+        path = normpath(joinpath(source_folder, link.href))
         # must not go outside folder
         startswith(path, "..") && return nothing
-        return "$(link.package)/$(doctype)/$path"
+        return "/$source_doctype/$(link.package)/$path"
     end
 end
 
@@ -270,24 +273,24 @@ end
 @testset "InternalLinkRule [AbstractLinkRule]" begin
     resolve(info) = parselink(InternalLinkRule(), info)
     # full link
-    @test resolve(LinkInfo("Pollen@0.1.0/doc/README.md", "", "", Node(:null), nothing, "",
+    @test resolve(LinkInfo("/doc/Pollen/README.md", "", "", Node(:null), nothing, "Pollen",
                            nothing)) ==
-          "Pollen@0.1.0/doc/README.md"
+          "/doc/Pollen/README.md"
     # doc type given, package omitted
-    @test resolve(LinkInfo("/doc/README.md", "", "", Node(:null), nothing, "Pollen@0.1.0",
+    @test resolve(LinkInfo("README.md", "", "doc/Pollen/note.md", Node(:null), nothing, "Pollen",
                            nothing)) ==
-          "Pollen@0.1.0/doc/README.md"
+          "/doc/Pollen/README.md"
     # doc type omitted, package omitted
-    @test resolve(LinkInfo("/README.md", "", "Pkg@1/doc/bla.md", Node(:null), nothing,
-                           "Pollen@0.1.0",
-                           nothing)) == "Pollen@0.1.0/doc/README.md"
+    @test resolve(LinkInfo("/README.md", "", "doc/Pkg/bla.md", Node(:null), nothing,
+                           "Pollen",
+                           nothing)) == "doc/Pollen/README.md"
     # only relative path given
-    @test resolve(LinkInfo("README.md", "", "Pkg@1/doc/bla.md", Node(:null), nothing,
-                           "Pollen@0.1.0",
-                           nothing)) == "Pollen@0.1.0/doc/README.md"
-    @test resolve(LinkInfo("../README.md", "", "Pkg@1/doc/folder/bla.md", Node(:null),
+    @test resolve(LinkInfo("README.md", "", "doc/Pkg/bla.md", Node(:null), nothing,
+                           "Pollen",
+                           nothing)) == "/doc/Pollen/README.md"
+    @test resolve(LinkInfo("../README.md", "", "doc/Pkg/folder/bla.md", Node(:null),
                            nothing,
-                           "Pollen@0.1.0", nothing)) == "Pollen@0.1.0/doc/README.md"
+                           "Pollen", nothing)) == "/doc/Pollen/README.md"
 
     # Cases where link is not resolvable
     # empty link target
@@ -295,12 +298,12 @@ end
     @test resolve(LinkInfo("/", "", "", Node(:null), nothing, "", nothing)) isa Nothing
     # relative link going above root folder
     @test resolve(LinkInfo("../../README.md", "", "Pkg@1/doc/bla.md", Node(:null), nothing,
-                           "Pollen@0.1.0", nothing)) isa Nothing
+                           "Pollen", nothing)) isa Nothing
 
     @test resolvelink(InternalLinkRule(),
-                      LinkInfo(Node(:a, "Title", href = "Pollen@0.1.0/doc/README.md"))) ==
-          Node(:reference, "Title", document_id = "Pollen@0.1.0/doc/README.md",
-               href = "Pollen@0.1.0/doc/README.md")
+                      LinkInfo(Node(:a, "Title", href = "/doc/Pollen/README.md"))) ==
+          Node(:reference, "Title", document_id = "/doc/Pollen/README.md",
+               href = "/doc/Pollen/README.md")
 end
 
 #=
@@ -340,7 +343,10 @@ function parselink(rule::SymbolLinkRule, link::LinkInfo)
             child isa Node || return nothing
             tag(child) == :code || return nothing
 
-            return (; symbol = gettext(child), mod = link.mod)
+            # Get rid of method call syntax from Documenter.jl, leaving just the symbol name
+            symbol = string(split(gettext(child), "(")[begin])
+
+            return (; symbol = symbol, mod = link.mod)
         end
     end
 end
@@ -348,17 +354,17 @@ end
 function resolvelink(rule::SymbolLinkRule, link::LinkInfo, target)
     bindings = unique(b -> b.symbol_id, resolvesymbol(rule.I, target.symbol))
     if isempty(bindings)
-        @debug "Could not resolve symbol link!" target link
+        @info "Could not resolve symbol link!" target link
         # return unmodified link node
         return link.node
     else
         if length(bindings) > 1
-            @debug """Found multiple possible bindings for automatic hyperreference:
+            @info """Found multiple possible bindings for automatic hyperreference:
                     $([b.id => b.symbol_id for b in bindings]). Using `$(bindings[begin].symbol_id)`""" target
         end
         return Node(:reference, children(link.node),
                     merge(attributes(link.node),
-                          Dict(:document_id => __id_from_binding(rule.I, bindings[1]),
+                          Dict(:document_id => "ref/$(bindings[1].symbol_id)",
                                :reftype => "symbol")))
     end
 end
@@ -373,11 +379,6 @@ function resolvesymbol(pkgindex::PackageIndex, symbol::String, modules = nothing
     filter(b -> haskey(pkgindex.index.symbols, b.symbol_id), bindings)
 end
 
-function __id_from_binding(I::ModuleInfo.PackageIndex, binding::ModuleInfo.BindingInfo)
-    symbol = ModuleInfo.getsymbol(I, binding)
-    package = ModuleInfo.getpackage(I, symbol)
-    return "$(package.name)@$(package.version)/ref/$(symbol.id)"
-end
 
 @testset "SymbolLinkRule [AbstractLinkRule]" begin
     resolve(info) = parselink(SymbolLinkRule(PackageIndex([Pollen])), info)
@@ -395,7 +396,7 @@ end
                       LinkInfo(Node(:a, Node(:code, "serve"), href = "#")),
                       (symbol = "serve", mod = "Pollen")) ==
           Node(:reference, Node(:code, "serve"),
-               document_id = "Pollen@0.1.0/ref/Pollen.serve",
+               document_id = "ref/Pollen.serve",
                href = "#", reftype = "symbol")
 end
 
@@ -456,8 +457,8 @@ function parselink(rule::SymbolCodeRule, link::LinkInfo)
     @assert length(children(link.node)) == 1 && only(children(link.node)) isa Leaf{String}
     idparts = splitpath(link.id)
     # FIXME link resolution
-    mod = if length(idparts) >= 2 && idparts[2] == "src"
-        split(idparts[begin], '@')[begin]
+    mod = if length(idparts) >= 2 && idparts[1] == "src"
+        idparts[2]
     else
     end
     return (identifier = only(children(link.node))[], mod = mod)
@@ -475,7 +476,7 @@ function resolvelink(rule::SymbolCodeRule, link::LinkInfo, target)
     else
         return Node(:reference, children(link.node),
                     merge(attributes(link.node),
-                          Dict(:document_id => __id_from_binding(rule.I, bindings[1]),
+                          Dict(:document_id => "ref/$(bindings[1].id)",
                                :reftype => "symbol")))
     end
 end
@@ -483,46 +484,15 @@ end
 
 # ## Loading the rewriters from configuration:
 
-# ### `ResolveReferences`
-
-default_config(::Type{ResolveReferences}) = Dict(
-    "index" => default_config(PackageIndex)
-)
-
-canonicalize_config(::Type{ResolveReferences}, config::Dict) = Dict(
-    "index" => canonicalize_config(PackageIndex, get(config, "index", []))
-)
-
-function default_config_project(::Type{ResolveReferences}, project_config)
-    config = default_config(ModuleReference)
-    config["index"] = default_config_project(PackageIndex, project_config)
-    config
+@option struct ConfigResolveReferences <: AbstractConfig
+    index::ConfigPackageIndex = ConfigPackageIndex()
 end
+configtype(::Type{ResolveReferences}) = ConfigResolveReferences
+from_config(config::ConfigResolveReferences) = ResolveReferences(from_config(config.index))
 
-function from_config(::Type{ResolveReferences}, config)
-    config = with_default_config(ResolveReferences, config)
-    pkgindex = from_config(PackageIndex, config["index"])
-    ResolveReferences(pkgindex)
+
+@option struct ConfigResolveSymbols <: AbstractConfig
+    index::ConfigPackageIndex = ConfigPackageIndex()
 end
-
-# ### `ResolveSymbols`
-
-default_config(::typeof(ResolveSymbols)) = Dict(
-    "index" => default_config(PackageIndex)
-)
-
-canonicalize_config(::typeof(ResolveSymbols), config::Dict) = Dict(
-    "index" => canonicalize_config(PackageIndex, get(config, "index", []))
-)
-
-function default_config_project(::typeof(ResolveSymbols), project_config)
-    config = default_config(ModuleReference)
-    config["index"] = default_config_project(PackageIndex, project_config)
-    config
-end
-
-function from_config(::typeof(ResolveSymbols), config)
-    config = with_default_config(ResolveSymbols, config)
-    pkgindex = from_config(PackageIndex, config["index"])
-    ResolveSymbols(pkgindex)
-end
+configtype(::typeof(ResolveSymbols)) = ConfigResolveSymbols
+from_config(config::ConfigResolveSymbols) = ResolveSymbols(from_config(config.index))

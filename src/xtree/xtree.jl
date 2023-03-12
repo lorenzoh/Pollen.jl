@@ -55,6 +55,7 @@ Base.@kwdef struct Node{T <: XTree, D <: Dict{Symbol}} <: XTree
 end
 
 Base.show(io::IO, xnode::Node) = print_tree(io, xnode; maxdepth = 4)
+PrettyPrint.pp_impl(io, xnode::Node, indent::Int) = (print_tree(io, xnode; maxdepth = 4); indent)
 
 function Node(tag::Symbol, children...; attributes...)
     return Node(tag,

@@ -1,20 +1,41 @@
 
+@option struct ConfigProjectPackage <: AbstractConfig
+    name::String
+    version::String
+    uuid::String
+    authors::Vector{String}
+    dir::String
+end
+
+@option struct ConfigProject <: AbstractConfig
+    package::Union{Nothing, ConfigProjectPackage} = nothing
+    contents::Dict = Dict{String, Any}()
+    rewriters::Dict{String, Any} = Dict{String, Any}()
+    frontend::Union{Nothing, Dict} = nothing
+    project::String = "."
+    dir::Union{Nothing, String} = nothing
+    title::Union{Nothing, String} = nothing
+    tag::String = "dev"
+    config_frontend::Union{Nothing, Any} = nothing
+    configs_rewriter::Union{Nothing, Any} = nothing
+end
+
 """
     Project(rewriters)
 
 A project manages the loading, parsing and rewriting of a set of
 documents.
-
 """
 struct Project
     sources::ThreadSafeDict{String, Node}
     outputs::ThreadSafeDict{String, Node}
     rewriters::Vector{<:Rewriter}
     frontend::Any
-    config::Dict
+    config::ConfigProject
 end
 
-function Project(rewriters, frontend = nothing, config = Dict())
+
+function Project(rewriters, frontend = nothing, config = ConfigProject())
     sources = ThreadSafeDict{String, Node}()
     foreach(rewriters) do rewriter
         merge!(sources, createsources!(rewriter))
@@ -23,9 +44,20 @@ function Project(rewriters, frontend = nothing, config = Dict())
     return Project(sources, outputs, rewriters, frontend, config)
 end
 
+
 function Base.show(io::IO, project::Project)
     print(io,
           "Project($(length(project.sources)) documents, $(length(project.rewriters)) rewriters)")
+end
+
+
+configtype(::Type{Project}) = ConfigProject
+
+function from_config(config::ConfigProject)
+    rewriters = map(from_config, config.configs_rewriter)
+    frontend = isnothing(config.config_frontend) ? nothing : from_config(config.config_frontend)
+    return Project(rewriters, frontend, config)
+
 end
 
 """

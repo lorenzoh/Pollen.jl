@@ -2,18 +2,20 @@
 abstract type Frontend end
 
 """
-    frontendrewriters(frontend::Frontend, config)
+    frontend_rewriter_entries(frontend::Frontend, config)
 
 List of rewriters for `frontend`.
 """
-function frontend_rewriters(::Frontend)
-    RewriterConfig[]
+function frontend_rewriter_entries(::AbstractConfig)
+    RewriterEntry[]
 end
 
-
-function with_frontend_rewriters(frontend::Frontend, rewriter_configs)
-    vcat(rewriter_configs, frontend_rewriters(frontend))
+function with_frontend_rewriters(config_frontend::AbstractConfig, rewriter_entries)
+    vcat(rewriter_entries, frontend_rewriter_entries(config_frontend))
 end
+with_frontend_rewriters(::Nothing, rewriter_entries) = rewriter_entries
+
+
 """
     frontend_serve(frontend, builddir)
 """
@@ -28,16 +30,9 @@ function frontend_setup end
 
 
 """
-    frontendformat(frontend)
-
-Default output format to use for `frontend`.
+    frontend_build(frontend, project, dir[, docids])
 """
-function frontend_format end
-
-"""
-    frontend_builder()
-"""
-frontend_builder(frontend::Frontend, builddir) = FileBuilder(frontend_format(frontend), builddir)
+function frontend_build end
 
 
 """
@@ -47,6 +42,9 @@ Frontend build step triggered after the `builder = frontend_builder(frontend, di
 This step can call external build tools.
 """
 function frontend_build end
+
+
+
 # TODO: Abstraction for setting up GitHub Pages
 # TODO: Abstraction for deploying to GitHub Pages
 
@@ -75,13 +73,14 @@ FRONTENDS["files"] = FileFrontend
 # The configuration for `FileFrontend` has just one key that determines the output format
 # by specifying the file extension. [`extensionformat`](#) is then used to detect the format.
 
-default_config(::Type{FileFrontend}) = Dict(
-    "filetype" => "md"
-)
+@option struct ConfigFileFrontend <: AbstractConfig
+    filetype::String = "md"
+end
+configtype(::Type{FileFrontend}) = ConfigFileFrontend
 
 
-function from_config(::Type{FileFrontend}, config)
-    format = extensionformat(Val(Symbol(get(config, "filetype", "md"))))
+function from_config(config::ConfigFileFrontend)
+    format = extensionformat(Val(Symbol(config.filetype)))
     FileFrontend(format)
 end
 
@@ -90,8 +89,9 @@ end
 
 frontend_rewriters(::FileFrontend) = Rewriter[]
 
-frontend_format(frontend::FileFrontend) = frontend.format
-
 frontend_serve(::FileFrontend, dir) = LiveServer.serve(dir=dir)
 
-function frontend_build(::FileFrontend, dir) end
+function frontend_build(frontend::FileFrontend, project, dir::String, docids = Set(keys(project.sources)))
+    builder = FileBuilder(frontend.format, dir)
+    build(project, builder, docids)
+end

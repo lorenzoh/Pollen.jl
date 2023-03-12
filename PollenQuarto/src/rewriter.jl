@@ -1,19 +1,25 @@
-struct ConfigureQuarto <: Rewriter
-    quartoconfig::Dict
+struct PrepareQuarto <: Rewriter
 end
 
-Base.show(io::IO, ::ConfigureQuarto) = print(io, "ConfigureQuarto()")
 
-function Pollen.rewritedoc(rewriter::ConfigureQuarto, docid, doc::Node)
+function Pollen.rewritedoc(rewriter::PrepareQuarto, docid, doc::Node)
     doc = remove_title(doc)
-
     return doc
 end
 
+@option struct ConfigPrepareQuarto <: Pollen.AbstractConfig end
+Pollen.configtype(::Type{PrepareQuarto}) = ConfigPrepareQuarto
+Pollen.from_config(::ConfigPrepareQuarto) = PrepareQuarto()
+
+
+#=
 function Pollen.postbuild(rewriter::ConfigureQuarto, _, builder::Pollen.FileBuilder)
     YAML.write_file(joinpath(string(builder.dir), "_quarto.yml"), rewriter.quartoconfig)
 end
+=#
 
+
+# TODO: render ref documents usefully
 
 ## Helpers
 

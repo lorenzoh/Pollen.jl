@@ -17,23 +17,14 @@ end
 # Load from config
 
 
-default_config(::Type{DocumenterCompat}) = Dict(
-    "index" => default_config(PackageIndex)
-)
-
-function default_config_project(::Type{DocumenterCompat}, project_config)
-    config = default_config(DocumenterCompat)
-    config["index"] = default_config_project(PackageIndex, project_config)
-    config
+@option struct ConfigDocumenterCompat <: AbstractConfig
+    index::ConfigPackageIndex = ConfigPackageIndex()
 end
-
-function from_config(::Type{DocumenterCompat}, config)
-    config = with_default_config(DocumenterCompat, config)
-    pkgindex = from_config(PackageIndex, config["index"])
-    DocumenterCompat(pkgindex)
-end
+configtype(::Type{DocumenterCompat}) = ConfigDocumenterCompat
+from_config(config::ConfigDocumenterCompat) = DocumenterCompat(from_config(config.index))
 
 
+# ## Helpers
 
 function SelectDocTest()
     (SelectTag(:codeblock) &

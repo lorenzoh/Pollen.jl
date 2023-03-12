@@ -10,29 +10,21 @@ end
 # TODO: check for non-existent pkgdirs
 SourceFiles(ms::Vector{Module}) = SourceFiles(pkgdir.(ms), string.(ms))
 
-# Loading from configuration
+# ## Configuration parsing
 
-default_config(::typeof(SourceFiles)) = Dict(
-    "index" => default_config(PackageIndex)
-)
-
-canonicalize_config(::typeof(SourceFiles), config::Dict) = Dict(
-    "index" => canonicalize_config(PackageIndex, get(config, "index", []))
-)
-
-function default_config_project(::typeof(SourceFiles), project_config)
-    config = default_config(SourceFiles)
-    config["index"] = default_config_project(PackageIndex, project_config)
-    config
+@option struct ConfigSourceFiles <: AbstractConfig
+    # TODO: only index packages, not other info
+    index::ConfigPackageIndex = ConfigPackageIndex()
 end
 
-function from_config(::typeof(SourceFiles), config)
-    config = with_default_config(SourceFiles, config)
-    index = from_config(PackageIndex, config["index"])
+configtype(::typeof(SourceFiles)) = ConfigSourceFiles
+
+function from_config(config::ConfigSourceFiles)
+    index = from_config(config.index)
     SourceFiles(index.packages.basedir, index.packages.name)
 end
 
-# Load function for the source files
+# ## Helpers
 
 function __load_source_file(file::String, id)
     doc = Pollen.parse(Path(file), JuliaSyntaxFormat())

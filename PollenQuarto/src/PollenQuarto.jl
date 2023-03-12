@@ -2,8 +2,10 @@ module PollenQuarto
 
 using Pollen: Pollen, Node, Frontend, MarkdownFormat, Rewriter, children, tag
 using YAML: YAML
+using Configurations: Configurations, @option
 
 
+include("format.jl")
 include("rewriter.jl")
 include("frontend.jl")
 #
@@ -29,6 +31,7 @@ function __init__()
             @warn "Could not find `quarto` executable. Please install it from [the Quarto website](https://quarto.org/docs/get-started/)"
         end
     end
+    Pollen.FRONTENDS["quarto"] = QuartoFrontend
 end
 
 end

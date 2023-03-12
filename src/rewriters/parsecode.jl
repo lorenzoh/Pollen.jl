@@ -8,7 +8,7 @@ end
 
 Base.show(io::IO, ::ParseCode) = print(io, "ParseCode()")
 
-function rewritedoc(rewriter::ParseCode, _, doc)
+function rewritedoc(rewriter::ParseCode, id, doc)
     return cata(doc, rewriter.selector) do x
         code = string(strip(Pollen.gettext(x)))
         return withchildren(x, [parse(code, rewriter.format)])
@@ -18,8 +18,10 @@ end
 
 # TODO: parse selector from config
 # TODO: parse format from config
-default_config(::Type{ParseCode}) = Dict{String, String}()
-from_config(::Type{ParseCode}, _) = ParseCode()
+
+@option struct ConfigParseCode <: AbstractConfig end
+configtype(::Type{ParseCode}) = ConfigParseCode
+from_config(::ConfigParseCode) = ParseCode()
 
 @testset "ParseCode [rewriter]" begin
     rewriter = ParseCode()

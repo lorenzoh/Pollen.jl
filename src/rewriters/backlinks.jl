@@ -20,7 +20,9 @@ function Backlinks()
     return Backlinks(g)
 end
 
-from_config(::Type{Backlinks}, _) = Backlinks()
+@option struct ConfigBacklinks<: AbstractConfig end
+configtype(::Type{Backlinks}) = ConfigBacklinks
+from_config(::ConfigBacklinks) = Backlinks()
 
 
 function rewriteoutputs!(docdict, docgraph::Backlinks)
