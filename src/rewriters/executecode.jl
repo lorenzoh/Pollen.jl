@@ -123,6 +123,8 @@ end
 # The rewriter acts on the document tree with [`rewritedoc`](#).
 
 function rewritedoc(executecode::ExecuteCode, p, doc)
+    # TODO: allow setting attribute that error is expected
+    # TODO: render errors using `Base.showerror`
     blocks = collect(select(doc, executecode.codeblocksel))
     codes = gettext.(blocks)
 
@@ -194,6 +196,7 @@ creategroupid(path, groupname) = Symbol("$(CM.slugify(string(path)))_$groupname"
 # printed output, and the result.
 
 function createcodecell(codeblock::Node, output, result)
+    return Node(:codecell, children(codeblock), merge(attributes(codeblock), Dict(:outputvalue => output, :resultvalue => result)))
     chs = Node[]
     codeattrs, outputattrs, resultattrs = __parsecodeattributes(attributes(codeblock))
     if get(codeattrs, :show, true)
@@ -257,6 +260,18 @@ function reset!(executecode::ExecuteCode)
     return
 end
 
+# We can also create the rewriter from a configuration dict:
+
+default_config(::Type{ExecuteCode}) = Dict(
+    "warn" => true,
+)
+
+function from_config(::Type{ExecuteCode}, config)
+    config = with_default_config(ExecuteCode, config)
+    return ExecuteCode(warnonerror = get(config, "warn", true))
+end
+
+
 # ## Tests
 
 @testset "ExecuteCode [rewriter]" begin
@@ -264,33 +279,30 @@ end
         rewriter = ExecuteCode(codeblocksel = SelectTag(:codeblock))
         doc = Node(:md, Node(:codeblock, "1 + 1"))
         @test Pollen.rewritedoc(rewriter, "path", doc) == Node(:md,
-                   Node(:codecell,
-                        Node(:codeinput, Node(:codeblock, "1 + 1")),
-                        Node(:coderesult, Node(:codeblock, ANSI(2)))))
+                   Node(:codecell, "1 + 1"; outputvalue = "", resultvalue = 2))
     end
     @testset "Output" begin
         rewriter = ExecuteCode(codeblocksel = SelectTag(:codeblock))
         doc = Node(:md, Node(:codeblock, "print(\"hi\")"))
         @test Pollen.rewritedoc(rewriter, "path", doc) == Node(:md,
-                   Node(:codecell,
-                        Node(:codeinput, Node(:codeblock, "print(\"hi\")")),
-                        Node(:codeoutput, Node(:codeblock, ANSI("hi")))))
+                   Node(:codecell, """print("hi")""", outputvalue = "hi", resultvalue = nothing))
     end
     @testset "Cache" begin
         # If a code block doesn't change, the result should be cached
         rewriter = ExecuteCode(codeblocksel = SelectTag(:codeblock))
         doc = Node(:md, Node(:codeblock, "rand()"))
-        outdoc = Pollen.rewritedoc(rewriter, "path", doc)
-        val = only(children(selectfirst(outdoc, SelectTag(:coderesult))))
-        outdoc2 = Pollen.rewritedoc(rewriter, "path", doc)
-        val2 = only(children(selectfirst(outdoc2, SelectTag(:coderesult))))
-        @test val == val2
+        outdoc = Pollen.rewritedoc(rewriter, "path", doc) |> children |> only
+        @test haskey(attributes(outdoc), :resultvalue)
+        @test haskey(attributes(outdoc), :outputvalue)
+        outdoc2 = Pollen.rewritedoc(rewriter, "path", doc) |> children |> only
+        @test haskey(attributes(outdoc), :resultvalue)
+        @test haskey(attributes(outdoc), :outputvalue)
+        @test attributes(outdoc)[:resultvalue] == attributes(outdoc2)[:resultvalue]
 
         # After a reset, the caches should be cleared
         reset!(rewriter)
-        outdoc3 = Pollen.rewritedoc(rewriter, "path", doc)
-        val3 = only(children(selectfirst(outdoc3, SelectTag(:coderesult))))
-        @test val != val3
+        outdoc3 = Pollen.rewritedoc(rewriter, "path", doc) |> children |> only
+        @test attributes(outdoc)[:resultvalue] != attributes(outdoc3)[:resultvalue]
     end
 
     @testset "__parsecodeattributes" begin

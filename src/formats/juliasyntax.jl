@@ -16,6 +16,8 @@ function Pollen.parse(io::IO, ::JuliaSyntaxFormat)
     end
 end
 
+extensionformat(::Val{:jl}) = JuliaSyntaxFormat()
+
 function xtree(ast::JuliaSyntax.GreenNode, source::String, offset = 1)
     tag = _tokenname(ast)
     if isempty(ast.args)
@@ -31,7 +33,7 @@ function xtree(ast::JuliaSyntax.GreenNode, source::String, offset = 1)
     end
 end
 
-function _tokenname(ast::JuliaSyntax.GreenNode) where {T}
+function _tokenname(ast::JuliaSyntax.GreenNode)
     Symbol(convert(String, ast.head.kind))
 end
 

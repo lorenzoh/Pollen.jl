@@ -51,10 +51,14 @@ end
 FileBuilder(format::Format, p::String) = FileBuilder(format, Path(p))
 
 function build(builder::FileBuilder, project::Project,
-               dirtydocids = collect(keys(project.outputs)))
+               dirtydocids = keys(project.outputs))
     # TODO: make threadable for performance. issue is paths not being created
-    foreach(dirtydocids) do docid
+    dirtydocids = collect(dirtydocids)
+    progress = _default_progress(length(dirtydocids), desc = "Rendering...")
+    foreach(enumerate(dirtydocids)) do (i, docid)
         buildtofile(project.outputs[docid], docid, builder.dir, builder.format)
+        showvalues = i == length(dirtydocids) ? [] : [(Symbol("Document"), dirtydocids[i+1])]
+        ProgressMeter.next!(progress; showvalues)
     end
 
     for rewriter in project.rewriters

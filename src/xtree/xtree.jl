@@ -55,6 +55,7 @@ Base.@kwdef struct Node{T <: XTree, D <: Dict{Symbol}} <: XTree
 end
 
 Base.show(io::IO, xnode::Node) = print_tree(io, xnode; maxdepth = 4)
+PrettyPrint.pp_impl(io, xnode::Node, indent::Int) = (print_tree(io, xnode; maxdepth = 4); indent)
 
 function Node(tag::Symbol, children...; attributes...)
     return Node(tag,
@@ -140,6 +141,11 @@ function catafold(f, xnode::Node, state; T = XTree)
 end
 
 catafold(f, xleaf::Leaf, state; kwargs...) = f(xleaf, state)
+#=
+catafold(f, tree, sel::Selector, state) = catafold(tree, state) do ch
+    matches(sel, ch) ? f(ch, state) : (ch, state)
+end
+=#
 
 """
     cata(f, tree)
@@ -208,10 +214,10 @@ function AbstractTrees.printnode(io::IO, x::Node)
     rich && print(io, crayon"bold")
     print(io, tag(x))
     rich && print(io, crayon"reset")
-    if !isempty(x.attributes)
+    if !isempty(attributes(x))
         print(io, "; ")
         rich && print(io, crayon"dark_gray")
-        for (i, (key, value)) in enumerate(x.attributes)
+        for (i, (key, value)) in enumerate(attributes(x))
             if i != 1
                 print(io, ", ")
             end

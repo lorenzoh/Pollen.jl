@@ -1,0 +1,22 @@
+title: "Pollen.jl"
+project: "./docs"
+rewriters: 
+  sourcefiles:
+    index:
+      packages: ["Pollen", "ModuleInfo"]
+  references:
+    index:
+      packages: ["Pollen", "AbstractTrees"]
+frontend:
+  type: files
+contents:
+  README: "doc/Pollen/README.md"
+  Tutorials:
+    "Documenting a Package": "docs/tutorials/setup.md"
+    "Working with documents": "docs/tutorials/documents.md"
+  "How-to":
+    "Install Pollen.jl": "docs/howto/install.md"
+    "Preview documentation locally": "docs/howto/preview.md"
+    "Set up package documentation": "docs/howto/setup.md"
+  Reference: "/ref/Pollen"
+  

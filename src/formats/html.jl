@@ -23,6 +23,7 @@ Pollen.render(node, format)
 """
 Base.@kwdef struct HTMLFormat <: Format
     stripbody = true
+    defaulttag::Union{Symbol, Nothing} = :div
 end
 
 # ## Parsing
@@ -55,16 +56,26 @@ end
 render!(io, doc::Node, format::HTMLFormat) = render!(io, doc, format, Val(doc.tag))
 
 function render!(io, x::Node, format::HTMLFormat, ::Val)
-    print(io, "<", x.tag)
-    if !isempty(x.attributes)
-        print(io, " ")
-        for (name, attr) in x.attributes
-            print(io, string(name), "=", attr, ' ')
+    if tag(x) in HTMLFormatTAGS || isnothing(format.defaulttag)
+        print(io, "<", tag(x))
+        if !isempty(attributes(x))
+            print(io, " ")
+            for (i, (name, attr)) in enumerate(attributes(x))
+                print(io, string(name), "=\"", attr, "\"")
+                i != length(attributes(x)) && print(io, " ")
+            end
         end
+        print(io, ">")
+        foreach(child -> render!(io, child, format), children(x))
+        print(io, "</", tag(x), ">")
+    else
+        node = Node(
+            tag=format.defaulttag,
+            children=children(x),
+            attributes=merge(attributes(x), Dict(:class => tag(x)))
+        )
+        render!(io, node, format)
     end
-    print(io, ">")
-    foreach(child -> render!(io, child, format), children(x))
-    print(io, "</", x.tag, ">")
 end
 
 const HTML_MIMES = [
@@ -85,18 +96,42 @@ function render!(io, x::Leaf, ::HTMLFormat)
     end
 end
 
-#=
-function render!(io, x::Leaf{PreRendered}, ::HTMLFormat)
-    reprs = x[].reprs
-    for mime in HTMLFormat_MIMES
-        if mime in keys(reprs)
-            print(io, adapthtmlstr(mime, reprs[mime]))
-            return
+function render!(io, node::Node, format::HTMLFormat, ::Val{:codecell})
+    codeattrs, outputattrs, resultattrs = __parsecodeattributes(attributes(node))
+
+    # Render code
+    render!(io, Node(:codeblock, children(node), codeattrs), format)
+
+    # Render output printed while executing code
+    if !isnothing(outputattrs[:value]) && get(outputattrs, :show, "true") == "true"
+        value = outputattrs[:value]
+        if value != ""
+            attrs = delete!(merge(outputattrs, Dict(:class => "codeoutput")), :value)
+            outputnode = Node(:codeblock, [Leaf(ANSI(value))], attrs)
+            render!(io, outputnode, format)
         end
     end
-    error("Could not find mime for $(x[])!")
+    # Render result of executed code
+    if !isnothing(resultattrs[:value]) && get(resultattrs, :show, "true") == "true"
+        value = resultattrs[:value]
+        attrs = delete!(merge(resultattrs, Dict(:class => "coderesult")), :value)
+        resultnode = if hasrichdisplay(value)
+            Node(:div, [Leaf(value)], attrs)
+        else
+            Node(:codeblock, [Leaf(ANSI(value))], attrs)
+        end
+        render!(io, resultnode, format)
+    end
 end
-=#
+
+function render!(io, node::Node, format::HTMLFormat, ::Val{:codeblock})
+    render!(io, Node(:pre, Node(:code, children(node), attributes(node))), format)
+end
+
+function render!(io, node::Node, format::HTMLFormat, ::Val{:julia})
+    node = Node(:span, children(node), merge(attributes(node), Dict(:class => "julia")))
+    render!(io, node, HTMLFormat(defaulttag=:span))
+end
 
 function htmlstr(mime::MIME, x)
     s = IJulia.limitstringmime(mime, x)
@@ -133,7 +168,7 @@ formatextension(::HTMLFormat) = "html"
     @test parse("<b>hi</b>", format) == Node(:html, Node(:b, "hi"))
     @test parse("<b x=\"yo\">hi</b>", format) == Node(:html, Node(:b, "hi"; x = "yo"))
     @testset "Round-trip" begin
-        s = "<html><b x=yo >hi</b></html>"
+        s = "<html><b x=\"yo\">hi</b></html>"
         @test render(parse(s, format), format) == s
     end
 end

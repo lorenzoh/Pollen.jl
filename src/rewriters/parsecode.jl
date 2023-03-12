@@ -6,12 +6,22 @@ Base.@kwdef struct ParseCode <: Rewriter
     format::Format = JuliaSyntaxFormat()
 end
 
-function rewritedoc(rewriter::ParseCode, _, doc)
+Base.show(io::IO, ::ParseCode) = print(io, "ParseCode()")
+
+function rewritedoc(rewriter::ParseCode, id, doc)
     return cata(doc, rewriter.selector) do x
         code = string(strip(Pollen.gettext(x)))
         return withchildren(x, [parse(code, rewriter.format)])
     end
 end
+
+
+# TODO: parse selector from config
+# TODO: parse format from config
+
+@option struct ConfigParseCode <: AbstractConfig end
+configtype(::Type{ParseCode}) = ConfigParseCode
+from_config(::ConfigParseCode) = ParseCode()
 
 @testset "ParseCode [rewriter]" begin
     rewriter = ParseCode()

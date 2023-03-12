@@ -2,6 +2,8 @@ struct Backlinks <: Rewriter
     graph::Any
 end
 
+Base.show(io::IO, ::Backlinks) = print(io, "Backlinks()")
+
 """
     Backlinks() <: Rewriter
 
@@ -17,6 +19,11 @@ function Backlinks()
     set_prop!(g, :idxs, Dict{String, Int}())
     return Backlinks(g)
 end
+
+@option struct ConfigBacklinks<: AbstractConfig end
+configtype(::Type{Backlinks}) = ConfigBacklinks
+from_config(::ConfigBacklinks) = Backlinks()
+
 
 function rewriteoutputs!(docdict, docgraph::Backlinks)
     g = docgraph.graph

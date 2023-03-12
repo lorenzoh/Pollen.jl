@@ -21,7 +21,7 @@ using Mustache
 using LiveServer
 import LiveServer
 using TOML
-using IOCapture
+using IOCapture: IOCapture
 using ModuleInfo
 using InlineTest
 using JSON3
@@ -31,10 +31,14 @@ using Revise
 using YAML: YAML
 import Git
 using PkgTemplates: PkgTemplates, @plugin, @with_kw_noshow, Template, Plugin,
-                     hook, getplugin, with_project, render_file, gen_file
+                     hook, getplugin, render_file, gen_file
+using ProgressMeter
 using Pkg
 using Scratch
 using NodeJS
+using Configurations: Configurations, @option, from_dict, to_dict
+using PrettyPrint: PrettyPrint
+
 
 # We first define [`Node`](#)s and [`Leaf`](#)s, the data structure that underpins
 # the rest of the library. We also define selectors to find parts of a tree.
@@ -82,10 +86,12 @@ include("serve/servefiles.jl")
 
 # Rewriters transform individual documents and can also modify project-level information.
 
+include("utils/pkgindex.jl")
 include("rewriters/documentfolder.jl")
 include("rewriters/checklinks.jl")
 include("rewriters/sourcefiles.jl")
 include("rewriters/modulereference.jl")
+include("rewriters/documentercompat.jl")
 include("rewriters/executecode.jl")
 include("rewriters/packagewatcher.jl")
 include("rewriters/parsecode.jl")
@@ -93,6 +99,7 @@ include("rewriters/parseansi.jl")
 include("rewriters/resolvereferences.jl")
 include("rewriters/backlinks.jl")
 include("rewriters/storkindex.jl")
+include("rewriters/copyassets.jl")
 include("rewriters/saveattributes.jl")
 include("rewriters/docversions.jl")
 include("rewriters/staticassets.jl")
@@ -110,8 +117,15 @@ end
 # Lastly, we have functionality to help with setting up and running complete documentation
 # projects.
 
-include("frontend.jl")
-include("docs.jl")
+include("documentation/config.jl")
+include("documentation/frontend.jl")
+include("documentation/project.jl")
+include("documentation/documenter.jl")
+
+export load_project, build_project, serve_project
+
+#include("frontend.jl")
+#include("docs.jl")
 include("pkgtemplate.jl")
 
 export servedocs
